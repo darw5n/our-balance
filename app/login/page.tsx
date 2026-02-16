@@ -28,12 +28,27 @@ export default function LoginPage() {
 
   const handleSignIn = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    if (error) setMessage(error.message);
-    else window.location.href = "/dashboard";
+    
+    if (error) {
+      setMessage(error.message);
+      setLoading(false);
+      return;
+    }
+
+    // Wait a bit for cookies to be set, then redirect
+    if (data.session) {
+      // Force a page reload to ensure cookies are synced
+      window.location.href = "/dashboard";
+    } else {
+      setMessage("Login riuscito, reindirizzamento...");
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 500);
+    }
     setLoading(false);
   };
 

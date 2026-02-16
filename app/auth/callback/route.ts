@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -20,15 +20,22 @@ export async function GET(request: Request) {
           getAll() {
             return cookieStore.getAll();
           },
-          async setAll(cookiesToSet) {
+          setAll(cookiesToSet) {
             cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value);
               response.cookies.set(name, value, options);
             });
           },
         },
       }
     );
-    await supabase.auth.exchangeCodeForSession(code);
+    
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    
+    if (error) {
+      console.error("[Auth Callback] Error exchanging code:", error);
+      return NextResponse.redirect(new URL("/login?error=auth_failed", request.url));
+    }
   }
 
   // Redirect user to dashboard (o next param)
