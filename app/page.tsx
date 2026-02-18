@@ -2,8 +2,9 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Wallet } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default async function Home() {
   const cookieStore = await cookies()
@@ -50,21 +51,18 @@ export default async function Home() {
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row">
-          <Button
-            asChild
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
-            size="lg"
+          <Link
+            href="/login"
+            className={cn(buttonVariants({ size: "lg" }), "bg-emerald-500 text-zinc-950 hover:bg-emerald-400")}
           >
-            <Link href="/login">Accedi</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
-            size="lg"
+            Accedi
+          </Link>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "border-white/15 bg-transparent text-zinc-50 hover:bg-white/5")}
           >
-            <Link href="/signup">Registrati</Link>
-          </Button>
+            Registrati
+          </Link>
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-3">
