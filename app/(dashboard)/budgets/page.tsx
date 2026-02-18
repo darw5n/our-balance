@@ -30,6 +30,7 @@ export default async function BudgetsPage() {
       <BudgetsList
         budgets={budgets}
         categoriesWithoutBudget={categoriesWithoutBudget}
+        hasCategories={categories.length > 0}
       />
     </div>
   )

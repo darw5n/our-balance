@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { BudgetFormDialog, type CategoryOption } from "@/components/dashboard/budget-form-dialog"
@@ -12,6 +13,7 @@ import type { BudgetWithProgress } from "@/lib/supabase/queries/budgets"
 type BudgetsListProps = {
   budgets: BudgetWithProgress[]
   categoriesWithoutBudget: CategoryOption[]
+  hasCategories: boolean
 }
 
 function progressBarColor(percentage: number, is_exceeded: boolean): string {
@@ -23,6 +25,7 @@ function progressBarColor(percentage: number, is_exceeded: boolean): string {
 export function BudgetsList({
   budgets: initialBudgets,
   categoriesWithoutBudget: initialCategoriesWithoutBudget,
+  hasCategories,
 }: BudgetsListProps) {
   const router = useRouter()
   const [budgets, setBudgets] = useState(initialBudgets)
@@ -86,18 +89,32 @@ export function BudgetsList({
 
         {budgets.length === 0 ? (
           <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
-            <p className="text-sm text-zinc-400">
-              Nessun budget impostato. Aggiungi un limite mensile per le tue categorie.
-            </p>
-            {canAddMore && (
-              <Button
-                onClick={openCreate}
-                variant="outline"
-                className="mt-4 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Aggiungi budget
-              </Button>
+            {!hasCategories ? (
+              <>
+                <p className="text-sm text-zinc-400">
+                  Per impostare un budget devi prima creare almeno una categoria.
+                </p>
+                <Link
+                  href="/categories"
+                  className="mt-4 inline-flex items-center rounded-md border border-emerald-500/50 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                >
+                  Vai alle categorie
+                </Link>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-zinc-400">
+                  Nessun budget impostato. Aggiungi un limite mensile per le tue categorie.
+                </p>
+                <Button
+                  onClick={openCreate}
+                  variant="outline"
+                  className="mt-4 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Aggiungi budget
+                </Button>
+              </>
             )}
           </Card>
         ) : (

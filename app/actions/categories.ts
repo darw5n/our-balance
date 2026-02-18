@@ -6,11 +6,13 @@ import { getServerUser } from "@/lib/supabase-server"
 export type CreateCategoryInput = {
   name: string
   color: string
+  type: "expense" | "income"
 }
 
 export type UpdateCategoryInput = {
   name: string
   color: string
+  type: "expense" | "income"
 }
 
 export type CategoryResult =
@@ -29,12 +31,13 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
   }
 
   const color = input.color?.trim() || "#71717a"
+  const type = input.type === "income" ? "income" : "expense"
 
   const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .insert({ user_id: user.id, name, color })
+    .insert({ user_id: user.id, name, color, type })
     .select("id")
     .single()
 
@@ -64,12 +67,13 @@ export async function updateCategory(
   }
 
   const color = input.color?.trim() || "#71717a"
+  const type = input.type === "income" ? "income" : "expense"
 
   const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .update({ name, color })
+    .update({ name, color, type })
     .eq("id", categoryId)
     .eq("user_id", user.id)
     .select("id")

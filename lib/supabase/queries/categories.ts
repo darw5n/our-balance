@@ -4,6 +4,7 @@ export type Category = {
   id: string
   name: string
   color: string
+  type: string
   user_id?: string
 }
 
@@ -14,7 +15,7 @@ export async function getCategories(userId: string): Promise<Category[]> {
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, color, user_id")
+    .select("id, name, color, type, user_id")
     .eq("user_id", userId)
     .order("name", { ascending: true })
 

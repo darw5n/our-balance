@@ -19,7 +19,7 @@ const PRESET_COLORS = [
 type CategoryFormDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  category?: { id: string; name: string; color: string } | null
+  category?: { id: string; name: string; color: string; type?: string } | null
   onSuccess?: () => void
 }
 
@@ -31,6 +31,7 @@ export function CategoryFormDialog({
 }: CategoryFormDialogProps) {
   const [name, setName] = useState("")
   const [color, setColor] = useState("#22c55e")
+  const [type, setType] = useState<"expense" | "income">("expense")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,6 +41,7 @@ export function CategoryFormDialog({
     if (open) {
       setName(category?.name ?? "")
       setColor(category?.color ?? "#22c55e")
+      setType(category?.type === "income" ? "income" : "expense")
       setError(null)
     }
   }, [open, category])
@@ -55,7 +57,7 @@ export function CategoryFormDialog({
 
     setSubmitting(true)
     try {
-      const input: CreateCategoryInput = { name: trimmed, color }
+      const input: CreateCategoryInput = { name: trimmed, color, type }
       const result = isEdit
         ? await updateCategory(category.id, input)
         : await createCategory(input)
@@ -90,6 +92,35 @@ export function CategoryFormDialog({
               className="border-white/15 bg-zinc-950 text-zinc-50"
             />
           </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-300">Tipo</label>
+            <div className="flex rounded-md border border-white/15 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setType("expense")}
+                className={`flex-1 py-2 text-sm transition-colors ${
+                  type === "expense"
+                    ? "bg-rose-500/20 text-rose-400 font-medium"
+                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                }`}
+              >
+                Spesa
+              </button>
+              <button
+                type="button"
+                onClick={() => setType("income")}
+                className={`flex-1 py-2 text-sm transition-colors ${
+                  type === "income"
+                    ? "bg-emerald-500/20 text-emerald-400 font-medium"
+                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                }`}
+              >
+                Entrata
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-xs font-medium text-zinc-300">Colore</label>
             <div className="flex flex-wrap gap-2">
@@ -114,6 +145,7 @@ export function CategoryFormDialog({
               placeholder="#22c55e"
             />
           </div>
+
           {error && <p className="text-xs text-rose-400">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button
