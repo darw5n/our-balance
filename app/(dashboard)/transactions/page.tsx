@@ -1,65 +1,26 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { getCategories } from "@/lib/supabase/queries/categories"
+import { TransactionsTable } from "@/components/dashboard/transactions-table"
+import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { formatCurrency } from "@/lib/utils"
-
-type Transaction = {
-  id: string
-  date?: string | null
-  created_at?: string | null
-  amount?: number | null
-  description?: string | null
-  type?: string | null
-  status?: string | null
-}
-
-async function getTransactions(filter?: { query?: string; from?: string; to?: string }) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll() {
-          // RSC: solo lettura
-        },
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+async function getTransactions(
+  userId: string,
+  filter?: { query?: string; from?: string; to?: string }
+): Promise<Transaction[]> {
+  const supabase = await createSupabaseServerClient()
 
   let query = supabase
     .from("transactions")
-    .select("id, date, created_at, amount, description, type, status", { head: false }) as any
+    .select("id, date, created_at, amount, description, type, status, category_id")
+    .eq("user_id", userId) as any
 
-  if (user?.id) {
-    query = query.eq("user_id", user.id)
-  }
-
-  if (filter?.from) {
-    query = query.gte("date", filter.from)
-  }
-
-  if (filter?.to) {
-    query = query.lte("date", filter.to)
-  }
-
-  if (filter?.query) {
-    query = query.ilike("description", `%${filter.query}%`)
-  }
+  if (filter?.from) query = query.gte("date", filter.from)
+  if (filter?.to) query = query.lte("date", filter.to)
+  if (filter?.query) query = query.ilike("description", `%${filter.query}%`)
 
   const { data, error } = await query.order("date", { ascending: false })
 
   if (error || !data) return []
-
   return data as Transaction[]
 }
 
@@ -68,15 +29,22 @@ export default async function TransactionsPage({
 }: {
   searchParams?: { q?: string; from?: string; to?: string }
 }) {
+  const user = await getServerUser()
+
   const q = searchParams?.q ?? ""
   const from = searchParams?.from ?? ""
   const to = searchParams?.to ?? ""
 
-  const transactions = await getTransactions({
-    query: q || undefined,
-    from: from || undefined,
-    to: to || undefined,
-  })
+  const [transactions, categories] = await Promise.all([
+    user?.id
+      ? getTransactions(user.id, {
+          query: q || undefined,
+          from: from || undefined,
+          to: to || undefined,
+        })
+      : Promise.resolve([]),
+    user?.id ? getCategories(user.id) : Promise.resolve([]),
+  ])
 
   return (
     <div className="space-y-6">
@@ -118,54 +86,8 @@ export default async function TransactionsPage({
       </div>
 
       <section>
-        {transactions.length === 0 ? (
-          <p className="text-xs text-zinc-400">Nessuna transazione trovata.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Descrizione</TableHead>
-                <TableHead className="text-right">Importo</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Stato</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((tx) => {
-                const dateValue = tx.date ?? tx.created_at
-                const dateLabel = dateValue
-                  ? new Date(dateValue).toLocaleDateString("it-IT")
-                  : "-"
-                const amount = tx.amount ?? 0
-                const isNegative = (amount ?? 0) < 0
-                const formattedAmount = formatCurrency(amount ?? 0)
-
-                return (
-                  <TableRow key={tx.id}>
-                    <TableCell>{dateLabel}</TableCell>
-                    <TableCell className="max-w-[220px] truncate text-xs text-zinc-200">
-                      {tx.description || "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className={isNegative ? "text-rose-400" : "text-emerald-400"}>
-                        {formattedAmount}
-                      </span>
-                    </TableCell>
-                    <TableCell className="capitalize text-xs text-zinc-300">
-                      {tx.type || "-"}
-                    </TableCell>
-                    <TableCell className="capitalize text-xs text-zinc-300">
-                      {tx.status || "-"}
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        )}
+        <TransactionsTable transactions={transactions} categories={categories} />
       </section>
     </div>
   )
 }
-

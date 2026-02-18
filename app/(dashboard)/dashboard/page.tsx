@@ -10,11 +10,13 @@ import {
   getTopCategories,
   type DashboardSummary,
 } from "@/lib/supabase/queries/transactions"
+import { getCategories } from "@/lib/supabase/queries/categories"
 
 type DashboardData = {
   summary: DashboardSummary
   cashflow: Awaited<ReturnType<typeof getCashflowMonthly>>
   topCategories: Awaited<ReturnType<typeof getTopCategories>>
+  categories: Awaited<ReturnType<typeof getCategories>>
 }
 
 async function getDashboardData(): Promise<DashboardData> {
@@ -44,20 +46,22 @@ async function getDashboardData(): Promise<DashboardData> {
       summary: { entrate: 0, uscite: 0, netto: 0, pending: 0 },
       cashflow: [],
       topCategories: [],
+      categories: [],
     }
   }
 
-  const [summary, cashflow, topCategories] = await Promise.all([
+  const [summary, cashflow, topCategories, categories] = await Promise.all([
     getDashboardSummary(user.id, "personal"),
     getCashflowMonthly(user.id, 12),
     getTopCategories(user.id, 5),
+    getCategories(user.id),
   ])
 
-  return { summary, cashflow, topCategories }
+  return { summary, cashflow, topCategories, categories }
 }
 
 export default async function DashboardPage() {
-  const { summary, cashflow, topCategories } = await getDashboardData()
+  const { summary, cashflow, topCategories, categories } = await getDashboardData()
 
   const hasAnyData =
     summary.entrate !== 0 ||
@@ -98,7 +102,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <AddTransactionDialog />
+      <AddTransactionDialog categories={categories} />
     </>
   )
 }

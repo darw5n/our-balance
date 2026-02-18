@@ -15,8 +15,14 @@ export type CreateTransactionInput = {
   scope?: "personal" | "family"
 }
 
+export type UpdateTransactionInput = Partial<CreateTransactionInput>
+
 export type CreateTransactionResult =
   | { success: true; id: string }
+  | { success: false; error: string }
+
+export type TransactionActionResult =
+  | { success: true }
   | { success: false; error: string }
 
 export async function createTransaction(
@@ -33,11 +39,6 @@ export async function createTransaction(
     }
 
     console.log("[createTransaction] Authenticated user ID:", user.id)
-
-  // Validate input
-  if (!input.amount || !input.type || !input.date) {
-    return { success: false, error: "Campi obbligatori mancanti: amount, type, date" }
-  }
 
     // Validate input
     if (!input.amount || !input.type || !input.date) {
@@ -103,6 +104,124 @@ export async function createTransaction(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Errore sconosciuto durante il salvataggio.",
+    }
+  }
+}
+
+export async function updateTransaction(
+  id: string,
+  input: UpdateTransactionInput
+): Promise<TransactionActionResult> {
+  try {
+    const user = await getServerUser()
+    if (!user?.id) {
+      return { success: false, error: "Utente non autenticato." }
+    }
+
+    const payload: Record<string, unknown> = {}
+    if (input.amount !== undefined) payload.amount = Number(input.amount)
+    if (input.type !== undefined) payload.type = input.type
+    if (input.date !== undefined) {
+      const dateObj = new Date(input.date)
+      if (isNaN(dateObj.getTime())) {
+        return { success: false, error: "Formato data non valido." }
+      }
+      payload.date = dateObj.toISOString().split("T")[0]
+    }
+    if (input.description !== undefined) payload.description = input.description || null
+    if (input.category_id !== undefined) payload.category_id = input.category_id || null
+    if (input.status !== undefined) payload.status = input.status
+    if (input.scope !== undefined) payload.scope = input.scope
+
+    const supabase = await createSupabaseServerClient()
+
+    const { error } = await supabase
+      .from("transactions")
+      .update(payload)
+      .eq("id", id)
+      .eq("user_id", user.id)
+
+    if (error) {
+      console.error("[updateTransaction] Error:", error)
+      return { success: false, error: error.message }
+    }
+
+    revalidatePath("/dashboard")
+    revalidatePath("/transactions")
+    return { success: true }
+  } catch (error) {
+    console.error("[updateTransaction] Unexpected error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore sconosciuto.",
+    }
+  }
+}
+
+export async function deleteTransaction(id: string): Promise<TransactionActionResult> {
+  try {
+    const user = await getServerUser()
+    if (!user?.id) {
+      return { success: false, error: "Utente non autenticato." }
+    }
+
+    const supabase = await createSupabaseServerClient()
+
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id)
+
+    if (error) {
+      console.error("[deleteTransaction] Error:", error)
+      return { success: false, error: error.message }
+    }
+
+    revalidatePath("/dashboard")
+    revalidatePath("/transactions")
+    return { success: true }
+  } catch (error) {
+    console.error("[deleteTransaction] Unexpected error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore sconosciuto.",
+    }
+  }
+}
+
+export async function bulkDeleteTransactions(ids: string[]): Promise<TransactionActionResult> {
+  try {
+    const user = await getServerUser()
+    if (!user?.id) {
+      return { success: false, error: "Utente non autenticato." }
+    }
+
+    if (!ids.length) {
+      return { success: false, error: "Nessuna transazione selezionata." }
+    }
+
+    const supabase = await createSupabaseServerClient()
+
+    const { error } = await supabase
+      .from("transactions")
+      .delete()
+      .in("id", ids)
+      .eq("user_id", user.id)
+
+    if (error) {
+      console.error("[bulkDeleteTransactions] Error:", error)
+      return { success: false, error: error.message }
+    }
+
+    revalidatePath("/dashboard")
+    revalidatePath("/transactions")
+    return { success: true }
+  } catch (error) {
+    console.error("[bulkDeleteTransactions] Unexpected error:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Errore sconosciuto.",
     }
   }
 }

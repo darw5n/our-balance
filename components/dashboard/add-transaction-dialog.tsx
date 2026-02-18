@@ -10,12 +10,19 @@ import { Input } from "@/components/ui/input"
 import { createTransaction, type TransactionType } from "@/app/actions/transactions"
 import { supabase } from "@/lib/supabase"
 
-export function AddTransactionDialog() {
+export type CategoryOption = { id: string; name: string; color: string }
+
+type AddTransactionDialogProps = {
+  categories?: CategoryOption[]
+}
+
+export function AddTransactionDialog({ categories = [] }: AddTransactionDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [date, setDate] = useState("")
   const [amount, setAmount] = useState("")
   const [type, setType] = useState<TransactionType>("expense")
+  const [categoryId, setCategoryId] = useState("")
   const [description, setDescription] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -111,6 +118,7 @@ export function AddTransactionDialog() {
         type,
         date: formattedDate,
         description: description || null,
+        category_id: categoryId || null,
         status: "confirmed",
         scope: "personal",
       })
@@ -128,6 +136,7 @@ export function AddTransactionDialog() {
       setDate("")
       setAmount("")
       setType("expense")
+      setCategoryId("")
       setDescription("")
       setError(null)
 
@@ -220,6 +229,25 @@ export function AddTransactionDialog() {
                 placeholder="0,00"
                 required
               />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-zinc-300" htmlFor="category">
+                Categoria
+              </label>
+              <select
+                id="category"
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+              >
+                <option value="">Nessuna categoria</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-1">
