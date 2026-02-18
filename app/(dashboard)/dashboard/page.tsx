@@ -11,12 +11,14 @@ import {
   type DashboardSummary,
 } from "@/lib/supabase/queries/transactions"
 import { getCategories } from "@/lib/supabase/queries/categories"
+import { getBudgetsWithProgress, type BudgetWithProgress } from "@/lib/supabase/queries/budgets"
 
 type DashboardData = {
   summary: DashboardSummary
   cashflow: Awaited<ReturnType<typeof getCashflowMonthly>>
   topCategories: Awaited<ReturnType<typeof getTopCategories>>
   categories: Awaited<ReturnType<typeof getCategories>>
+  budgets: BudgetWithProgress[]
 }
 
 async function getDashboardData(): Promise<DashboardData> {
@@ -47,21 +49,23 @@ async function getDashboardData(): Promise<DashboardData> {
       cashflow: [],
       topCategories: [],
       categories: [],
+      budgets: [],
     }
   }
 
-  const [summary, cashflow, topCategories, categories] = await Promise.all([
+  const [summary, cashflow, topCategories, categories, budgets] = await Promise.all([
     getDashboardSummary(user.id, "personal"),
     getCashflowMonthly(user.id, 12),
     getTopCategories(user.id, 5),
     getCategories(user.id),
+    getBudgetsWithProgress(user.id),
   ])
 
-  return { summary, cashflow, topCategories, categories }
+  return { summary, cashflow, topCategories, categories, budgets }
 }
 
 export default async function DashboardPage() {
-  const { summary, cashflow, topCategories, categories } = await getDashboardData()
+  const { summary, cashflow, topCategories, categories, budgets } = await getDashboardData()
 
   const hasAnyData =
     summary.entrate !== 0 ||
@@ -70,6 +74,8 @@ export default async function DashboardPage() {
     summary.pending !== 0 ||
     cashflow.length > 0 ||
     topCategories.length > 0
+
+  const exceededBudgets = budgets.filter((b) => b.is_exceeded)
 
   return (
     <>
@@ -95,6 +101,53 @@ export default async function DashboardPage() {
           netto={summary.netto}
           pending={summary.pending}
         />
+
+        {budgets.length > 0 && (
+          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-zinc-100">Budget del mese</h2>
+              {exceededBudgets.length > 0 && (
+                <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-medium text-rose-400">
+                  {exceededBudgets.length}{" "}
+                  {exceededBudgets.length === 1 ? "budget superato" : "budget superati"}
+                </span>
+              )}
+            </div>
+            <ul className="space-y-3">
+              {budgets.map((budget) => (
+                <li key={budget.id}>
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: budget.category_color }}
+                      />
+                      <span className="truncate text-xs text-zinc-300">{budget.category_name}</span>
+                      {budget.is_exceeded && (
+                        <span className="shrink-0 text-xs text-rose-400">Superato!</span>
+                      )}
+                    </div>
+                    <span className="shrink-0 text-xs text-zinc-400">
+                      € {budget.spent.toFixed(2)} / € {budget.amount_limit.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        budget.is_exceeded || budget.percentage >= 100
+                          ? "bg-rose-500"
+                          : budget.percentage >= 80
+                          ? "bg-amber-400"
+                          : "bg-emerald-500"
+                      }`}
+                      style={{ width: `${Math.min(budget.percentage, 100)}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
           <CashflowChart data={cashflow} />

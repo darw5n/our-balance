@@ -44,6 +44,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Transazioni
             </Link>
             <Link
+              href="/budgets"
+              className="text-xs text-zinc-400 transition-colors hover:text-zinc-50"
+            >
+              Budget
+            </Link>
+            <Link
               href="/categories"
               className="text-xs text-zinc-400 transition-colors hover:text-zinc-50"
             >
