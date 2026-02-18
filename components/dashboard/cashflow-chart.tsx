@@ -58,7 +58,7 @@ export function CashflowChart({ data }: CashflowChartProps) {
                   tickFormatter={(v) => formatCurrency(Number(v))}
                 />
                 <ChartTooltip
-                  formatter={(value: any, name: string) => {
+                  formatter={(value: any, name) => {
                     const label = name === "entrate" ? "Entrate" : "Uscite"
                     return [formatCurrency(Number(value)), label]
                   }}
