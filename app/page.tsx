@@ -63,7 +63,7 @@ export default async function Home() {
             className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
             size="lg"
           >
-            <Link href="/login">Registrati</Link>
+            <Link href="/signup">Registrati</Link>
           </Button>
         </div>
 
