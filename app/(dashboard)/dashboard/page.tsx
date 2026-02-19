@@ -2,6 +2,7 @@ import { BalanceCards } from "@/components/dashboard/balance-cards"
 import { CashflowChart } from "@/components/dashboard/cashflow-chart"
 import { TopCategoriesChart } from "@/components/dashboard/top-categories-chart"
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog"
+import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import {
@@ -9,6 +10,7 @@ import {
   getDashboardSummary,
   getTopCategories,
   type DashboardSummary,
+  type ViewMode,
 } from "@/lib/supabase/queries/transactions"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { getBudgetsWithProgress, type BudgetWithProgress } from "@/lib/supabase/queries/budgets"
@@ -21,7 +23,7 @@ type DashboardData = {
   budgets: BudgetWithProgress[]
 }
 
-async function getDashboardData(): Promise<DashboardData> {
+async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
@@ -54,18 +56,25 @@ async function getDashboardData(): Promise<DashboardData> {
   }
 
   const [summary, cashflow, topCategories, categories, budgets] = await Promise.all([
-    getDashboardSummary(user.id, "personal"),
-    getCashflowMonthly(user.id, 12),
-    getTopCategories(user.id, 5),
+    getDashboardSummary(user.id, viewMode),
+    getCashflowMonthly(user.id, 12, viewMode),
+    getTopCategories(user.id, 5, viewMode),
     getCategories(user.id),
-    getBudgetsWithProgress(user.id),
+    getBudgetsWithProgress(user.id, viewMode),
   ])
 
   return { summary, cashflow, topCategories, categories, budgets }
 }
 
-export default async function DashboardPage() {
-  const { summary, cashflow, topCategories, categories, budgets } = await getDashboardData()
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>
+}) {
+  const { view } = await searchParams
+  const viewMode: ViewMode = view === "family" || view === "both" ? (view as ViewMode) : "personal"
+
+  const { summary, cashflow, topCategories, categories, budgets } = await getDashboardData(viewMode)
 
   const hasAnyData =
     summary.entrate !== 0 ||
@@ -80,20 +89,21 @@ export default async function DashboardPage() {
   return (
     <>
       <div className="space-y-6">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
             <p className="text-xs text-zinc-400">
               Riepilogo di entrate, uscite e categorie principali per il mese corrente.
             </p>
           </div>
-
-          {!hasAnyData && (
-            <p className="text-xs text-zinc-400">
-              Nessuna transazione, aggiungi la prima per iniziare a tracciare il bilancio.
-            </p>
-          )}
+          <ViewModeSwitcher currentView={viewMode} basePath="/dashboard" />
         </div>
+
+        {!hasAnyData && (
+          <p className="text-xs text-zinc-400">
+            Nessuna transazione, aggiungi la prima per iniziare a tracciare il bilancio.
+          </p>
+        )}
 
         <BalanceCards
           entrate={summary.entrate}
@@ -159,4 +169,3 @@ export default async function DashboardPage() {
     </>
   )
 }
-

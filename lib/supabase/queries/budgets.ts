@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import type { ViewMode } from "@/lib/supabase/queries/transactions"
 
 export type BudgetWithProgress = {
   id: string
@@ -26,7 +27,10 @@ function toNumber(value: number | string | null | undefined): number {
   return 0
 }
 
-export async function getBudgetsWithProgress(userId: string): Promise<BudgetWithProgress[]> {
+export async function getBudgetsWithProgress(
+  userId: string,
+  viewMode: ViewMode = "both"
+): Promise<BudgetWithProgress[]> {
   if (!userId) return []
 
   const supabase = await createSupabaseServerClient()
@@ -44,14 +48,20 @@ export async function getBudgetsWithProgress(userId: string): Promise<BudgetWith
 
   const { startISO, endISO } = getMonthRange()
 
-  const { data: transactions, error: txError } = await supabase
+  let txQuery = supabase
     .from("transactions")
-    .select("amount, category_id")
+    .select("amount, category_id, scope")
     .eq("user_id", userId)
     .eq("type", "expense")
     .eq("status", "confirmed")
     .gte("date", startISO)
     .lt("date", endISO)
+
+  if (viewMode === "family") {
+    txQuery = txQuery.eq("scope", "family")
+  }
+
+  const { data: transactions, error: txError } = await txQuery
 
   if (txError) {
     console.error("[getBudgetsWithProgress] transactions error:", txError)
@@ -60,8 +70,10 @@ export async function getBudgetsWithProgress(userId: string): Promise<BudgetWith
   const spentByCategory = new Map<string, number>()
   for (const tx of transactions ?? []) {
     if (!tx.category_id) continue
+    const rawAmount = Math.abs(toNumber(tx.amount))
+    const amount = viewMode === "personal" && tx.scope === "family" ? rawAmount * 0.5 : rawAmount
     const prev = spentByCategory.get(tx.category_id) ?? 0
-    spentByCategory.set(tx.category_id, prev + Math.abs(toNumber(tx.amount)))
+    spentByCategory.set(tx.category_id, prev + amount)
   }
 
   return budgets.map((b) => {

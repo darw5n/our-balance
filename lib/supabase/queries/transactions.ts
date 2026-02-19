@@ -43,6 +43,12 @@ function getLastMonthsRange(months: number, now = new Date()) {
   return { fromISO: from.toISOString(), toISO: to.toISOString() }
 }
 
+function getYearRange(year: number) {
+  const start = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0))
+  const end = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0))
+  return { startISO: start.toISOString(), endISO: end.toISOString() }
+}
+
 function toNumber(value: number | string | null | undefined): number {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value === "string") {
@@ -52,13 +58,43 @@ function toNumber(value: number | string | null | undefined): number {
   return 0
 }
 
+function applyScope(amount: number, scope: string | null | undefined, viewMode: ViewMode): number {
+  if (viewMode === "personal" && scope === "family") return amount * 0.5
+  return amount
+}
+
+function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSummary {
+  let entrate = 0
+  let uscite = 0
+  let pending = 0
+
+  for (const row of data) {
+    const rawAmount = Math.abs(toNumber(row.amount))
+    const amount = applyScope(rawAmount, row.scope, viewMode)
+    const type = row.type ?? ""
+    const status = row.status ?? ""
+
+    if (status === "pending") {
+      pending += amount
+    }
+
+    if (status === "confirmed" && type === "income") {
+      entrate += amount
+    }
+
+    if (status === "confirmed" && type === "expense") {
+      uscite += amount
+    }
+  }
+
+  return { entrate, uscite, netto: entrate - uscite, pending }
+}
+
 export async function getDashboardSummary(
   userId: string,
   viewMode: ViewMode
 ): Promise<DashboardSummary> {
-  if (!userId) {
-    return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
-  }
+  if (!userId) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
 
   const supabase = await createSupabaseServerClient()
   const { startISO, endISO } = getMonthRange()
@@ -70,58 +106,67 @@ export async function getDashboardSummary(
     .gte("date", startISO)
     .lt("date", endISO)
 
-  if (viewMode !== "both") {
-    query = query.eq("scope", viewMode)
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
   }
 
   const { data, error } = await query
 
-  if (error || !data) {
-    return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+  if (error || !data) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+
+  return computeSummary(data as TransactionRow[], viewMode)
+}
+
+export async function getDashboardSummaryYear(
+  userId: string,
+  viewMode: ViewMode,
+  year: number
+): Promise<DashboardSummary> {
+  if (!userId) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+
+  const supabase = await createSupabaseServerClient()
+  const { startISO, endISO } = getYearRange(year)
+
+  let query = supabase
+    .from("transactions")
+    .select("amount, type, status, date, scope", { head: false })
+    .eq("user_id", userId)
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
   }
 
-  let entrate = 0
-  let uscite = 0
-  let pending = 0
+  const { data, error } = await query
 
-  for (const row of data as TransactionRow[]) {
-    const amount = toNumber(row.amount)
-    const type = row.type ?? ""
-    const status = row.status ?? ""
+  if (error || !data) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
 
-    if (status === "pending") {
-      pending += Math.abs(amount)
-    }
-
-    if (status === "confirmed" && type === "income") {
-      entrate += Math.abs(amount)
-    }
-
-    if (status === "confirmed" && type === "expense") {
-      uscite += Math.abs(amount)
-    }
-  }
-
-  const netto = entrate - uscite
-
-  return { entrate, uscite, netto, pending }
+  return computeSummary(data as TransactionRow[], viewMode)
 }
 
 export async function getCashflowMonthly(
   userId: string,
-  months: number = 12
+  months: number = 12,
+  viewMode: ViewMode = "both"
 ): Promise<CashflowMonthlyPoint[]> {
   if (!userId || months <= 0) return []
 
   const supabase = await createSupabaseServerClient()
   const { fromISO, toISO } = getLastMonthsRange(months)
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("transactions")
     .select("amount, type, status, date, scope", { head: false })
     .eq("user_id", userId)
     .gte("date", fromISO)
     .lt("date", toISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
+
+  const { data, error } = await query
 
   if (error || !data) return []
 
@@ -137,16 +182,17 @@ export async function getCashflowMonthly(
     }
 
     const bucket = buckets.get(key)!
-    const amount = toNumber(row.amount)
+    const rawAmount = Math.abs(toNumber(row.amount))
+    const amount = applyScope(rawAmount, row.scope, viewMode)
     const type = row.type ?? ""
     const status = row.status ?? ""
 
     if (status !== "confirmed") continue
 
     if (type === "income") {
-      bucket.entrate += Math.abs(amount)
+      bucket.entrate += amount
     } else if (type === "expense") {
-      bucket.uscite += Math.abs(amount)
+      bucket.uscite += amount
     }
   }
 
@@ -163,6 +209,7 @@ type TopCategoryRow = {
   type: string | null
   status: string | null
   date: string | null
+  scope?: string | null
   category: {
     id?: string
     name: string | null
@@ -176,20 +223,27 @@ type TopCategoryRow = {
 
 export async function getTopCategories(
   userId: string,
-  limit: number = 5
+  limit: number = 5,
+  viewMode: ViewMode = "both"
 ): Promise<TopCategory[]> {
   if (!userId || limit <= 0) return []
 
   const supabase = await createSupabaseServerClient()
   const { startISO, endISO } = getMonthRange()
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("transactions")
-    .select("amount, type, status, date, category:categories ( id, name, color )", { head: false })
+    .select("amount, type, status, date, scope, category:categories ( id, name, color )", { head: false })
     .eq("user_id", userId)
     .eq("type", "expense")
     .gte("date", startISO)
     .lt("date", endISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
+
+  const { data, error } = await query
 
   if (error || !data) return []
 
@@ -207,7 +261,7 @@ export async function getTopCategories(
 
     // Handle category as object or array (Supabase join can return either)
     let categoryObj: { id?: string; name: string | null; color: string | null } | null = null
-    
+
     if (Array.isArray(row.category)) {
       categoryObj = row.category[0] || null
     } else {
@@ -219,7 +273,8 @@ export async function getTopCategories(
     const id = categoryObj.id ?? categoryObj.name ?? "unknown"
     const name = categoryObj.name ?? "Senza categoria"
     const color = categoryObj.color ?? "#71717a"
-    const amount = Math.abs(toNumber(row.amount))
+    const rawAmount = Math.abs(toNumber(row.amount))
+    const amount = applyScope(rawAmount, row.scope, viewMode)
 
     const existing = totals.get(id)
     if (existing) {
@@ -250,4 +305,3 @@ export async function getTopCategories(
     percentage: (item.amount / totalAmount) * 100,
   }))
 }
-

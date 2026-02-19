@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TrendingUp, TrendingDown } from "lucide-react"
+import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,7 @@ export type Transaction = {
   type?: string | null
   status?: string | null
   category_id?: string | null
+  scope?: string | null
 }
 
 type EditTransactionDialogProps = {
@@ -35,6 +36,7 @@ export function EditTransactionDialog({
   onSuccess,
 }: EditTransactionDialogProps) {
   const [type, setType] = useState<TransactionType>("expense")
+  const [scope, setScope] = useState<"personal" | "family">("personal")
   const [date, setDate] = useState("")
   const [amount, setAmount] = useState("")
   const [categoryId, setCategoryId] = useState("")
@@ -45,6 +47,7 @@ export function EditTransactionDialog({
   useEffect(() => {
     if (open && transaction) {
       setType((transaction.type as TransactionType) ?? "expense")
+      setScope(transaction.scope === "family" ? "family" : "personal")
       const dateValue = transaction.date ?? transaction.created_at ?? ""
       setDate(dateValue ? dateValue.split("T")[0] : "")
       setAmount(transaction.amount != null ? String(Math.abs(transaction.amount)) : "")
@@ -75,6 +78,7 @@ export function EditTransactionDialog({
     try {
       const result = await updateTransaction(transaction.id, {
         type,
+        scope,
         date,
         amount: parsedAmount,
         category_id: categoryId || null,
@@ -129,6 +133,38 @@ export function EditTransactionDialog({
               >
                 <TrendingDown className="h-4 w-4" />
                 Uscita
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-300">
+              Visibilità
+            </label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setScope("personal")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                  scope === "personal"
+                    ? "border-blue-500 bg-blue-500/20 text-blue-400"
+                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                }`}
+              >
+                <User className="h-4 w-4" />
+                Personale
+              </button>
+              <button
+                type="button"
+                onClick={() => setScope("family")}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                  scope === "family"
+                    ? "border-violet-500 bg-violet-500/20 text-violet-400"
+                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                }`}
+              >
+                <Users className="h-4 w-4" />
+                In comune
               </button>
             </div>
           </div>
