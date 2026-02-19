@@ -50,6 +50,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Budget
             </Link>
             <Link
+              href="/recurring"
+              className="text-xs text-zinc-400 transition-colors hover:text-zinc-50"
+            >
+              Ricorrenti
+            </Link>
+            <Link
               href="/reports"
               className="text-xs text-zinc-400 transition-colors hover:text-zinc-50"
             >
