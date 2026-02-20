@@ -7,6 +7,7 @@ type ViewMode = "personal" | "family" | "both"
 type ViewModeSwitcherProps = {
   currentView: string
   basePath?: string
+  extraParams?: Record<string, string>
 }
 
 const views: { value: ViewMode; label: string }[] = [
@@ -15,11 +16,12 @@ const views: { value: ViewMode; label: string }[] = [
   { value: "both", label: "Entrambi" },
 ]
 
-export function ViewModeSwitcher({ currentView, basePath = "/dashboard" }: ViewModeSwitcherProps) {
+export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraParams }: ViewModeSwitcherProps) {
   const router = useRouter()
 
   function handleClick(view: ViewMode) {
-    router.replace(`${basePath}?view=${view}`, { scroll: false })
+    const params = new URLSearchParams({ view, ...extraParams })
+    router.replace(`${basePath}?${params.toString()}`, { scroll: false })
   }
 
   return (

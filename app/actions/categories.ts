@@ -7,12 +7,14 @@ export type CreateCategoryInput = {
   name: string
   color: string
   type: "expense" | "income"
+  macro_category?: string | null
 }
 
 export type UpdateCategoryInput = {
   name: string
   color: string
   type: "expense" | "income"
+  macro_category?: string | null
 }
 
 export type CategoryResult =
@@ -32,12 +34,13 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
 
   const color = input.color?.trim() || "#71717a"
   const type = input.type === "income" ? "income" : "expense"
+  const macro_category = input.macro_category ?? null
 
   const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .insert({ user_id: user.id, name, color, type })
+    .insert({ user_id: user.id, name, color, type, macro_category })
     .select("id")
     .single()
 
@@ -68,12 +71,13 @@ export async function updateCategory(
 
   const color = input.color?.trim() || "#71717a"
   const type = input.type === "income" ? "income" : "expense"
+  const macro_category = input.macro_category ?? null
 
   const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .update({ name, color, type })
+    .update({ name, color, type, macro_category })
     .eq("id", categoryId)
     .eq("user_id", user.id)
     .select("id")

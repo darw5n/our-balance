@@ -10,16 +10,25 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createCategory, updateCategory, type CreateCategoryInput } from "@/app/actions/categories"
+import type { MacroCategory } from "@/lib/supabase/queries/categories"
 
 const PRESET_COLORS = [
   "#ef4444", "#f97316", "#eab308", "#22c55e", "#14b8a6",
   "#3b82f6", "#8b5cf6", "#ec4899", "#71717a", "#a3a3a3",
 ]
 
+const MACRO_OPTIONS: { value: MacroCategory | null; label: string; className: string }[] = [
+  { value: null, label: "Nessuna", className: "border-zinc-600 text-zinc-400 data-[active=true]:bg-zinc-700 data-[active=true]:text-zinc-100 data-[active=true]:border-zinc-500" },
+  { value: "necessita", label: "Necessità", className: "border-amber-700/50 text-amber-400 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-300 data-[active=true]:border-amber-500" },
+  { value: "svago", label: "Svago", className: "border-violet-700/50 text-violet-400 data-[active=true]:bg-violet-500/20 data-[active=true]:text-violet-300 data-[active=true]:border-violet-500" },
+  { value: "risparmi", label: "Risparmi", className: "border-emerald-700/50 text-emerald-400 data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-300 data-[active=true]:border-emerald-500" },
+  { value: "investimenti", label: "Investimenti", className: "border-blue-700/50 text-blue-400 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-300 data-[active=true]:border-blue-500" },
+]
+
 type CategoryFormDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  category?: { id: string; name: string; color: string; type?: string } | null
+  category?: { id: string; name: string; color: string; type?: string; macro_category?: MacroCategory | null } | null
   onSuccess?: () => void
 }
 
@@ -32,6 +41,7 @@ export function CategoryFormDialog({
   const [name, setName] = useState("")
   const [color, setColor] = useState("#22c55e")
   const [type, setType] = useState<"expense" | "income">("expense")
+  const [macroCategory, setMacroCategory] = useState<MacroCategory | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,6 +52,7 @@ export function CategoryFormDialog({
       setName(category?.name ?? "")
       setColor(category?.color ?? "#22c55e")
       setType(category?.type === "income" ? "income" : "expense")
+      setMacroCategory(category?.macro_category ?? null)
       setError(null)
     }
   }, [open, category])
@@ -57,7 +68,7 @@ export function CategoryFormDialog({
 
     setSubmitting(true)
     try {
-      const input: CreateCategoryInput = { name: trimmed, color, type }
+      const input: CreateCategoryInput = { name: trimmed, color, type, macro_category: macroCategory }
       const result = isEdit
         ? await updateCategory(category.id, input)
         : await createCategory(input)
@@ -144,6 +155,23 @@ export function CategoryFormDialog({
               className="mt-1 border-white/15 bg-zinc-950 font-mono text-zinc-50"
               placeholder="#22c55e"
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-zinc-300">Macro-categoria <span className="text-zinc-500">(opzionale)</span></label>
+            <div className="flex flex-wrap gap-2">
+              {MACRO_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value ?? "none"}
+                  type="button"
+                  data-active={macroCategory === opt.value}
+                  onClick={() => setMacroCategory(opt.value)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${opt.className}`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {error && <p className="text-xs text-rose-400">{error}</p>}
