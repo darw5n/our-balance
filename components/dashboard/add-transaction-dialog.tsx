@@ -168,7 +168,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button
-              className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full bg-emerald-500 text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 focus-visible:ring-emerald-300"
+              className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-emerald-500 text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 focus-visible:ring-emerald-300 md:bottom-6"
               size="icon"
             >
               <Plus className="h-6 w-6" />
