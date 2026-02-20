@@ -7,54 +7,26 @@ import type { DashboardSummary, ViewMode } from "@/lib/supabase/queries/transact
 
 type BalanceCardsProps = {
   current: DashboardSummary
-  prev: DashboardSummary
   viewMode: ViewMode
-}
-
-function delta(current: number, prev: number): { pct: number; positive: boolean } | null {
-  if (prev === 0) return null
-  const pct = ((current - prev) / prev) * 100
-  return { pct, positive: pct >= 0 }
-}
-
-function DeltaBadge({
-  current,
-  prev,
-  invertColors = false,
-}: {
-  current: number
-  prev: number
-  invertColors?: boolean
-}) {
-  const d = delta(current, prev)
-  if (!d) return null
-  const isGood = invertColors ? !d.positive : d.positive
-  return (
-    <span
-      className={`text-[10px] font-medium ${isGood ? "text-emerald-400" : "text-rose-400"}`}
-    >
-      {d.positive ? "▲" : "▼"} {Math.abs(d.pct).toFixed(1)}% vs mese prec.
-    </span>
-  )
 }
 
 function HealthBadge({ entrate, uscite }: { entrate: number; uscite: number }) {
   if (entrate === 0) return null
-  const rate = ((entrate - uscite) / entrate) * 100
+  const rate = (entrate - uscite) / entrate
 
   let label: string
   let className: string
-  if (rate >= 20) {
-    label = `Ottimo · ${rate.toFixed(0)}% risparmiato`
+  if (rate >= 0.2) {
+    label = "Ottimo"
     className = "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-  } else if (rate >= 10) {
-    label = `Buono · ${rate.toFixed(0)}% risparmiato`
+  } else if (rate >= 0.1) {
+    label = "Buono"
     className = "bg-sky-500/15 text-sky-400 border-sky-500/30"
   } else if (rate >= 0) {
-    label = `Attenzione · ${rate.toFixed(0)}% risparmiato`
+    label = "Attenzione"
     className = "bg-amber-500/15 text-amber-400 border-amber-500/30"
   } else {
-    label = `In deficit · ${Math.abs(rate).toFixed(0)}% oltre le entrate`
+    label = "In deficit"
     className = "bg-rose-500/15 text-rose-400 border-rose-500/30"
   }
 
@@ -65,7 +37,7 @@ function HealthBadge({ entrate, uscite }: { entrate: number; uscite: number }) {
   )
 }
 
-export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
+export function BalanceCards({ current, viewMode }: BalanceCardsProps) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {/* Entrate */}
@@ -76,7 +48,6 @@ export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
             <p className="text-2xl font-semibold tracking-tight text-emerald-400">
               {formatCurrency(current.entrate)}
             </p>
-            <DeltaBadge current={current.entrate} prev={prev.entrate} />
           </div>
           <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
             <TrendingUp className="h-5 w-5 text-emerald-400" />
@@ -92,7 +63,6 @@ export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
             <p className="text-2xl font-semibold tracking-tight text-rose-400">
               {formatCurrency(current.uscite)}
             </p>
-            <DeltaBadge current={current.uscite} prev={prev.uscite} invertColors />
           </div>
           <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
             <TrendingDown className="h-5 w-5 text-rose-400" />
@@ -100,7 +70,7 @@ export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
         </div>
       </Card>
 
-      {/* Netto + health score */}
+      {/* Netto + health badge */}
       <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
@@ -108,10 +78,7 @@ export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
             <p className={`text-2xl font-semibold tracking-tight ${current.netto >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
               {formatCurrency(current.netto)}
             </p>
-            <DeltaBadge current={current.netto} prev={prev.netto} />
-            <div className="pt-0.5">
-              <HealthBadge entrate={current.entrate} uscite={current.uscite} />
-            </div>
+            <HealthBadge entrate={current.entrate} uscite={current.uscite} />
           </div>
           <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
             <Wallet className="h-5 w-5 text-sky-400" />
@@ -119,7 +86,7 @@ export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
         </div>
       </Card>
 
-      {/* Quota in comune (solo vista personal) oppure Pending */}
+      {/* Quota in comune (vista personal) oppure Pending */}
       {viewMode === "personal" && current.spese_comuni > 0 ? (
         <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
           <div className="flex items-start justify-between gap-4">

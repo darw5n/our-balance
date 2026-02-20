@@ -126,7 +126,6 @@ export default async function DashboardPage({
 
         <BalanceCards
           current={summary}
-          prev={summaryPrev}
           viewMode={viewMode}
         />
 
