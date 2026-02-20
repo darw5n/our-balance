@@ -130,7 +130,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
               ? new Date(dateValue).toLocaleDateString("it-IT")
               : "-"
             const amount = tx.amount ?? 0
-            const isNegative = amount < 0
             const formattedAmount = formatCurrency(amount)
 
             return (
@@ -149,7 +148,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   {tx.description || "-"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className={isNegative ? "text-rose-400" : "text-emerald-400"}>
+                  <span className={tx.type === "expense" ? "text-rose-400" : "text-emerald-400"}>
                     {formattedAmount}
                   </span>
                 </TableCell>

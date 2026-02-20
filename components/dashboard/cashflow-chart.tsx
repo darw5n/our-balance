@@ -19,17 +19,24 @@ import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type CashflowChartProps = {
   data: CashflowMonthlyPoint[]
+  hideIncome?: boolean
 }
 
-export function CashflowChart({ data }: CashflowChartProps) {
+export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) {
   const hasData = data.length > 0
 
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
-        <h2 className="text-sm font-medium text-zinc-200">Cashflow ultimi 12 mesi</h2>
+        <h2 className="text-sm font-medium text-zinc-200">
+          {hideIncome ? "Spese mensili in comune" : "Cashflow ultimi 12 mesi"}
+        </h2>
         <p className="text-xs text-zinc-400">
-          {hasData ? "Andamento entrate/uscite mensili." : "Nessuna transazione sufficiente per il grafico."}
+          {hasData
+            ? hideIncome
+              ? "Andamento spese condivise mensili."
+              : "Andamento entrate/uscite mensili."
+            : "Nessuna transazione sufficiente per il grafico."}
         </p>
       </div>
 
@@ -63,11 +70,15 @@ export function CashflowChart({ data }: CashflowChartProps) {
                     return [formatCurrency(Number(value)), label]
                   }}
                 />
-                <ChartLegend
-                  wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
-                  formatter={(value) => (value === "entrate" ? "Entrate" : "Uscite")}
-                />
-                <Bar dataKey="entrate" fill="rgba(52,211,153,0.9)" radius={[6, 6, 0, 0]} />
+                {!hideIncome && (
+                  <ChartLegend
+                    wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
+                    formatter={(value) => (value === "entrate" ? "Entrate" : "Uscite")}
+                  />
+                )}
+                {!hideIncome && (
+                  <Bar dataKey="entrate" fill="rgba(52,211,153,0.9)" radius={[6, 6, 0, 0]} />
+                )}
                 <Bar dataKey="uscite" fill="rgba(248,113,113,0.9)" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

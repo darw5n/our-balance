@@ -14,6 +14,22 @@ const FREQUENCY_LABEL: Record<string, string> = {
   yearly: "Annuale",
 }
 
+function getPendingDate(nextDueDate: string, frequency: string): string {
+  const date = new Date(nextDueDate + "T00:00:00Z")
+  if (frequency === "weekly") date.setUTCDate(date.getUTCDate() - 7)
+  else if (frequency === "monthly") date.setUTCMonth(date.getUTCMonth() - 1)
+  else date.setUTCFullYear(date.getUTCFullYear() - 1)
+
+  if (frequency === "monthly") {
+    return date.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" })
+  }
+  if (frequency === "yearly") {
+    return String(date.getUTCFullYear())
+  }
+  // weekly: show the specific date
+  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })
+}
+
 type PendingConfirmationsProps = {
   items: RecurringTransaction[]
 }
@@ -55,6 +71,9 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
             {FREQUENCY_LABEL[item.frequency]} ·{" "}
             {item.type === "income" ? "Entrata prevista" : "Uscita prevista"}: €{" "}
             {Number(item.amount).toFixed(2)}
+          </p>
+          <p className="text-xs text-amber-400/80">
+            Competenza: {getPendingDate(item.next_due_date, item.frequency)}
           </p>
         </div>
 

@@ -18,6 +18,7 @@ import {
 } from "@/app/actions/recurring"
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
+import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 
 type RecurringFormDialogProps = {
   open: boolean
@@ -64,6 +65,7 @@ export function RecurringFormDialog({
   // Auto-set requires_confirmation default based on type
   function handleTypeChange(newType: "income" | "expense") {
     setType(newType)
+    setCategoryId("")
     if (!recurring) {
       setRequiresConfirmation(newType === "income")
     }
@@ -78,6 +80,11 @@ export function RecurringFormDialog({
       setError("Importo non valido.")
       return
     }
+    if (!categoryId) {
+      setError("La categoria è obbligatoria.")
+      return
+    }
+
     if (!startDate) {
       setError("La data di inizio è obbligatoria.")
       return
@@ -218,22 +225,15 @@ export function RecurringFormDialog({
 
           {/* Category */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="rec-category">
-              Categoria
+            <label className="text-xs font-medium text-zinc-300">
+              Categoria <span className="text-rose-400">*</span>
             </label>
-            <select
-              id="rec-category"
+            <CategoryCombobox
+              categories={categories}
+              txType={type}
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-            >
-              <option value="">Nessuna categoria</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              onChange={setCategoryId}
+            />
           </div>
 
           {/* Frequency */}
