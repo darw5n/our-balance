@@ -10,6 +10,7 @@ import {
   getCashflowMonthly,
   getDashboardSummary,
   getDashboardSummaryPrevMonth,
+  getDashboardSummaryYear,
   getTopCategories,
   type DashboardSummary,
   type ViewMode,
@@ -22,6 +23,7 @@ import { processRecurringTransactions } from "@/app/actions/recurring"
 type DashboardData = {
   summary: DashboardSummary
   summaryPrev: DashboardSummary
+  summaryYTD: DashboardSummary
   cashflow: Awaited<ReturnType<typeof getCashflowMonthly>>
   topCategories: Awaited<ReturnType<typeof getTopCategories>>
   categories: Awaited<ReturnType<typeof getCategories>>
@@ -57,6 +59,7 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
     return {
       summary: EMPTY,
       summaryPrev: EMPTY,
+      summaryYTD: EMPTY,
       cashflow: [],
       topCategories: [],
       categories: [],
@@ -68,10 +71,13 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
   // Process due recurring transactions before fetching pending confirmations
   await processRecurringTransactions(user.id)
 
-  const [summary, summaryPrev, cashflow, topCategories, categories, budgets, pendingConfirmations] =
+  const currentYear = new Date().getUTCFullYear()
+
+  const [summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations] =
     await Promise.all([
       getDashboardSummary(user.id, viewMode),
       getDashboardSummaryPrevMonth(user.id, viewMode),
+      getDashboardSummaryYear(user.id, viewMode, currentYear),
       getCashflowMonthly(user.id, 12, viewMode),
       getTopCategories(user.id, 5, viewMode),
       getCategories(user.id),
@@ -79,7 +85,7 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
       getPendingConfirmations(user.id),
     ])
 
-  return { summary, summaryPrev, cashflow, topCategories, categories, budgets, pendingConfirmations }
+  return { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations }
 }
 
 export default async function DashboardPage({
@@ -90,7 +96,7 @@ export default async function DashboardPage({
   const { view } = await searchParams
   const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
-  const { summary, summaryPrev, cashflow, topCategories, categories, budgets, pendingConfirmations } =
+  const { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations } =
     await getDashboardData(viewMode)
 
   const hasAnyData =
@@ -126,6 +132,7 @@ export default async function DashboardPage({
 
         <BalanceCards
           current={summary}
+          ytdUscite={summaryYTD.uscite}
           viewMode={viewMode}
         />
 
@@ -177,7 +184,7 @@ export default async function DashboardPage({
         )}
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-          <CashflowChart data={cashflow} />
+          <CashflowChart data={cashflow} hideIncome={viewMode === "family"} />
           <TopCategoriesChart data={topCategories} />
         </div>
       </div>
