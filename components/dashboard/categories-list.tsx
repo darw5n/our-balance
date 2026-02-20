@@ -45,18 +45,23 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
   async function handleImportDefaults() {
     setImporting(true)
     setImportMsg(null)
-    const result = await createDefaultCategories()
-    if (result.success) {
-      setImportMsg(
-        result.created === 0
-          ? "Tutte le categorie predefinite sono già presenti."
-          : `${result.created} categorie aggiunte.`
-      )
-      if (result.created > 0) router.refresh()
-    } else {
-      setImportMsg(result.error ?? "Errore durante l'importazione.")
+    try {
+      const result = await createDefaultCategories()
+      if (result.success) {
+        setImportMsg(
+          result.created === 0
+            ? "Tutte le categorie predefinite sono già presenti."
+            : `${result.created} categorie aggiunte.`
+        )
+        if (result.created > 0) router.refresh()
+      } else {
+        setImportMsg(result.error ?? "Errore durante l'importazione.")
+      }
+    } catch (err) {
+      setImportMsg(err instanceof Error ? err.message : "Errore imprevisto.")
+    } finally {
+      setImporting(false)
     }
-    setImporting(false)
   }
 
   async function handleDelete(cat: Category) {
@@ -81,6 +86,7 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button
+              type="button"
               variant="outline"
               size="sm"
               onClick={handleImportDefaults}
@@ -101,7 +107,9 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
           </div>
         </div>
         {importMsg && (
-          <p className="text-xs text-zinc-400">{importMsg}</p>
+          <p className={`text-xs ${importMsg.includes("aggiunte") || importMsg.includes("presenti") ? "text-zinc-400" : "text-rose-400"}`}>
+            {importMsg}
+          </p>
         )}
 
         {categories.length === 0 ? (
