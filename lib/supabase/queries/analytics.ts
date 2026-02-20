@@ -93,7 +93,6 @@ export async function getMacroCategoryBreakdown(
 
     if (macro === "necessita") result.necessita += amount
     else if (macro === "svago") result.svago += amount
-    else if (macro === "risparmi") result.risparmi += amount
     else if (macro === "investimenti") result.investimenti += amount
   }
 
@@ -101,6 +100,10 @@ export async function getMacroCategoryBreakdown(
     const rawAmount = Math.abs(toNumber(row.amount))
     result.totale_entrate += applyScope(rawAmount, row.scope, viewMode)
   }
+
+  // Risparmiato totale = quanto rimane dopo necessità e svago.
+  // Investimenti è un sub-bucket del risparmio (capitale allocato = forma di risparmio).
+  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago)
 
   return result
 }
@@ -163,6 +166,95 @@ function buildEmptyYear(year: number): CashflowMonthlyPoint[] {
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
     return { month: monthLabel, entrate: 0, uscite: 0 }
   })
+}
+
+export type CategoryMonthRow = {
+  id: string
+  name: string
+  color: string
+  macro_category: string | null
+  months: number[] // 12 valori, indice 0 = Gennaio
+  total: number
+}
+
+export async function getCategoryMonthlyBreakdown(
+  userId: string,
+  viewMode: ViewMode,
+  year: number
+): Promise<CategoryMonthRow[]> {
+  if (!userId) return []
+
+  const supabase = await createSupabaseServerClient()
+  const { startISO, endISO } = getYearRange(year)
+
+  let query = supabase
+    .from("transactions")
+    .select("amount, status, date, scope, category:categories ( id, name, color, macro_category )", { head: false })
+    .eq("user_id", userId)
+    .eq("type", "expense")
+    .eq("status", "confirmed")
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
+
+  const { data, error } = await query
+  if (error || !data) return []
+
+  type Row = {
+    amount: number | null
+    scope?: string | null
+    date: string | null
+    category: {
+      id?: string
+      name: string | null
+      color: string | null
+      macro_category: string | null
+    } | Array<{
+      id?: string
+      name: string | null
+      color: string | null
+      macro_category: string | null
+    }> | null
+  }
+
+  const map = new Map<string, CategoryMonthRow>()
+
+  for (const row of data as unknown as Row[]) {
+    if (!row.category || !row.date) continue
+
+    let cat: { id?: string; name: string | null; color: string | null; macro_category: string | null } | null = null
+    if (Array.isArray(row.category)) {
+      cat = row.category[0] ?? null
+    } else {
+      cat = row.category
+    }
+    if (!cat) continue
+
+    const id = cat.id ?? cat.name ?? "unknown"
+    const monthIndex = new Date(row.date).getUTCMonth() // 0-11
+    const rawAmount = Math.abs(toNumber(row.amount))
+    const amount = applyScope(rawAmount, row.scope, viewMode)
+
+    if (!map.has(id)) {
+      map.set(id, {
+        id,
+        name: cat.name ?? "Senza categoria",
+        color: cat.color ?? "#71717a",
+        macro_category: cat.macro_category ?? null,
+        months: Array(12).fill(0),
+        total: 0,
+      })
+    }
+
+    const entry = map.get(id)!
+    entry.months[monthIndex] += amount
+    entry.total += amount
+  }
+
+  return Array.from(map.values()).sort((a, b) => b.total - a.total)
 }
 
 export type CategoryMonthlyAverage = {

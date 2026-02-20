@@ -5,6 +5,7 @@ import { CashflowChart } from "@/components/dashboard/cashflow-chart"
 import { TopCategoriesChart } from "@/components/dashboard/top-categories-chart"
 import { MacroBreakdownChart } from "@/components/dashboard/macro-breakdown-chart"
 import { YearComparisonChart } from "@/components/dashboard/year-comparison-chart"
+import { CategoryMonthTable } from "@/components/dashboard/category-month-table"
 import {
   getCashflowMonthly,
   getTopCategories,
@@ -14,6 +15,7 @@ import {
 import {
   getMacroCategoryBreakdown,
   getCashflowForYear,
+  getCategoryMonthlyBreakdown,
 } from "@/lib/supabase/queries/analytics"
 import { formatCurrency } from "@/lib/utils"
 
@@ -23,7 +25,7 @@ export default async function ReportsPage({
   searchParams: Promise<{ view?: string; year?: string }>
 }) {
   const { view, year: yearParam } = await searchParams
-  const viewMode: ViewMode = view === "family" || view === "both" ? (view as ViewMode) : "personal"
+  const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
   const currentUTCYear = new Date().getUTCFullYear()
   const year = yearParam ? parseInt(yearParam, 10) : currentUTCYear
@@ -33,7 +35,7 @@ export default async function ReportsPage({
   const user = await getServerUser()
   if (!user) return null
 
-  const [summary, cashflowCurrent, cashflowPrev, cashflow12, topCategories, macroBreakdown] =
+  const [summary, cashflowCurrent, cashflowPrev, cashflow12, topCategories, macroBreakdown, categoryMonthly] =
     await Promise.all([
       getDashboardSummaryYear(user.id, viewMode, safeYear),
       getCashflowForYear(user.id, viewMode, safeYear),
@@ -41,6 +43,7 @@ export default async function ReportsPage({
       getCashflowMonthly(user.id, 12, viewMode),
       getTopCategories(user.id, 5, viewMode),
       getMacroCategoryBreakdown(user.id, viewMode, safeYear),
+      getCategoryMonthlyBreakdown(user.id, viewMode, safeYear),
     ])
 
   // Forecast: only for current partial year
@@ -130,6 +133,9 @@ export default async function ReportsPage({
 
       {/* Macro breakdown */}
       <MacroBreakdownChart data={macroBreakdown} />
+
+      {/* Tabella categorie × mese */}
+      <CategoryMonthTable data={categoryMonthly} year={safeYear} />
 
       {/* Cashflow + top categories */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">

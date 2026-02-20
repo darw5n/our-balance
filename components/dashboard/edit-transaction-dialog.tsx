@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateTransaction, type TransactionType } from "@/app/actions/transactions"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
+import { buildGroupedOptions } from "@/components/dashboard/add-transaction-dialog"
 
 export type Transaction = {
   id: string
@@ -112,7 +113,7 @@ export function EditTransactionDialog({
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setType("income")}
+                onClick={() => { setType("income"); setCategoryId("") }}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "income"
                     ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
@@ -124,7 +125,7 @@ export function EditTransactionDialog({
               </button>
               <button
                 type="button"
-                onClick={() => setType("expense")}
+                onClick={() => { setType("expense"); setCategoryId("") }}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "expense"
                     ? "border-rose-500 bg-rose-500/20 text-rose-400"
@@ -209,10 +210,12 @@ export function EditTransactionDialog({
               className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
             >
               <option value="">Nessuna categoria</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
+              {buildGroupedOptions(categories, type).map((group) => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.items.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>

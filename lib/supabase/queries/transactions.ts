@@ -1,12 +1,13 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
-export type ViewMode = "personal" | "family" | "both"
+export type ViewMode = "personal" | "family"
 
 export type DashboardSummary = {
   entrate: number
   uscite: number
   netto: number
   pending: number
+  spese_comuni: number  // totale lordo spese scope=family (utile in vista personal)
 }
 
 export type CashflowMonthlyPoint = {
@@ -67,6 +68,7 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
   let entrate = 0
   let uscite = 0
   let pending = 0
+  let spese_comuni = 0
 
   for (const row of data) {
     const rawAmount = Math.abs(toNumber(row.amount))
@@ -84,17 +86,23 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
 
     if (status === "confirmed" && type === "expense") {
       uscite += amount
+      // Traccia le spese in comune al lordo (prima dell'halving) solo in vista personal
+      if (viewMode === "personal" && row.scope === "family") {
+        spese_comuni += rawAmount
+      }
     }
   }
 
-  return { entrate, uscite, netto: entrate - uscite, pending }
+  return { entrate, uscite, netto: entrate - uscite, pending, spese_comuni }
 }
+
+const EMPTY_SUMMARY: DashboardSummary = { entrate: 0, uscite: 0, netto: 0, pending: 0, spese_comuni: 0 }
 
 export async function getDashboardSummary(
   userId: string,
   viewMode: ViewMode
 ): Promise<DashboardSummary> {
-  if (!userId) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+  if (!userId) return { ...EMPTY_SUMMARY }
 
   const supabase = await createSupabaseServerClient()
   const { startISO, endISO } = getMonthRange()
@@ -112,7 +120,36 @@ export async function getDashboardSummary(
 
   const { data, error } = await query
 
-  if (error || !data) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+  if (error || !data) return { ...EMPTY_SUMMARY }
+
+  return computeSummary(data as TransactionRow[], viewMode)
+}
+
+export async function getDashboardSummaryPrevMonth(
+  userId: string,
+  viewMode: ViewMode
+): Promise<DashboardSummary> {
+  if (!userId) return { ...EMPTY_SUMMARY }
+
+  const supabase = await createSupabaseServerClient()
+  const now = new Date()
+  const prevMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
+  const { startISO, endISO } = getMonthRange(prevMonth)
+
+  let query = supabase
+    .from("transactions")
+    .select("amount, type, status, date, scope", { head: false })
+    .eq("user_id", userId)
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
+
+  const { data, error } = await query
+
+  if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
 }
@@ -122,7 +159,7 @@ export async function getDashboardSummaryYear(
   viewMode: ViewMode,
   year: number
 ): Promise<DashboardSummary> {
-  if (!userId) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+  if (!userId) return { ...EMPTY_SUMMARY }
 
   const supabase = await createSupabaseServerClient()
   const { startISO, endISO } = getYearRange(year)
@@ -140,7 +177,7 @@ export async function getDashboardSummaryYear(
 
   const { data, error } = await query
 
-  if (error || !data) return { entrate: 0, uscite: 0, netto: 0, pending: 0 }
+  if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
 }
@@ -148,7 +185,7 @@ export async function getDashboardSummaryYear(
 export async function getCashflowMonthly(
   userId: string,
   months: number = 12,
-  viewMode: ViewMode = "both"
+  viewMode: ViewMode = "personal"
 ): Promise<CashflowMonthlyPoint[]> {
   if (!userId || months <= 0) return []
 
@@ -224,7 +261,7 @@ type TopCategoryRow = {
 export async function getTopCategories(
   userId: string,
   limit: number = 5,
-  viewMode: ViewMode = "both"
+  viewMode: ViewMode = "personal"
 ): Promise<TopCategory[]> {
   if (!userId || limit <= 0) return []
 

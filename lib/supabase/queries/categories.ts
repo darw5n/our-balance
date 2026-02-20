@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
-export type MacroCategory = "necessita" | "svago" | "risparmi" | "investimenti"
+export type MacroCategory = "necessita" | "svago" | "investimenti"
 
 export type Category = {
   id: string
@@ -9,6 +9,7 @@ export type Category = {
   type: string
   user_id?: string
   macro_category?: MacroCategory | null
+  group_name?: string | null
 }
 
 export async function getCategories(userId: string): Promise<Category[]> {
@@ -18,7 +19,7 @@ export async function getCategories(userId: string): Promise<Category[]> {
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, color, type, user_id, macro_category")
+    .select("id, name, color, type, user_id, macro_category, group_name")
     .eq("user_id", userId)
     .order("name", { ascending: true })
 

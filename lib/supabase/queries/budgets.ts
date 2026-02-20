@@ -29,7 +29,7 @@ function toNumber(value: number | string | null | undefined): number {
 
 export async function getBudgetsWithProgress(
   userId: string,
-  viewMode: ViewMode = "both"
+  viewMode: ViewMode = "personal"
 ): Promise<BudgetWithProgress[]> {
   if (!userId) return []
 
