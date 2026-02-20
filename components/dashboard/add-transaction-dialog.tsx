@@ -11,7 +11,42 @@ import { createTransaction, type TransactionType } from "@/app/actions/transacti
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
 
-export type CategoryOption = { id: string; name: string; color: string }
+export type CategoryOption = {
+  id: string
+  name: string
+  color: string
+  type?: string | null
+  group_name?: string | null
+}
+
+export function buildGroupedOptions(categories: CategoryOption[], txType: string) {
+  const visible = categories.filter((c) => !c.type || c.type === txType)
+  const grouped = new Map<string, CategoryOption[]>()
+
+  for (const cat of visible) {
+    const key = cat.group_name?.trim() || ""
+    if (!grouped.has(key)) grouped.set(key, [])
+    grouped.get(key)!.push(cat)
+  }
+
+  // Sort items within each group alphabetically
+  for (const items of grouped.values()) {
+    items.sort((a, b) => a.name.localeCompare(b.name, "it"))
+  }
+
+  // Sort group headers alphabetically; ungrouped ("") goes last
+  const sortedKeys = Array.from(grouped.keys()).sort((a, b) => {
+    if (a === "") return 1
+    if (b === "") return -1
+    return a.localeCompare(b, "it")
+  })
+
+  return sortedKeys.map((k) => ({
+    key: k || "__ungrouped__",
+    label: k || "Altro",
+    items: grouped.get(k)!,
+  }))
+}
 
 type AddTransactionDialogProps = {
   categories?: CategoryOption[]
@@ -188,7 +223,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => { setType("income"); setRequiresConfirmation(true) }}
+                  onClick={() => { setType("income"); setRequiresConfirmation(true); setCategoryId("") }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "income"
                       ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
@@ -200,7 +235,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setType("expense"); setRequiresConfirmation(false) }}
+                  onClick={() => { setType("expense"); setRequiresConfirmation(false); setCategoryId("") }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "expense"
                       ? "border-rose-500 bg-rose-500/20 text-rose-400"
@@ -286,10 +321,12 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
                 className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
               >
                 <option value="">Nessuna categoria</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                {buildGroupedOptions(categories, type).map((group) => (
+                  <optgroup key={group.key} label={group.label}>
+                    {group.items.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
