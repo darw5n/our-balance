@@ -24,13 +24,25 @@ export type RecurringActionResult =
   | { success: false; error: string }
 
 function advanceDate(dateStr: string, frequency: RecurringFrequency): string {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr + "T00:00:00Z")
   if (frequency === "weekly") {
     date.setUTCDate(date.getUTCDate() + 7)
   } else if (frequency === "monthly") {
     date.setUTCMonth(date.getUTCMonth() + 1)
   } else {
     date.setUTCFullYear(date.getUTCFullYear() + 1)
+  }
+  return date.toISOString().split("T")[0]
+}
+
+function rewindDate(dateStr: string, frequency: RecurringFrequency): string {
+  const date = new Date(dateStr + "T00:00:00Z")
+  if (frequency === "weekly") {
+    date.setUTCDate(date.getUTCDate() - 7)
+  } else if (frequency === "monthly") {
+    date.setUTCMonth(date.getUTCMonth() - 1)
+  } else {
+    date.setUTCFullYear(date.getUTCFullYear() - 1)
   }
   return date.toISOString().split("T")[0]
 }
@@ -173,32 +185,35 @@ export async function processRecurringTransactions(userId: string): Promise<void
     }
 
     for (const rec of due ?? []) {
-      const nextDue = advanceDate(rec.next_due_date, rec.frequency as RecurringFrequency)
-
       if (!rec.requires_confirmation) {
-        // Auto-create transaction
-        await supabase.from("transactions").insert({
-          user_id: userId,
-          type: rec.type,
-          scope: rec.scope,
-          amount: rec.amount,
-          description: rec.description,
-          category_id: rec.category_id,
-          date: rec.next_due_date,
-          status: "confirmed",
-        })
+        // Auto-create one transaction per missed occurrence
+        let currentDue = rec.next_due_date as string
+        while (currentDue <= today) {
+          await supabase.from("transactions").insert({
+            user_id: userId,
+            type: rec.type,
+            scope: rec.scope,
+            amount: rec.amount,
+            description: rec.description,
+            category_id: rec.category_id,
+            date: currentDue,
+            status: "confirmed",
+          })
+          currentDue = advanceDate(currentDue, rec.frequency as RecurringFrequency)
+        }
         await supabase
           .from("recurring_transactions")
-          .update({ next_due_date: nextDue })
+          .update({ next_due_date: currentDue })
           .eq("id", rec.id)
       } else if (!rec.pending_confirmation) {
-        // Flag for confirmation
+        // Flag the oldest missed occurrence for confirmation; advance next_due_date by one cycle
+        const nextDue = advanceDate(rec.next_due_date, rec.frequency as RecurringFrequency)
         await supabase
           .from("recurring_transactions")
           .update({ pending_confirmation: true, next_due_date: nextDue })
           .eq("id", rec.id)
       }
-      // If already pending_confirmation=true → skip
+      // If already pending_confirmation=true → skip (user must confirm first)
     }
   } catch (error) {
     console.error("[processRecurringTransactions] Unexpected error:", error)
@@ -228,9 +243,9 @@ export async function confirmRecurringTransaction(
       return { success: false, error: "Ricorrenza non trovata." }
     }
 
-    // The date that was processed is next_due_date minus one cycle (already advanced when set pending)
-    // We use today as the transaction date
-    const today = new Date().toISOString().split("T")[0]
+    // next_due_date was already advanced by one cycle when pending_confirmation was set,
+    // so the actual occurrence date is one cycle back.
+    const pendingDate = rewindDate(rec.next_due_date, rec.frequency as RecurringFrequency)
 
     const { error: txError } = await supabase.from("transactions").insert({
       user_id: user.id,
@@ -239,7 +254,7 @@ export async function confirmRecurringTransaction(
       amount: Number(amount),
       description: rec.description,
       category_id: rec.category_id,
-      date: today,
+      date: pendingDate,
       status: "confirmed",
     })
 

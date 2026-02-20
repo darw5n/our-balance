@@ -129,7 +129,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
             <p className="text-sm text-zinc-400">Netto mese</p>
-            <p className={`text-2xl font-semibold tracking-tight ${current.netto >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+            <p className="text-2xl font-semibold tracking-tight text-sky-400">
               {formatCurrency(current.netto)}
             </p>
             <HealthBadge entrate={current.entrate} uscite={current.uscite} />

@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { createTransaction, type TransactionType } from "@/app/actions/transactions"
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
+import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 
 export type CategoryOption = {
   id: string
@@ -34,10 +35,10 @@ export function buildGroupedOptions(categories: CategoryOption[], txType: string
     items.sort((a, b) => a.name.localeCompare(b.name, "it"))
   }
 
-  // Sort group headers alphabetically; ungrouped ("") goes last
+  // Sort group headers alphabetically; "Altro" and ungrouped ("") always last
   const sortedKeys = Array.from(grouped.keys()).sort((a, b) => {
-    if (a === "") return 1
-    if (b === "") return -1
+    if (a === "" || a === "Altro") return 1
+    if (b === "" || b === "Altro") return -1
     return a.localeCompare(b, "it")
   })
 
@@ -311,24 +312,15 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="category">
+              <label className="text-xs font-medium text-zinc-300">
                 Categoria
               </label>
-              <select
-                id="category"
+              <CategoryCombobox
+                categories={categories}
+                txType={type}
                 value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-              >
-                <option value="">Nessuna categoria</option>
-                {buildGroupedOptions(categories, type).map((group) => (
-                  <optgroup key={group.key} label={group.label}>
-                    {group.items.map((cat) => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+                onChange={setCategoryId}
+              />
             </div>
 
             <div className="space-y-1">

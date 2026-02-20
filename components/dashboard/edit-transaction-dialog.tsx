@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateTransaction, type TransactionType } from "@/app/actions/transactions"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
-import { buildGroupedOptions } from "@/components/dashboard/add-transaction-dialog"
+import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 
 export type Transaction = {
   id: string
@@ -200,24 +200,15 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-category">
+            <label className="text-xs font-medium text-zinc-300">
               Categoria
             </label>
-            <select
-              id="edit-category"
+            <CategoryCombobox
+              categories={categories}
+              txType={type}
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
-            >
-              <option value="">Nessuna categoria</option>
-              {buildGroupedOptions(categories, type).map((group) => (
-                <optgroup key={group.key} label={group.label}>
-                  {group.items.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+              onChange={setCategoryId}
+            />
           </div>
 
           <div className="space-y-1">
