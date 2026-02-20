@@ -21,7 +21,6 @@ const MACRO_OPTIONS: { value: MacroCategory | null; label: string; className: st
   { value: null, label: "Nessuna", className: "border-zinc-600 text-zinc-400 data-[active=true]:bg-zinc-700 data-[active=true]:text-zinc-100 data-[active=true]:border-zinc-500" },
   { value: "necessita", label: "Necessità", className: "border-amber-700/50 text-amber-400 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-300 data-[active=true]:border-amber-500" },
   { value: "svago", label: "Svago", className: "border-violet-700/50 text-violet-400 data-[active=true]:bg-violet-500/20 data-[active=true]:text-violet-300 data-[active=true]:border-violet-500" },
-  { value: "risparmi", label: "Risparmi", className: "border-emerald-700/50 text-emerald-400 data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-300 data-[active=true]:border-emerald-500" },
   { value: "investimenti", label: "Investimenti", className: "border-blue-700/50 text-blue-400 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-300 data-[active=true]:border-blue-500" },
 ]
 

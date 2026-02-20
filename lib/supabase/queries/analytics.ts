@@ -93,7 +93,6 @@ export async function getMacroCategoryBreakdown(
 
     if (macro === "necessita") result.necessita += amount
     else if (macro === "svago") result.svago += amount
-    else if (macro === "risparmi") result.risparmi += amount
     else if (macro === "investimenti") result.investimenti += amount
   }
 
@@ -101,6 +100,9 @@ export async function getMacroCategoryBreakdown(
     const rawAmount = Math.abs(toNumber(row.amount))
     result.totale_entrate += applyScope(rawAmount, row.scope, viewMode)
   }
+
+  // Risparmi = residuale: quanto rimane dopo necessità, svago e investimenti
+  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago - result.investimenti)
 
   return result
 }

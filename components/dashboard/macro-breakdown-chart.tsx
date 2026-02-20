@@ -10,16 +10,18 @@ type Props = {
 }
 
 const MACRO_CONFIG = [
-  { key: "necessita" as const, label: "Necessità", color: "#f59e0b", textColor: "text-amber-400" },
-  { key: "svago" as const, label: "Svago", color: "#8b5cf6", textColor: "text-violet-400" },
-  { key: "risparmi" as const, label: "Risparmi", color: "#10b981", textColor: "text-emerald-400" },
-  { key: "investimenti" as const, label: "Investimenti", color: "#3b82f6", textColor: "text-blue-400" },
+  { key: "necessita" as const, label: "Necessità", color: "#f59e0b", textColor: "text-amber-400", isResidual: false },
+  { key: "svago" as const, label: "Svago", color: "#8b5cf6", textColor: "text-violet-400", isResidual: false },
+  { key: "investimenti" as const, label: "Investimenti", color: "#3b82f6", textColor: "text-blue-400", isResidual: false },
+  { key: "risparmi" as const, label: "Risparmiato", color: "#10b981", textColor: "text-emerald-400", isResidual: true },
 ]
 
 export function MacroBreakdownChart({ data }: Props) {
   const { totale_entrate } = data
-  const totaleUscite = MACRO_CONFIG.reduce((sum, m) => sum + data[m.key], 0)
-  const hasData = totaleUscite > 0
+  const totalSpending = data.necessita + data.svago + data.investimenti
+  const hasData = totale_entrate > 0 || totalSpending > 0
+  // Bar base: totale_entrate so all segments (spending + residual savings) fill 100%
+  const barBase = Math.max(totale_entrate, totalSpending)
 
   const pct = (value: number) =>
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
@@ -29,7 +31,7 @@ export function MacroBreakdownChart({ data }: Props) {
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-zinc-200">Suddivisione macro-categorie</h2>
         <p className="text-xs text-zinc-400">
-          Spese per macro-categoria in % sulle entrate annuali.
+          Come si distribuiscono le entrate tra necessità, svago, investimenti e risparmi.
         </p>
       </div>
 
@@ -42,11 +44,11 @@ export function MacroBreakdownChart({ data }: Props) {
         </div>
       ) : (
         <>
-          {/* Stacked horizontal bar */}
-          <div className="mb-6 flex h-8 w-full overflow-hidden rounded-lg">
+          {/* Stacked horizontal bar — base = totale_entrate (100%) */}
+          <div className="mb-6 flex h-8 w-full overflow-hidden rounded-lg bg-zinc-800">
             {MACRO_CONFIG.map((m) => {
               const value = data[m.key]
-              const width = totaleUscite > 0 ? (value / totaleUscite) * 100 : 0
+              const width = barBase > 0 ? (value / barBase) * 100 : 0
               if (width <= 0) return null
               return (
                 <div
@@ -65,6 +67,7 @@ export function MacroBreakdownChart({ data }: Props) {
               <div key={m.key} className="flex items-center gap-1.5 text-xs text-zinc-300">
                 <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: m.color }} />
                 {m.label}
+                {m.isResidual && <span className="text-zinc-500">(calcolato)</span>}
               </div>
             ))}
           </div>
@@ -75,8 +78,8 @@ export function MacroBreakdownChart({ data }: Props) {
               <thead>
                 <tr className="border-b border-white/10 text-zinc-500">
                   <th className="pb-2 text-left font-medium">Macro-categoria</th>
-                  <th className="pb-2 text-right font-medium">Mensile</th>
-                  <th className="pb-2 text-right font-medium">Annuale ×12</th>
+                  <th className="pb-2 text-right font-medium">Media/mese</th>
+                  <th className="pb-2 text-right font-medium">Totale anno</th>
                   <th className="pb-2 text-right font-medium">% entrate</th>
                 </tr>
               </thead>
@@ -89,6 +92,7 @@ export function MacroBreakdownChart({ data }: Props) {
                         <div className="flex items-center gap-2">
                           <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: m.color }} />
                           <span className={m.textColor}>{m.label}</span>
+                          {m.isResidual && <span className="text-zinc-600">(residuale)</span>}
                         </div>
                       </td>
                       <td className="py-2 text-right text-zinc-200">{formatCurrency(value / 12)}</td>
@@ -100,10 +104,10 @@ export function MacroBreakdownChart({ data }: Props) {
               </tbody>
               <tfoot>
                 <tr className="border-t border-white/15 font-medium">
-                  <td className="pt-3 text-zinc-300">Totale</td>
-                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totaleUscite / 12)}</td>
-                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totaleUscite)}</td>
-                  <td className="pt-3 text-right text-zinc-400">{pct(totaleUscite)}%</td>
+                  <td className="pt-3 text-zinc-300">Entrate totali</td>
+                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totale_entrate / 12)}</td>
+                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totale_entrate)}</td>
+                  <td className="pt-3 text-right text-zinc-400">100%</td>
                 </tr>
               </tfoot>
             </table>

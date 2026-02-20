@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
-export type MacroCategory = "necessita" | "svago" | "risparmi" | "investimenti"
+export type MacroCategory = "necessita" | "svago" | "investimenti"
 
 export type Category = {
   id: string
