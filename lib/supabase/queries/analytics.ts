@@ -101,8 +101,9 @@ export async function getMacroCategoryBreakdown(
     result.totale_entrate += applyScope(rawAmount, row.scope, viewMode)
   }
 
-  // Risparmi = residuale: quanto rimane dopo necessità, svago e investimenti
-  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago - result.investimenti)
+  // Risparmiato totale = quanto rimane dopo necessità e svago.
+  // Investimenti è un sub-bucket del risparmio (capitale allocato = forma di risparmio).
+  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago)
 
   return result
 }

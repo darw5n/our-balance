@@ -9,19 +9,20 @@ type Props = {
   data: MacroBreakdown
 }
 
-const MACRO_CONFIG = [
-  { key: "necessita" as const, label: "Necessità", color: "#f59e0b", textColor: "text-amber-400", isResidual: false },
-  { key: "svago" as const, label: "Svago", color: "#8b5cf6", textColor: "text-violet-400", isResidual: false },
-  { key: "investimenti" as const, label: "Investimenti", color: "#3b82f6", textColor: "text-blue-400", isResidual: false },
-  { key: "risparmi" as const, label: "Risparmiato", color: "#10b981", textColor: "text-emerald-400", isResidual: true },
+// 3 segments in the stacked bar: necessità | svago | risparmiato
+const BAR_SEGMENTS = [
+  { key: "necessita" as const, label: "Necessità",   color: "#f59e0b" },
+  { key: "svago"     as const, label: "Svago",        color: "#8b5cf6" },
+  { key: "risparmi"  as const, label: "Risparmiato",  color: "#10b981" },
 ]
 
 export function MacroBreakdownChart({ data }: Props) {
-  const { totale_entrate } = data
-  const totalSpending = data.necessita + data.svago + data.investimenti
-  const hasData = totale_entrate > 0 || totalSpending > 0
-  // Bar base: totale_entrate so all segments (spending + residual savings) fill 100%
-  const barBase = Math.max(totale_entrate, totalSpending)
+  const { totale_entrate, necessita, svago, investimenti, risparmi } = data
+  const hasData = totale_entrate > 0 || (necessita + svago + investimenti) > 0
+  const barBase = Math.max(totale_entrate, necessita + svago)
+
+  // Investimenti è un sub-bucket di risparmi; liquidità = resto del risparmio
+  const liquidita = Math.max(0, risparmi - investimenti)
 
   const pct = (value: number) =>
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
@@ -31,7 +32,7 @@ export function MacroBreakdownChart({ data }: Props) {
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-zinc-200">Suddivisione macro-categorie</h2>
         <p className="text-xs text-zinc-400">
-          Come si distribuiscono le entrate tra necessità, svago, investimenti e risparmi.
+          Come si distribuiscono le entrate tra necessità, svago e risparmi (liquidità + investimenti).
         </p>
       </div>
 
@@ -44,30 +45,29 @@ export function MacroBreakdownChart({ data }: Props) {
         </div>
       ) : (
         <>
-          {/* Stacked horizontal bar — base = totale_entrate (100%) */}
-          <div className="mb-6 flex h-8 w-full overflow-hidden rounded-lg bg-zinc-800">
-            {MACRO_CONFIG.map((m) => {
-              const value = data[m.key]
+          {/* Stacked horizontal bar: necessità | svago | risparmiato = 100% entrate */}
+          <div className="mb-4 flex h-7 w-full overflow-hidden rounded-lg bg-zinc-800">
+            {BAR_SEGMENTS.map((s) => {
+              const value = data[s.key]
               const width = barBase > 0 ? (value / barBase) * 100 : 0
               if (width <= 0) return null
               return (
                 <div
-                  key={m.key}
+                  key={s.key}
                   className="h-full transition-all"
-                  style={{ width: `${width}%`, backgroundColor: m.color }}
-                  title={`${m.label}: ${formatCurrency(value)}`}
+                  style={{ width: `${width}%`, backgroundColor: s.color }}
+                  title={`${s.label}: ${formatCurrency(value)}`}
                 />
               )
             })}
           </div>
 
-          {/* Legend pills */}
+          {/* Legend */}
           <div className="mb-5 flex flex-wrap gap-3">
-            {MACRO_CONFIG.filter((m) => data[m.key] > 0).map((m) => (
-              <div key={m.key} className="flex items-center gap-1.5 text-xs text-zinc-300">
-                <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: m.color }} />
-                {m.label}
-                {m.isResidual && <span className="text-zinc-500">(calcolato)</span>}
+            {BAR_SEGMENTS.filter((s) => data[s.key] > 0).map((s) => (
+              <div key={s.key} className="flex items-center gap-1.5 text-xs text-zinc-300">
+                <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: s.color }} />
+                {s.label}
               </div>
             ))}
           </div>
@@ -84,23 +84,76 @@ export function MacroBreakdownChart({ data }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {MACRO_CONFIG.map((m) => {
-                  const value = data[m.key]
-                  return (
-                    <tr key={m.key} className="py-1">
+                {/* Necessità */}
+                <tr>
+                  <td className="py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-amber-400" />
+                      <span className="text-amber-400">Necessità</span>
+                    </div>
+                  </td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(necessita / 12)}</td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(necessita)}</td>
+                  <td className="py-2 text-right text-zinc-400">{pct(necessita)}%</td>
+                </tr>
+
+                {/* Svago */}
+                <tr>
+                  <td className="py-2">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-violet-400" />
+                      <span className="text-violet-400">Svago</span>
+                    </div>
+                  </td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(svago / 12)}</td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(svago)}</td>
+                  <td className="py-2 text-right text-zinc-400">{pct(svago)}%</td>
+                </tr>
+
+                {/* Risparmiato totale */}
+                {risparmi > 0 && (
+                  <>
+                    <tr>
                       <td className="py-2">
                         <div className="flex items-center gap-2">
-                          <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: m.color }} />
-                          <span className={m.textColor}>{m.label}</span>
-                          {m.isResidual && <span className="text-zinc-600">(residuale)</span>}
+                          <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+                          <span className="text-emerald-400">Risparmiato</span>
                         </div>
                       </td>
-                      <td className="py-2 text-right text-zinc-200">{formatCurrency(value / 12)}</td>
-                      <td className="py-2 text-right text-zinc-200">{formatCurrency(value)}</td>
-                      <td className="py-2 text-right text-zinc-400">{pct(value)}%</td>
+                      <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi / 12)}</td>
+                      <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi)}</td>
+                      <td className="py-2 text-right text-zinc-400">{pct(risparmi)}%</td>
                     </tr>
-                  )
-                })}
+                    {/* Sub-row: Investimenti */}
+                    {investimenti > 0 && (
+                      <tr className="text-zinc-500">
+                        <td className="py-1.5 pl-5">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-sm bg-blue-400" />
+                            <span className="text-blue-400">Investimenti</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 text-right">{formatCurrency(Math.min(investimenti, risparmi) / 12)}</td>
+                        <td className="py-1.5 text-right">{formatCurrency(Math.min(investimenti, risparmi))}</td>
+                        <td className="py-1.5 text-right">{pct(Math.min(investimenti, risparmi))}%</td>
+                      </tr>
+                    )}
+                    {/* Sub-row: Liquidità */}
+                    {liquidita > 0 && (
+                      <tr className="text-zinc-500">
+                        <td className="py-1.5 pl-5">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-sm bg-teal-400" />
+                            <span className="text-teal-400">Liquidità</span>
+                          </div>
+                        </td>
+                        <td className="py-1.5 text-right">{formatCurrency(liquidita / 12)}</td>
+                        <td className="py-1.5 text-right">{formatCurrency(liquidita)}</td>
+                        <td className="py-1.5 text-right">{pct(liquidita)}%</td>
+                      </tr>
+                    )}
+                  </>
+                )}
               </tbody>
               <tfoot>
                 <tr className="border-t border-white/15 font-medium">
