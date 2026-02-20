@@ -67,6 +67,11 @@ export function EditTransactionDialog({
       return
     }
 
+    if (!categoryId) {
+      setError("La categoria è obbligatoria.")
+      return
+    }
+
     const parsedAmount = parseFloat(amount.replace(",", "."))
     if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
       setError("Importo non valido.")
@@ -201,7 +206,7 @@ export function EditTransactionDialog({
 
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-300">
-              Categoria
+              Categoria <span className="text-rose-400">*</span>
             </label>
             <CategoryCombobox
               categories={categories}

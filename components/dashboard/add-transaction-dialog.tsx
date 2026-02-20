@@ -107,6 +107,11 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
       return
     }
 
+    if (!categoryId) {
+      setError("La categoria è obbligatoria.")
+      return
+    }
+
     if (!type || (type !== "income" && type !== "expense")) {
       setError("Seleziona un tipo di transazione (Entrata o Uscita).")
       return
@@ -313,7 +318,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-300">
-                Categoria
+                Categoria <span className="text-rose-400">*</span>
               </label>
               <CategoryCombobox
                 categories={categories}

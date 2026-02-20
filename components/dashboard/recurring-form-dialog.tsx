@@ -80,6 +80,11 @@ export function RecurringFormDialog({
       setError("Importo non valido.")
       return
     }
+    if (!categoryId) {
+      setError("La categoria è obbligatoria.")
+      return
+    }
+
     if (!startDate) {
       setError("La data di inizio è obbligatoria.")
       return
@@ -221,7 +226,7 @@ export function RecurringFormDialog({
           {/* Category */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-zinc-300">
-              Categoria
+              Categoria <span className="text-rose-400">*</span>
             </label>
             <CategoryCombobox
               categories={categories}
