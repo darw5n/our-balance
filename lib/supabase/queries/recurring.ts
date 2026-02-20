@@ -31,7 +31,7 @@ export async function getRecurringTransactions(userId: string): Promise<Recurrin
     .order("created_at", { ascending: true })
 
   if (error) {
-    console.error("[getRecurringTransactions] Error:", error)
+    console.error("[getRecurringTransactions] Error:", error.message, error.code, error.details)
     return []
   }
 
@@ -57,7 +57,7 @@ export async function getPendingConfirmations(userId: string): Promise<Recurring
     .eq("is_active", true)
 
   if (error) {
-    console.error("[getPendingConfirmations] Error:", error)
+    console.error("[getPendingConfirmations] Error:", error.message, error.code, error.details)
     return []
   }
 

@@ -200,8 +200,6 @@ export async function processRecurringTransactions(userId: string): Promise<void
       }
       // If already pending_confirmation=true → skip
     }
-
-    revalidatePath("/dashboard")
   } catch (error) {
     console.error("[processRecurringTransactions] Unexpected error:", error)
   }

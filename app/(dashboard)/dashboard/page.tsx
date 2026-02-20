@@ -60,10 +60,8 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
     }
   }
 
-  // Fire-and-forget processing of due recurring transactions
-  processRecurringTransactions(user.id).catch((err) =>
-    console.error("[dashboard] processRecurringTransactions error:", err)
-  )
+  // Process due recurring transactions before fetching pending confirmations
+  await processRecurringTransactions(user.id)
 
   const [summary, cashflow, topCategories, categories, budgets, pendingConfirmations] =
     await Promise.all([

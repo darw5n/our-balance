@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createTransaction, type TransactionType } from "@/app/actions/transactions"
+import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
 
 export type CategoryOption = { id: string; name: string; color: string }
@@ -25,6 +26,9 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
   const [scope, setScope] = useState<"personal" | "family">("personal")
   const [categoryId, setCategoryId] = useState("")
   const [description, setDescription] = useState("")
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
+  const [requiresConfirmation, setRequiresConfirmation] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -105,32 +109,36 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
       return
     }
 
-    // Debug logging
-    console.log("[AddTransactionDialog] Submitting transaction:")
-    console.log("  - User ID:", user.id)
-    console.log("  - Date:", formattedDate)
-    console.log("  - Amount:", parsedAmount)
-    console.log("  - Type:", type)
-    console.log("  - Description:", description || "(vuoto)")
-
     try {
-      const result = await createTransaction({
-        amount: parsedAmount,
-        type,
-        date: formattedDate,
-        description: description || null,
-        category_id: categoryId || null,
-        status: "confirmed",
-        scope,
-      })
+      let result: { success: boolean; error?: string }
 
-      if (!result.success) {
-        setError(result.error)
-        console.error("[AddTransactionDialog] Error:", result.error)
-        return
+      if (isRecurring) {
+        result = await createRecurringTransaction({
+          type,
+          scope,
+          amount: parsedAmount,
+          description: description || null,
+          category_id: categoryId || null,
+          frequency,
+          start_date: formattedDate,
+          requires_confirmation: requiresConfirmation,
+        })
+      } else {
+        result = await createTransaction({
+          amount: parsedAmount,
+          type,
+          date: formattedDate,
+          description: description || null,
+          category_id: categoryId || null,
+          status: "confirmed",
+          scope,
+        })
       }
 
-      console.log("[AddTransactionDialog] Transaction created successfully:", result.id)
+      if (!result.success) {
+        setError(result.error ?? "Errore durante il salvataggio.")
+        return
+      }
 
       // Reset form
       setOpen(false)
@@ -140,14 +148,15 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
       setScope("personal")
       setCategoryId("")
       setDescription("")
+      setIsRecurring(false)
+      setFrequency("monthly")
+      setRequiresConfirmation(false)
       setError(null)
 
-      // Refresh page to show new transaction
       router.refresh()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Errore sconosciuto."
       setError(errorMessage)
-      console.error("[AddTransactionDialog] Unexpected error:", err)
     } finally {
       setSubmitting(false)
     }
@@ -179,7 +188,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setType("income")}
+                  onClick={() => { setType("income"); setRequiresConfirmation(true) }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "income"
                       ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
@@ -191,7 +200,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
                 </button>
                 <button
                   type="button"
-                  onClick={() => setType("expense")}
+                  onClick={() => { setType("expense"); setRequiresConfirmation(false) }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "expense"
                       ? "border-rose-500 bg-rose-500/20 text-rose-400"
@@ -238,7 +247,8 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
 
             <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-300" htmlFor="date">
-                Data <span className="text-rose-400">*</span>
+                {isRecurring ? "Data di inizio" : "Data"}{" "}
+                <span className="text-rose-400">*</span>
               </label>
               <Input
                 id="date"
@@ -297,6 +307,69 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
               />
             </div>
 
+            {/* Recurring toggle */}
+            <div className="border-t border-white/10 pt-3">
+              <div className="flex items-center justify-between">
+                <label htmlFor="is-recurring" className="text-xs font-medium text-zinc-300 cursor-pointer">
+                  Rendila ricorrente
+                </label>
+                <button
+                  id="is-recurring"
+                  type="button"
+                  role="switch"
+                  aria-checked={isRecurring}
+                  onClick={() => setIsRecurring((v) => !v)}
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 ${
+                    isRecurring ? "bg-emerald-500" : "bg-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${
+                      isRecurring ? "translate-x-4" : "translate-x-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {isRecurring && (
+                <div className="mt-3 space-y-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-medium text-zinc-300">Periodicità</label>
+                    <div className="flex gap-2">
+                      {(["weekly", "monthly", "yearly"] as const).map((f) => (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setFrequency(f)}
+                          className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                            frequency === f
+                              ? "border-amber-500 bg-amber-500/20 text-amber-400"
+                              : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                          }`}
+                        >
+                          {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="req-confirm"
+                      type="checkbox"
+                      checked={requiresConfirmation}
+                      onChange={(e) => setRequiresConfirmation(e.target.checked)}
+                      className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
+                    />
+                    <label htmlFor="req-confirm" className="text-xs text-zinc-300 cursor-pointer">
+                      Chiedi conferma importo ogni volta{" "}
+                      <span className="text-zinc-500">(utile per stipendi variabili)</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {error && <p className="text-xs text-rose-400">{error}</p>}
 
             <div className="flex justify-end gap-2 pt-2">
@@ -315,7 +388,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
                 className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
                 disabled={submitting}
               >
-                {submitting ? "Salvataggio..." : "Salva"}
+                {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
               </Button>
             </div>
           </form>
