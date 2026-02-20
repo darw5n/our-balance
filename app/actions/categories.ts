@@ -118,3 +118,65 @@ export async function deleteCategory(categoryId: string): Promise<CategoryResult
   revalidatePath("/transactions")
   return { success: true, id: categoryId }
 }
+
+type DefaultCategory = {
+  name: string
+  color: string
+  type: "expense" | "income"
+  macro_category: string | null
+}
+
+const DEFAULT_CATEGORIES: DefaultCategory[] = [
+  // Necessità
+  { name: "Affitto / Mutuo",    color: "#f59e0b", type: "expense", macro_category: "necessita" },
+  { name: "Alimentari",         color: "#22c55e", type: "expense", macro_category: "necessita" },
+  { name: "Bollette",           color: "#3b82f6", type: "expense", macro_category: "necessita" },
+  { name: "Trasporti",          color: "#8b5cf6", type: "expense", macro_category: "necessita" },
+  { name: "Salute",             color: "#ec4899", type: "expense", macro_category: "necessita" },
+  { name: "Telefono / Internet",color: "#14b8a6", type: "expense", macro_category: "necessita" },
+  { name: "Assicurazioni",      color: "#a3a3a3", type: "expense", macro_category: "necessita" },
+  // Svago
+  { name: "Ristoranti / Bar",   color: "#ef4444", type: "expense", macro_category: "svago" },
+  { name: "Abbonamenti",        color: "#a78bfa", type: "expense", macro_category: "svago" },
+  { name: "Viaggi",             color: "#f97316", type: "expense", macro_category: "svago" },
+  { name: "Sport / Hobby",      color: "#4ade80", type: "expense", macro_category: "svago" },
+  // Risparmi
+  { name: "Risparmio",          color: "#10b981", type: "expense", macro_category: "risparmi" },
+  // Investimenti
+  { name: "Investimenti",       color: "#60a5fa", type: "expense", macro_category: "investimenti" },
+  // Entrate
+  { name: "Stipendio",          color: "#34d399", type: "income",  macro_category: null },
+  { name: "Freelance",          color: "#2dd4bf", type: "income",  macro_category: null },
+]
+
+export async function createDefaultCategories(): Promise<{ success: boolean; created: number; error?: string }> {
+  const user = await getServerUser()
+  if (!user?.id) return { success: false, created: 0, error: "Utente non autenticato." }
+
+  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+
+  // Recupera nomi esistenti per evitare duplicati
+  const { data: existing } = await supabase
+    .from("categories")
+    .select("name")
+    .eq("user_id", user.id)
+
+  const existingNames = new Set((existing ?? []).map((c: { name: string }) => c.name.toLowerCase()))
+
+  const toInsert = DEFAULT_CATEGORIES
+    .filter((c) => !existingNames.has(c.name.toLowerCase()))
+    .map((c) => ({ ...c, user_id: user.id }))
+
+  if (toInsert.length === 0) return { success: true, created: 0 }
+
+  const { error } = await supabase.from("categories").insert(toInsert)
+
+  if (error) {
+    console.error("[createDefaultCategories] Error:", error)
+    return { success: false, created: 0, error: error.message }
+  }
+
+  revalidatePath("/categories")
+  revalidatePath("/dashboard")
+  return { success: true, created: toInsert.length }
+}

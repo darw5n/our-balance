@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Plus } from "lucide-react"
+import { Pencil, Trash2, Plus, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CategoryFormDialog } from "@/components/dashboard/category-form-dialog"
-import { deleteCategory } from "@/app/actions/categories"
+import { deleteCategory, createDefaultCategories } from "@/app/actions/categories"
 import type { Category } from "@/lib/supabase/queries/categories"
 
 type CategoriesListProps = {
@@ -23,6 +23,8 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
   }, [initialCategories])
   const [formOpen, setFormOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importMsg, setImportMsg] = useState<string | null>(null)
 
   function handleSuccess() {
     router.refresh()
@@ -38,6 +40,23 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
   function openEdit(cat: Category) {
     setEditingCategory(cat)
     setFormOpen(true)
+  }
+
+  async function handleImportDefaults() {
+    setImporting(true)
+    setImportMsg(null)
+    const result = await createDefaultCategories()
+    if (result.success) {
+      setImportMsg(
+        result.created === 0
+          ? "Tutte le categorie predefinite sono già presenti."
+          : `${result.created} categorie aggiunte.`
+      )
+      if (result.created > 0) router.refresh()
+    } else {
+      setImportMsg(result.error ?? "Errore durante l'importazione.")
+    }
+    setImporting(false)
   }
 
   async function handleDelete(cat: Category) {
@@ -60,15 +79,30 @@ export function CategoriesList({ categories: initialCategories }: CategoriesList
           <p className="text-xs text-zinc-400">
             {categories.length} {categories.length === 1 ? "categoria" : "categorie"}
           </p>
-          <Button
-            onClick={openCreate}
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
-            size="sm"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Aggiungi categoria
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleImportDefaults}
+              disabled={importing}
+              className="border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+            >
+              <Sparkles className="mr-2 h-3.5 w-3.5 text-amber-400" />
+              {importing ? "Importazione..." : "Importa predefinite"}
+            </Button>
+            <Button
+              onClick={openCreate}
+              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              size="sm"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Aggiungi
+            </Button>
+          </div>
         </div>
+        {importMsg && (
+          <p className="text-xs text-zinc-400">{importMsg}</p>
+        )}
 
         {categories.length === 0 ? (
           <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">

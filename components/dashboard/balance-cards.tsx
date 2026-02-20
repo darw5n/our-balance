@@ -1,64 +1,159 @@
 "use client"
 
-import { Clock, TrendingDown, TrendingUp, Wallet } from "lucide-react"
-
+import { TrendingDown, TrendingUp, Wallet, Clock, Users } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
+import type { DashboardSummary, ViewMode } from "@/lib/supabase/queries/transactions"
 
 type BalanceCardsProps = {
-  entrate: number
-  uscite: number
-  netto: number
-  pending: number
+  current: DashboardSummary
+  prev: DashboardSummary
+  viewMode: ViewMode
 }
 
-export function BalanceCards({ entrate, uscite, netto, pending }: BalanceCardsProps) {
-  const items = [
-    {
-      title: "Entrate Mese",
-      value: entrate,
-      Icon: TrendingUp,
-      iconClassName: "text-emerald-400",
-    },
-    {
-      title: "Uscite Mese",
-      value: uscite,
-      Icon: TrendingDown,
-      iconClassName: "text-rose-400",
-    },
-    {
-      title: "Netto",
-      value: netto,
-      Icon: Wallet,
-      iconClassName: "text-sky-400",
-    },
-    {
-      title: "Pending",
-      value: pending,
-      Icon: Clock,
-      iconClassName: "text-amber-400",
-    },
-  ] as const
+function delta(current: number, prev: number): { pct: number; positive: boolean } | null {
+  if (prev === 0) return null
+  const pct = ((current - prev) / prev) * 100
+  return { pct, positive: pct >= 0 }
+}
 
+function DeltaBadge({
+  current,
+  prev,
+  invertColors = false,
+}: {
+  current: number
+  prev: number
+  invertColors?: boolean
+}) {
+  const d = delta(current, prev)
+  if (!d) return null
+  const isGood = invertColors ? !d.positive : d.positive
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      {items.map(({ title, value, Icon, iconClassName }) => (
-        <Card
-          key={title}
-          className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur"
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <p className="text-sm text-zinc-300">{title}</p>
-              <p className="text-2xl font-semibold tracking-tight">{formatCurrency(value)}</p>
-            </div>
-            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
-              <Icon className={`h-5 w-5 ${iconClassName}`} />
-            </div>
-          </div>
-        </Card>
-      ))}
-    </div>
+    <span
+      className={`text-[10px] font-medium ${isGood ? "text-emerald-400" : "text-rose-400"}`}
+    >
+      {d.positive ? "▲" : "▼"} {Math.abs(d.pct).toFixed(1)}% vs mese prec.
+    </span>
   )
 }
 
+function HealthBadge({ entrate, uscite }: { entrate: number; uscite: number }) {
+  if (entrate === 0) return null
+  const rate = ((entrate - uscite) / entrate) * 100
+
+  let label: string
+  let className: string
+  if (rate >= 20) {
+    label = `Ottimo · ${rate.toFixed(0)}% risparmiato`
+    className = "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+  } else if (rate >= 10) {
+    label = `Buono · ${rate.toFixed(0)}% risparmiato`
+    className = "bg-sky-500/15 text-sky-400 border-sky-500/30"
+  } else if (rate >= 0) {
+    label = `Attenzione · ${rate.toFixed(0)}% risparmiato`
+    className = "bg-amber-500/15 text-amber-400 border-amber-500/30"
+  } else {
+    label = `In deficit · ${Math.abs(rate).toFixed(0)}% oltre le entrate`
+    className = "bg-rose-500/15 text-rose-400 border-rose-500/30"
+  }
+
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${className}`}>
+      {label}
+    </span>
+  )
+}
+
+export function BalanceCards({ current, prev, viewMode }: BalanceCardsProps) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Entrate */}
+      <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-sm text-zinc-400">Entrate mese</p>
+            <p className="text-2xl font-semibold tracking-tight text-emerald-400">
+              {formatCurrency(current.entrate)}
+            </p>
+            <DeltaBadge current={current.entrate} prev={prev.entrate} />
+          </div>
+          <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
+            <TrendingUp className="h-5 w-5 text-emerald-400" />
+          </div>
+        </div>
+      </Card>
+
+      {/* Uscite */}
+      <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-sm text-zinc-400">Uscite mese</p>
+            <p className="text-2xl font-semibold tracking-tight text-rose-400">
+              {formatCurrency(current.uscite)}
+            </p>
+            <DeltaBadge current={current.uscite} prev={prev.uscite} invertColors />
+          </div>
+          <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
+            <TrendingDown className="h-5 w-5 text-rose-400" />
+          </div>
+        </div>
+      </Card>
+
+      {/* Netto + health score */}
+      <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+        <div className="flex items-start justify-between gap-4">
+          <div className="space-y-1.5">
+            <p className="text-sm text-zinc-400">Netto mese</p>
+            <p className={`text-2xl font-semibold tracking-tight ${current.netto >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+              {formatCurrency(current.netto)}
+            </p>
+            <DeltaBadge current={current.netto} prev={prev.netto} />
+            <div className="pt-0.5">
+              <HealthBadge entrate={current.entrate} uscite={current.uscite} />
+            </div>
+          </div>
+          <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
+            <Wallet className="h-5 w-5 text-sky-400" />
+          </div>
+        </div>
+      </Card>
+
+      {/* Quota in comune (solo vista personal) oppure Pending */}
+      {viewMode === "personal" && current.spese_comuni > 0 ? (
+        <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-sm text-zinc-400">Spese in comune</p>
+              <p className="text-2xl font-semibold tracking-tight text-violet-400">
+                {formatCurrency(current.spese_comuni / 2)}
+              </p>
+              <span className="text-[10px] text-zinc-500">
+                La mia quota (50%) · Totale {formatCurrency(current.spese_comuni)}
+              </span>
+            </div>
+            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
+              <Users className="h-5 w-5 text-violet-400" />
+            </div>
+          </div>
+        </Card>
+      ) : (
+        current.pending > 0 && (
+          <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-sm text-zinc-400">Da confermare</p>
+                <p className="text-2xl font-semibold tracking-tight text-amber-400">
+                  {formatCurrency(current.pending)}
+                </p>
+              </div>
+              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
+                <Clock className="h-5 w-5 text-amber-400" />
+              </div>
+            </div>
+          </Card>
+        )
+      )}
+    </div>
+  )
+}
