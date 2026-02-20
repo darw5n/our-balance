@@ -18,6 +18,7 @@ import {
 } from "@/app/actions/recurring"
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
+import { buildGroupedOptions } from "@/components/dashboard/add-transaction-dialog"
 
 type RecurringFormDialogProps = {
   open: boolean
@@ -64,6 +65,7 @@ export function RecurringFormDialog({
   // Auto-set requires_confirmation default based on type
   function handleTypeChange(newType: "income" | "expense") {
     setType(newType)
+    setCategoryId("")
     if (!recurring) {
       setRequiresConfirmation(newType === "income")
     }
@@ -228,10 +230,12 @@ export function RecurringFormDialog({
               className="flex h-10 w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
             >
               <option value="">Nessuna categoria</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
+              {buildGroupedOptions(categories, type).map((group) => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.items.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
