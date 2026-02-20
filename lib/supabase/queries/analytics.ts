@@ -165,6 +165,95 @@ function buildEmptyYear(year: number): CashflowMonthlyPoint[] {
   })
 }
 
+export type CategoryMonthRow = {
+  id: string
+  name: string
+  color: string
+  macro_category: string | null
+  months: number[] // 12 valori, indice 0 = Gennaio
+  total: number
+}
+
+export async function getCategoryMonthlyBreakdown(
+  userId: string,
+  viewMode: ViewMode,
+  year: number
+): Promise<CategoryMonthRow[]> {
+  if (!userId) return []
+
+  const supabase = await createSupabaseServerClient()
+  const { startISO, endISO } = getYearRange(year)
+
+  let query = supabase
+    .from("transactions")
+    .select("amount, status, date, scope, category:categories ( id, name, color, macro_category )", { head: false })
+    .eq("user_id", userId)
+    .eq("type", "expense")
+    .eq("status", "confirmed")
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
+
+  const { data, error } = await query
+  if (error || !data) return []
+
+  type Row = {
+    amount: number | null
+    scope?: string | null
+    date: string | null
+    category: {
+      id?: string
+      name: string | null
+      color: string | null
+      macro_category: string | null
+    } | Array<{
+      id?: string
+      name: string | null
+      color: string | null
+      macro_category: string | null
+    }> | null
+  }
+
+  const map = new Map<string, CategoryMonthRow>()
+
+  for (const row of data as unknown as Row[]) {
+    if (!row.category || !row.date) continue
+
+    let cat: { id?: string; name: string | null; color: string | null; macro_category: string | null } | null = null
+    if (Array.isArray(row.category)) {
+      cat = row.category[0] ?? null
+    } else {
+      cat = row.category
+    }
+    if (!cat) continue
+
+    const id = cat.id ?? cat.name ?? "unknown"
+    const monthIndex = new Date(row.date).getUTCMonth() // 0-11
+    const rawAmount = Math.abs(toNumber(row.amount))
+    const amount = applyScope(rawAmount, row.scope, viewMode)
+
+    if (!map.has(id)) {
+      map.set(id, {
+        id,
+        name: cat.name ?? "Senza categoria",
+        color: cat.color ?? "#71717a",
+        macro_category: cat.macro_category ?? null,
+        months: Array(12).fill(0),
+        total: 0,
+      })
+    }
+
+    const entry = map.get(id)!
+    entry.months[monthIndex] += amount
+    entry.total += amount
+  }
+
+  return Array.from(map.values()).sort((a, b) => b.total - a.total)
+}
+
 export type CategoryMonthlyAverage = {
   name: string
   color: string
