@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
-export type ViewMode = "personal" | "family" | "both"
+export type ViewMode = "personal" | "family"
 
 export type DashboardSummary = {
   entrate: number
@@ -185,7 +185,7 @@ export async function getDashboardSummaryYear(
 export async function getCashflowMonthly(
   userId: string,
   months: number = 12,
-  viewMode: ViewMode = "both"
+  viewMode: ViewMode = "personal"
 ): Promise<CashflowMonthlyPoint[]> {
   if (!userId || months <= 0) return []
 
@@ -261,7 +261,7 @@ type TopCategoryRow = {
 export async function getTopCategories(
   userId: string,
   limit: number = 5,
-  viewMode: ViewMode = "both"
+  viewMode: ViewMode = "personal"
 ): Promise<TopCategory[]> {
   if (!userId || limit <= 0) return []
 

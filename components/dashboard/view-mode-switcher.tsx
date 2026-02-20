@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 
-type ViewMode = "personal" | "family" | "both"
+type ViewMode = "personal" | "family"
 
 type ViewModeSwitcherProps = {
   currentView: string
@@ -13,7 +13,6 @@ type ViewModeSwitcherProps = {
 const views: { value: ViewMode; label: string }[] = [
   { value: "personal", label: "Personale" },
   { value: "family", label: "In comune" },
-  { value: "both", label: "Entrambi" },
 ]
 
 export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraParams }: ViewModeSwitcherProps) {

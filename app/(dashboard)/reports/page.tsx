@@ -25,7 +25,7 @@ export default async function ReportsPage({
   searchParams: Promise<{ view?: string; year?: string }>
 }) {
   const { view, year: yearParam } = await searchParams
-  const viewMode: ViewMode = view === "family" || view === "both" ? (view as ViewMode) : "personal"
+  const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
   const currentUTCYear = new Date().getUTCFullYear()
   const year = yearParam ? parseInt(yearParam, 10) : currentUTCYear

@@ -88,7 +88,7 @@ export default async function DashboardPage({
   searchParams: Promise<{ view?: string }>
 }) {
   const { view } = await searchParams
-  const viewMode: ViewMode = view === "family" || view === "both" ? (view as ViewMode) : "personal"
+  const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
   const { summary, summaryPrev, cashflow, topCategories, categories, budgets, pendingConfirmations } =
     await getDashboardData(viewMode)
