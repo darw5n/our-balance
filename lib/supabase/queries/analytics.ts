@@ -257,6 +257,87 @@ export async function getCategoryMonthlyBreakdown(
   return Array.from(map.values()).sort((a, b) => b.total - a.total)
 }
 
+export type AnnualDistribution = {
+  risparmi: number
+  investimenti: number
+  viaggi: number
+  altre_uscite: number
+  totale_entrate: number
+  totale_uscite: number
+}
+
+export async function getAnnualDistribution(
+  userId: string,
+  viewMode: ViewMode,
+  year: number
+): Promise<AnnualDistribution> {
+  const empty: AnnualDistribution = {
+    risparmi: 0, investimenti: 0, viaggi: 0, altre_uscite: 0,
+    totale_entrate: 0, totale_uscite: 0,
+  }
+  if (!userId) return empty
+
+  const supabase = await createSupabaseServerClient()
+  const { startISO, endISO } = getYearRange(year)
+
+  type ExpRow = {
+    amount: number | null
+    scope?: string | null
+    category: { macro_category: string | null; group_name: string | null } |
+              Array<{ macro_category: string | null; group_name: string | null }> | null
+  }
+
+  let expenseQuery = supabase
+    .from("transactions")
+    .select("amount, scope, category:categories(macro_category, group_name)", { head: false })
+    .eq("user_id", userId)
+    .eq("type", "expense")
+    .eq("status", "confirmed")
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  let incomeQuery = supabase
+    .from("transactions")
+    .select("amount, scope", { head: false })
+    .eq("user_id", userId)
+    .eq("type", "income")
+    .eq("status", "confirmed")
+    .gte("date", startISO)
+    .lt("date", endISO)
+
+  if (viewMode === "family") {
+    expenseQuery = expenseQuery.eq("scope", "family")
+    incomeQuery = incomeQuery.eq("scope", "family")
+  }
+
+  const [{ data: expenseData }, { data: incomeData }] = await Promise.all([expenseQuery, incomeQuery])
+
+  const result = { ...empty }
+
+  for (const row of (incomeData ?? []) as Array<{ amount: number | null; scope?: string | null }>) {
+    result.totale_entrate += applyScope(Math.abs(toNumber(row.amount)), row.scope, viewMode)
+  }
+
+  for (const row of (expenseData ?? []) as unknown as ExpRow[]) {
+    const amount = applyScope(Math.abs(toNumber(row.amount)), row.scope, viewMode)
+    result.totale_uscite += amount
+
+    let macro: string | null = null
+    let groupName: string | null = null
+    if (row.category) {
+      const cat = Array.isArray(row.category) ? row.category[0] : row.category
+      if (cat) { macro = cat.macro_category; groupName = cat.group_name }
+    }
+
+    if (macro === "investimenti") result.investimenti += amount
+    else if (groupName === "Viaggi") result.viaggi += amount
+    else result.altre_uscite += amount
+  }
+
+  result.risparmi = Math.max(0, result.totale_entrate - result.totale_uscite)
+  return result
+}
+
 export type CategoryMonthlyAverage = {
   name: string
   color: string

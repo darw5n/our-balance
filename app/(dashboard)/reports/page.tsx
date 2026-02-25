@@ -1,14 +1,12 @@
-import Link from "next/link"
+import { TrendingUp, TrendingDown, Wallet, CalendarClock } from "lucide-react"
 import { getServerUser } from "@/lib/supabase-server"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
-import { CashflowChart } from "@/components/dashboard/cashflow-chart"
-import { TopCategoriesChart } from "@/components/dashboard/top-categories-chart"
 import { MacroBreakdownChart } from "@/components/dashboard/macro-breakdown-chart"
 import { YearComparisonChart } from "@/components/dashboard/year-comparison-chart"
 import { CategoryMonthTable } from "@/components/dashboard/category-month-table"
+import { CashflowReportChart } from "@/components/dashboard/cashflow-report-chart"
+import { AnnualDistributionChart } from "@/components/dashboard/annual-distribution-chart"
 import {
-  getCashflowMonthly,
-  getTopCategories,
   getDashboardSummaryYear,
   type ViewMode,
 } from "@/lib/supabase/queries/transactions"
@@ -16,6 +14,7 @@ import {
   getMacroCategoryBreakdown,
   getCashflowForYear,
   getCategoryMonthlyBreakdown,
+  getAnnualDistribution,
 } from "@/lib/supabase/queries/analytics"
 import { formatCurrency } from "@/lib/utils"
 
@@ -31,47 +30,47 @@ export default async function ReportsPage({
   const year = yearParam ? parseInt(yearParam, 10) : currentUTCYear
   const safeYear = Number.isFinite(year) ? year : currentUTCYear
   const isCurrentYear = safeYear === currentUTCYear
+  const isFutureYear = safeYear >= currentUTCYear
 
   const user = await getServerUser()
   if (!user) return null
 
-  const [summary, cashflowCurrent, cashflowPrev, cashflow12, topCategories, macroBreakdown, categoryMonthly] =
+  const [summary, cashflowCurrent, cashflowPrev, macroBreakdown, annualDistribution, categoryMonthly] =
     await Promise.all([
       getDashboardSummaryYear(user.id, viewMode, safeYear),
       getCashflowForYear(user.id, viewMode, safeYear),
       getCashflowForYear(user.id, viewMode, safeYear - 1),
-      getCashflowMonthly(user.id, 12, viewMode),
-      getTopCategories(user.id, 5, viewMode),
       getMacroCategoryBreakdown(user.id, viewMode, safeYear),
+      getAnnualDistribution(user.id, viewMode, safeYear),
       getCategoryMonthlyBreakdown(user.id, viewMode, safeYear),
     ])
 
-  // Forecast: only for current partial year
+  // Previsione: solo per anno corrente parziale
   let previsione: number | null = null
   if (isCurrentYear) {
     const now = new Date()
-    const monthsElapsed = now.getUTCMonth() + 1 // 1-12
+    const currentMonthIndex = now.getUTCMonth() // 0-based
+    const hasPrevData = cashflowPrev.some((p) => p.entrate > 0 || p.uscite > 0)
 
-    // Count months that have actual data
-    const monthsWithData = cashflowCurrent.filter((p) => p.entrate > 0 || p.uscite > 0).length
-    const divisor = monthsWithData > 0 ? monthsWithData : monthsElapsed
-
-    if (divisor > 0 && summary.uscite > 0) {
-      previsione = (summary.netto / divisor) * 12
+    if (hasPrevData) {
+      // Anno precedente come baseline per la stagionalità
+      const prevRemainingNetto = cashflowPrev
+        .slice(currentMonthIndex + 1)
+        .reduce((sum, p) => sum + p.entrate - p.uscite, 0)
+      previsione = summary.netto + prevRemainingNetto
+    } else {
+      // Fallback: estrapolazione lineare
+      const monthsElapsed = currentMonthIndex + 1
+      if (monthsElapsed > 0) {
+        previsione = (summary.netto / monthsElapsed) * 12
+      }
     }
   }
 
-  const prevYearUrl = (v: string) => {
+  const makeUrl = (targetYear: number) => {
     const params = new URLSearchParams()
-    params.set("year", String(safeYear - 1))
-    if (v !== "personal") params.set("view", v)
-    return `/reports?${params.toString()}`
-  }
-
-  const nextYearUrl = (v: string) => {
-    const params = new URLSearchParams()
-    params.set("year", String(safeYear + 1))
-    if (v !== "personal") params.set("view", v)
+    params.set("year", String(targetYear))
+    if (viewMode !== "personal") params.set("view", viewMode)
     return `/reports?${params.toString()}`
   }
 
@@ -80,68 +79,108 @@ export default async function ReportsPage({
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            href={prevYearUrl(viewMode)}
+          <a
+            href={makeUrl(safeYear - 1)}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
             aria-label={`Anno ${safeYear - 1}`}
           >
             ←
-          </Link>
+          </a>
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Report {safeYear}</h1>
             <p className="text-xs text-zinc-400">Riepilogo entrate e uscite per il {safeYear}.</p>
           </div>
-          <Link
-            href={nextYearUrl(viewMode)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
-            aria-label={`Anno ${safeYear + 1}`}
-          >
-            →
-          </Link>
+          {isFutureYear ? (
+            <span
+              className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-white/5 text-zinc-700"
+              aria-disabled="true"
+            >
+              →
+            </span>
+          ) : (
+            <a
+              href={makeUrl(safeYear + 1)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
+              aria-label={`Anno ${safeYear + 1}`}
+            >
+              →
+            </a>
+          )}
         </div>
         <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
       </div>
 
       {/* Summary cards */}
-      <div className={`grid gap-3 ${previsione !== null ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-          <p className="text-xs text-zinc-400">Entrate {safeYear}</p>
-          <p className="mt-1 text-xl font-semibold text-emerald-400">{formatCurrency(summary.entrate)}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-          <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
-          <p className="mt-1 text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
-        </div>
-        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-          <p className="text-xs text-zinc-400">Netto {safeYear}</p>
-          <p className={`mt-1 text-xl font-semibold ${summary.netto >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-            {formatCurrency(summary.netto)}
-          </p>
-        </div>
-        {previsione !== null && (
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <p className="text-xs text-zinc-400">Previsione netto</p>
-            <p className={`mt-1 text-xl font-semibold ${previsione >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-              {formatCurrency(previsione)}
-            </p>
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400">Entrate {safeYear}</p>
+              <p className="text-xl font-semibold text-emerald-400">{formatCurrency(summary.entrate)}</p>
+            </div>
+            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
+              <TrendingUp className="h-4 w-4 text-emerald-400" />
+            </div>
           </div>
-        )}
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
+              <p className="text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
+            </div>
+            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
+              <TrendingDown className="h-4 w-4 text-rose-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400">Netto {safeYear}</p>
+              <p className="text-xl font-semibold text-sky-400">{formatCurrency(summary.netto)}</p>
+            </div>
+            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
+              <Wallet className="h-4 w-4 text-sky-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+          <div className="flex items-start justify-between gap-2">
+            <div className="space-y-1">
+              <p className="text-xs text-zinc-400">
+                {isCurrentYear && previsione !== null ? "Previsione netto" : "Netto medio/mese"}
+              </p>
+              <p className="text-xl font-semibold text-amber-400">
+                {isCurrentYear && previsione !== null
+                  ? formatCurrency(previsione)
+                  : formatCurrency(summary.netto / 12)}
+              </p>
+            </div>
+            <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
+              <CalendarClock className="h-4 w-4 text-amber-400" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Year comparison */}
-      <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} />
+      {/* Cashflow mensile con linea netto */}
+      <CashflowReportChart data={cashflowCurrent} year={safeYear} />
 
-      {/* Macro breakdown */}
+      {/* Distribuzione annuale del reddito */}
+      <AnnualDistributionChart data={annualDistribution} />
+
+      {/* Ripartizione macro-categorie (50-30-20) */}
       <MacroBreakdownChart data={macroBreakdown} />
 
-      {/* Tabella categorie × mese */}
+      {/* Tabella mesi × categorie */}
       <CategoryMonthTable data={categoryMonthly} year={safeYear} />
 
-      {/* Cashflow + top categories */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-        <CashflowChart data={cashflow12} />
-        <TopCategoriesChart data={topCategories} />
-      </div>
+      {/* Confronto anno precedente */}
+      <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} />
     </div>
   )
 }
