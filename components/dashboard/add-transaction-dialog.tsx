@@ -56,7 +56,7 @@ type AddTransactionDialogProps = {
 export function AddTransactionDialog({ categories = [] }: AddTransactionDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [date, setDate] = useState("")
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [amount, setAmount] = useState("")
   const [type, setType] = useState<TransactionType>("expense")
   const [scope, setScope] = useState<"personal" | "family">("personal")
@@ -198,7 +198,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
 
       // Reset form
       setOpen(false)
-      setDate("")
+      setDate(new Date().toISOString().slice(0, 10))
       setAmount("")
       setType("expense")
       setScope("personal")
@@ -308,7 +308,9 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
               </label>
               <Input
                 id="date"
-                type="date"
+                type="text"
+                inputMode="numeric"
+                placeholder="AAAA-MM-GG"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required

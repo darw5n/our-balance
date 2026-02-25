@@ -266,7 +266,9 @@ export function RecurringFormDialog({
             </label>
             <Input
               id="rec-start"
-              type="date"
+              type="text"
+              inputMode="numeric"
+              placeholder="AAAA-MM-GG"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="border-white/15 bg-zinc-950 text-zinc-50"
