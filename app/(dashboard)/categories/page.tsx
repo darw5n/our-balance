@@ -1,34 +1,17 @@
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
+import { getServerUser } from "@/lib/supabase-server"
 import { redirect } from "next/navigation"
 import { getCategories } from "@/lib/supabase/queries/categories"
+import { getBudgetsWithProgress } from "@/lib/supabase/queries/budgets"
 import { CategoriesList } from "@/components/dashboard/categories-list"
 
 export default async function CategoriesPage() {
-  const cookieStore = await cookies()
+  const user = await getServerUser()
+  if (!user) redirect("/login")
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll() {},
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect("/login")
-  }
-
-  const categories = await getCategories(user.id)
+  const [categories, budgets] = await Promise.all([
+    getCategories(user.id),
+    getBudgetsWithProgress(user.id, "personal"),
+  ])
 
   return (
     <div className="space-y-6">
@@ -39,7 +22,7 @@ export default async function CategoriesPage() {
         </p>
       </div>
 
-      <CategoriesList categories={categories} />
+      <CategoriesList categories={categories} budgets={budgets} />
     </div>
   )
 }

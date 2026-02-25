@@ -44,6 +44,35 @@ export async function getRecurringTransactions(userId: string): Promise<Recurrin
   }) as RecurringTransaction[]
 }
 
+export async function getUpcomingRecurring(userId: string, days: number = 14): Promise<RecurringTransaction[]> {
+  if (!userId) return []
+
+  const supabase = await createSupabaseServerClient()
+  const now = new Date()
+  const future = new Date(now)
+  future.setDate(future.getDate() + days)
+
+  const { data, error } = await supabase
+    .from("recurring_transactions")
+    .select("*, categories ( name, color )")
+    .eq("user_id", userId)
+    .eq("is_active", true)
+    .eq("pending_confirmation", false)
+    .gt("next_due_date", now.toISOString())
+    .lte("next_due_date", future.toISOString())
+    .order("next_due_date", { ascending: true })
+
+  if (error) return []
+
+  return (data ?? []).map((row) => {
+    const cat = Array.isArray(row.categories) ? row.categories[0] : row.categories
+    return {
+      ...row,
+      category: cat ? { name: (cat as { name: string }).name, color: (cat as { color: string }).color } : null,
+    }
+  }) as RecurringTransaction[]
+}
+
 export async function getPendingConfirmations(userId: string): Promise<RecurringTransaction[]> {
   if (!userId) return []
 

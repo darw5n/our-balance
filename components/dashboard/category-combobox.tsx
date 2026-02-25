@@ -68,10 +68,13 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
         <Popover.Content
           sideOffset={4}
           align="start"
-          className="z-[200] w-[var(--radix-popover-trigger-width)] rounded-md border border-white/15 bg-zinc-900 shadow-xl outline-none"
+          side="bottom"
+          avoidCollisions={false}
+          className="z-[200] flex w-[var(--radix-popover-trigger-width)] flex-col overflow-hidden rounded-md border border-white/15 bg-zinc-900 shadow-xl outline-none"
+          style={{ maxHeight: "min(var(--radix-popover-content-available-height), 18rem)" }}
         >
           {/* Search */}
-          <div className="flex items-center gap-2 border-b border-white/10 px-3 py-2">
+          <div className="flex shrink-0 items-center gap-2 border-b border-white/10 px-3 py-2">
             <Search className="h-3.5 w-3.5 shrink-0 text-zinc-500" />
             <input
               ref={inputRef}
@@ -84,7 +87,10 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
           </div>
 
           {/* Options */}
-          <div className="max-h-64 overflow-y-auto py-1">
+          <div
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-1"
+            onWheel={(e) => e.stopPropagation()}
+          >
             {/* None */}
             <button
               type="button"

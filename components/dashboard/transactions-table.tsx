@@ -2,13 +2,15 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2 } from "lucide-react"
+import { Download, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
 import { EditTransactionDialog, type Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
+import { useToast } from "@/components/ui/toast-provider"
+import { useConfirm } from "@/components/ui/confirm-dialog"
 
 type TransactionsTableProps = {
   transactions: Transaction[]
@@ -17,6 +19,8 @@ type TransactionsTableProps = {
 
 export function TransactionsTable({ transactions, categories }: TransactionsTableProps) {
   const router = useRouter()
+  const toast = useToast()
+  const confirm = useConfirm()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
@@ -50,14 +54,16 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   }
 
   async function handleDelete(tx: Transaction) {
-    if (!confirm(`Eliminare questa transazione?`)) return
+    const ok = await confirm({ message: "Eliminare questa transazione?", destructive: true, confirmLabel: "Elimina" })
+    if (!ok) return
     setDeleting(true)
     try {
       const result = await deleteTransaction(tx.id)
       if (!result.success) {
-        alert(result.error)
+        toast(result.error ?? "Errore durante l'eliminazione.", "error")
         return
       }
+      toast("Transazione eliminata.", "success")
       router.refresh()
     } finally {
       setDeleting(false)
@@ -66,19 +72,48 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
 
   async function handleBulkDelete() {
     const count = selected.size
-    if (!confirm(`Eliminare ${count} ${count === 1 ? "transazione" : "transazioni"}?`)) return
+    const ok = await confirm({
+      message: `Eliminare ${count} ${count === 1 ? "transazione" : "transazioni"}?`,
+      destructive: true,
+      confirmLabel: "Elimina",
+    })
+    if (!ok) return
     setDeleting(true)
     try {
       const result = await bulkDeleteTransactions([...selected])
       if (!result.success) {
-        alert(result.error)
+        toast(result.error ?? "Errore durante l'eliminazione.", "error")
         return
       }
+      toast(`${count} ${count === 1 ? "transazione eliminata" : "transazioni eliminate"}.`, "success")
       setSelected(new Set())
       router.refresh()
     } finally {
       setDeleting(false)
     }
+  }
+
+  function handleExportCSV() {
+    const categoryMap = new Map(categories.map((c) => [c.id, c.name]))
+    const rows = [
+      ["Data", "Descrizione", "Tipo", "Importo", "Stato", "Categoria"],
+      ...transactions.map((tx) => [
+        tx.date ? new Date(tx.date).toLocaleDateString("it-IT") : "",
+        tx.description ?? "",
+        tx.type ?? "",
+        (tx.amount ?? 0).toString().replace(".", ","),
+        tx.status ?? "",
+        tx.category_id ? (categoryMap.get(tx.category_id) ?? "") : "",
+      ]),
+    ]
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n")
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `transazioni_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   if (transactions.length === 0) {
@@ -87,6 +122,18 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
 
   return (
     <>
+      <div className="mb-3 flex items-center justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1.5 border-white/15 bg-transparent text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+          onClick={handleExportCSV}
+        >
+          <Download className="h-3.5 w-3.5" />
+          Esporta CSV
+        </Button>
+      </div>
+
       {selected.size > 0 && (
         <div className="mb-3 flex items-center gap-3 rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-2">
           <span className="text-xs text-rose-300">

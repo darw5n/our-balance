@@ -75,6 +75,21 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
     setMounted(true)
   }, [])
 
+  // Keyboard shortcut: press 'N' to open the dialog (unless focus is in an input/textarea)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
+      if ((e.target as HTMLElement)?.isContentEditable) return
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault()
+        setOpen(true)
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [])
+
   // Check authentication status
   useEffect(() => {
     async function checkAuth() {

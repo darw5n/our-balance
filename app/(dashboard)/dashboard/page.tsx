@@ -17,8 +17,9 @@ import {
 } from "@/lib/supabase/queries/transactions"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { getBudgetsWithProgress, type BudgetWithProgress } from "@/lib/supabase/queries/budgets"
-import { getPendingConfirmations, type RecurringTransaction } from "@/lib/supabase/queries/recurring"
+import { getPendingConfirmations, getUpcomingRecurring, type RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import { processRecurringTransactions } from "@/app/actions/recurring"
+import { UpcomingRecurring } from "@/components/dashboard/upcoming-recurring"
 
 type DashboardData = {
   summary: DashboardSummary
@@ -29,6 +30,7 @@ type DashboardData = {
   categories: Awaited<ReturnType<typeof getCategories>>
   budgets: BudgetWithProgress[]
   pendingConfirmations: RecurringTransaction[]
+  upcomingRecurring: RecurringTransaction[]
 }
 
 async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
@@ -65,6 +67,7 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
       categories: [],
       budgets: [],
       pendingConfirmations: [],
+      upcomingRecurring: [],
     }
   }
 
@@ -73,7 +76,7 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
 
   const currentYear = new Date().getUTCFullYear()
 
-  const [summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations] =
+  const [summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations, upcomingRecurring] =
     await Promise.all([
       getDashboardSummary(user.id, viewMode),
       getDashboardSummaryPrevMonth(user.id, viewMode),
@@ -83,9 +86,10 @@ async function getDashboardData(viewMode: ViewMode): Promise<DashboardData> {
       getCategories(user.id),
       getBudgetsWithProgress(user.id, viewMode),
       getPendingConfirmations(user.id),
+      getUpcomingRecurring(user.id),
     ])
 
-  return { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations }
+  return { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations, upcomingRecurring }
 }
 
 export default async function DashboardPage({
@@ -96,7 +100,7 @@ export default async function DashboardPage({
   const { view } = await searchParams
   const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
-  const { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations } =
+  const { summary, summaryPrev, summaryYTD, cashflow, topCategories, categories, budgets, pendingConfirmations, upcomingRecurring } =
     await getDashboardData(viewMode)
 
   const hasAnyData =
@@ -129,6 +133,8 @@ export default async function DashboardPage({
         )}
 
         <PendingConfirmations items={pendingConfirmations} />
+
+        <UpcomingRecurring items={upcomingRecurring} />
 
         <BalanceCards
           current={summary}
