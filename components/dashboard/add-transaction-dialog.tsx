@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Plus, TrendingUp, TrendingDown, User, Users } from "lucide-react"
 
@@ -69,6 +69,8 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [suggestedCategoryId, setSuggestedCategoryId] = useState<string | null>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Prevent hydration mismatch by only rendering DialogTrigger client-side
   useEffect(() => {
@@ -89,6 +91,68 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
+
+  // Auto-suggest category from description (debounced 400ms, client-side query)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+
+    const trimmed = description.trim()
+    if (trimmed.length < 3) {
+      setSuggestedCategoryId(null)
+      return
+    }
+
+    debounceRef.current = setTimeout(async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      function mostCommon(rows: { category_id: string | null }[]): string | null {
+        const counts = new Map<string, number>()
+        for (const row of rows) {
+          if (row.category_id)
+            counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+        }
+        return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+      }
+
+      // 1. Try full description match
+      const { data: exact } = await supabase
+        .from("transactions")
+        .select("category_id")
+        .eq("user_id", user.id)
+        .eq("type", type)
+        .not("category_id", "is", null)
+        .ilike("description", `%${trimmed}%`)
+        .order("date", { ascending: false })
+        .limit(20)
+
+      let suggested = exact?.length ? mostCommon(exact as { category_id: string | null }[]) : null
+
+      // 2. Fallback: individual words ≥ 3 chars
+      if (!suggested) {
+        const words = trimmed.split(/\s+/).filter((w) => w.length >= 3)
+        if (words.length > 0) {
+          const orFilter = words.map((w) => `description.ilike.%${w}%`).join(",")
+          const { data: partial } = await supabase
+            .from("transactions")
+            .select("category_id")
+            .eq("user_id", user.id)
+            .eq("type", type)
+            .not("category_id", "is", null)
+            .or(orFilter)
+            .order("date", { ascending: false })
+            .limit(30)
+          suggested = partial?.length ? mostCommon(partial as { category_id: string | null }[]) : null
+        }
+      }
+
+      setSuggestedCategoryId(suggested ?? null)
+    }, 400)
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [description, type]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check authentication status
   useEffect(() => {
@@ -198,6 +262,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
 
       // Reset form
       setOpen(false)
+      setSuggestedCategoryId(null)
       setDate(new Date().toISOString().slice(0, 10))
       setAmount("")
       setType("expense")
@@ -334,18 +399,6 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300">
-                Categoria <span className="text-rose-400">*</span>
-              </label>
-              <CategoryCombobox
-                categories={categories}
-                txType={type}
-                value={categoryId}
-                onChange={setCategoryId}
-              />
-            </div>
-
-            <div className="space-y-1">
               <label className="text-xs font-medium text-zinc-300" htmlFor="description">
                 Descrizione
               </label>
@@ -356,6 +409,33 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Es. Spesa supermercato"
               />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-zinc-300">
+                Categoria <span className="text-rose-400">*</span>
+              </label>
+              <CategoryCombobox
+                categories={categories}
+                txType={type}
+                value={categoryId}
+                onChange={(id) => { setCategoryId(id); setSuggestedCategoryId(null) }}
+              />
+              {suggestedCategoryId && suggestedCategoryId !== categoryId && (() => {
+                const cat = categories.find((c) => c.id === suggestedCategoryId)
+                if (!cat) return null
+                return (
+                  <button
+                    type="button"
+                    onClick={() => { setCategoryId(suggestedCategoryId); setSuggestedCategoryId(null) }}
+                    className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs text-amber-300 transition-colors hover:bg-amber-500/20"
+                  >
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: cat.color }} />
+                    <span>Suggerito: <strong>{cat.name}</strong></span>
+                    <span className="ml-1 opacity-60">— tocca per applicare</span>
+                  </button>
+                )
+              })()}
             </div>
 
             {/* Recurring toggle */}
