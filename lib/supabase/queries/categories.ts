@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
 export type MacroCategory = "necessita" | "svago" | "investimenti"
@@ -12,7 +13,7 @@ export type Category = {
   group_name?: string | null
 }
 
-export async function getCategories(userId: string): Promise<Category[]> {
+export const getCategories = cache(async function getCategories(userId: string): Promise<Category[]> {
   if (!userId) return []
 
   const supabase = await createSupabaseServerClient()
@@ -29,4 +30,4 @@ export async function getCategories(userId: string): Promise<Category[]> {
   }
 
   return (data ?? []) as Category[]
-}
+})

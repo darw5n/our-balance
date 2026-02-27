@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode } from "@/lib/supabase/queries/transactions"
 
@@ -27,7 +28,7 @@ function toNumber(value: number | string | null | undefined): number {
   return 0
 }
 
-export async function getBudgetsWithProgress(
+export const getBudgetsWithProgress = cache(async function getBudgetsWithProgress(
   userId: string,
   viewMode: ViewMode = "personal"
 ): Promise<BudgetWithProgress[]> {
@@ -96,4 +97,4 @@ export async function getBudgetsWithProgress(
       is_exceeded,
     }
   })
-}
+})

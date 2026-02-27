@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
 export type ViewMode = "personal" | "family"
@@ -98,7 +99,7 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
 
 const EMPTY_SUMMARY: DashboardSummary = { entrate: 0, uscite: 0, netto: 0, pending: 0, spese_comuni: 0 }
 
-export async function getDashboardSummary(
+export const getDashboardSummary = cache(async function getDashboardSummary(
   userId: string,
   viewMode: ViewMode
 ): Promise<DashboardSummary> {
@@ -123,9 +124,9 @@ export async function getDashboardSummary(
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
-}
+})
 
-export async function getDashboardSummaryPrevMonth(
+export const getDashboardSummaryPrevMonth = cache(async function getDashboardSummaryPrevMonth(
   userId: string,
   viewMode: ViewMode
 ): Promise<DashboardSummary> {
@@ -152,9 +153,9 @@ export async function getDashboardSummaryPrevMonth(
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
-}
+})
 
-export async function getDashboardSummaryYear(
+export const getDashboardSummaryYear = cache(async function getDashboardSummaryYear(
   userId: string,
   viewMode: ViewMode,
   year: number
@@ -180,9 +181,9 @@ export async function getDashboardSummaryYear(
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
-}
+})
 
-export async function getCashflowMonthly(
+export const getCashflowMonthly = cache(async function getCashflowMonthly(
   userId: string,
   months: number = 12,
   viewMode: ViewMode = "personal"
@@ -239,7 +240,7 @@ export async function getCashflowMonthly(
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
     return { month: monthLabel, entrate, uscite }
   })
-}
+})
 
 type TopCategoryRow = {
   amount: number | null
@@ -258,7 +259,7 @@ type TopCategoryRow = {
   }>
 }
 
-export async function getTopCategories(
+export const getTopCategories = cache(async function getTopCategories(
   userId: string,
   limit: number = 5,
   viewMode: ViewMode = "personal"
@@ -341,4 +342,4 @@ export async function getTopCategories(
     amount: item.amount,
     percentage: (item.amount / totalAmount) * 100,
   }))
-}
+})

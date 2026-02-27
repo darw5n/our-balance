@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 
 export type RecurringTransaction = {
@@ -18,7 +19,7 @@ export type RecurringTransaction = {
   category?: { name: string; color: string } | null
 }
 
-export async function getRecurringTransactions(userId: string): Promise<RecurringTransaction[]> {
+export const getRecurringTransactions = cache(async function getRecurringTransactions(userId: string): Promise<RecurringTransaction[]> {
   if (!userId) return []
 
   const supabase = await createSupabaseServerClient()
@@ -42,9 +43,9 @@ export async function getRecurringTransactions(userId: string): Promise<Recurrin
       category: cat ? { name: (cat as { name: string }).name, color: (cat as { color: string }).color } : null,
     }
   }) as RecurringTransaction[]
-}
+})
 
-export async function getUpcomingRecurring(userId: string, days: number = 14): Promise<RecurringTransaction[]> {
+export const getUpcomingRecurring = cache(async function getUpcomingRecurring(userId: string, days: number = 14): Promise<RecurringTransaction[]> {
   if (!userId) return []
 
   const supabase = await createSupabaseServerClient()
@@ -71,9 +72,9 @@ export async function getUpcomingRecurring(userId: string, days: number = 14): P
       category: cat ? { name: (cat as { name: string }).name, color: (cat as { color: string }).color } : null,
     }
   }) as RecurringTransaction[]
-}
+})
 
-export async function getPendingConfirmations(userId: string): Promise<RecurringTransaction[]> {
+export const getPendingConfirmations = cache(async function getPendingConfirmations(userId: string): Promise<RecurringTransaction[]> {
   if (!userId) return []
 
   const supabase = await createSupabaseServerClient()
@@ -97,4 +98,4 @@ export async function getPendingConfirmations(userId: string): Promise<Recurring
       category: cat ? { name: (cat as { name: string }).name, color: (cat as { color: string }).color } : null,
     }
   }) as RecurringTransaction[]
-}
+})

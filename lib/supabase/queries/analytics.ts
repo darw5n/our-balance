@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode, CashflowMonthlyPoint } from "./transactions"
 
@@ -40,7 +41,7 @@ function getYearRange(year: number) {
   return { startISO: start.toISOString(), endISO: end.toISOString() }
 }
 
-export async function getMacroCategoryBreakdown(
+export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBreakdown(
   userId: string,
   viewMode: ViewMode,
   year: number
@@ -106,9 +107,9 @@ export async function getMacroCategoryBreakdown(
   result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago)
 
   return result
-}
+})
 
-export async function getCashflowForYear(
+export const getCashflowForYear = cache(async function getCashflowForYear(
   userId: string,
   viewMode: ViewMode,
   year: number
@@ -158,7 +159,7 @@ export async function getCashflowForYear(
     const bucket = buckets.get(i) ?? { entrate: 0, uscite: 0 }
     return { month: monthLabel, entrate: bucket.entrate, uscite: bucket.uscite }
   })
-}
+})
 
 function buildEmptyYear(year: number): CashflowMonthlyPoint[] {
   return Array.from({ length: 12 }, (_, i) => {
@@ -177,7 +178,7 @@ export type CategoryMonthRow = {
   total: number
 }
 
-export async function getCategoryMonthlyBreakdown(
+export const getCategoryMonthlyBreakdown = cache(async function getCategoryMonthlyBreakdown(
   userId: string,
   viewMode: ViewMode,
   year: number
@@ -255,7 +256,7 @@ export async function getCategoryMonthlyBreakdown(
   }
 
   return Array.from(map.values()).sort((a, b) => b.total - a.total)
-}
+})
 
 export type AnnualDistribution = {
   risparmi: number
@@ -266,7 +267,7 @@ export type AnnualDistribution = {
   totale_uscite: number
 }
 
-export async function getAnnualDistribution(
+export const getAnnualDistribution = cache(async function getAnnualDistribution(
   userId: string,
   viewMode: ViewMode,
   year: number
@@ -336,7 +337,7 @@ export async function getAnnualDistribution(
 
   result.risparmi = Math.max(0, result.totale_entrate - result.totale_uscite)
   return result
-}
+})
 
 export type CategoryMonthlyAverage = {
   name: string
@@ -345,7 +346,7 @@ export type CategoryMonthlyAverage = {
   avg_monthly: number
 }
 
-export async function getCategoryMonthlyAverages(
+export const getCategoryMonthlyAverages = cache(async function getCategoryMonthlyAverages(
   userId: string,
   viewMode: ViewMode,
   months: number = 6
@@ -427,4 +428,4 @@ export async function getCategoryMonthlyAverages(
       avg_monthly: amount / months,
     }))
     .sort((a, b) => b.avg_monthly - a.avg_monthly)
-}
+})
