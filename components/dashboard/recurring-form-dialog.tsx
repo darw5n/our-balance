@@ -28,6 +28,12 @@ type RecurringFormDialogProps = {
   onSuccess?: () => void
 }
 
+const DELAY_OPTIONS: { value: number; label: string; hint: string }[] = [
+  { value: 0, label: "Immediato", hint: "Alla scadenza" },
+  { value: 1, label: "+1 ciclo", hint: "Es. stipendio gen → conferma feb" },
+  { value: 2, label: "+2 cicli", hint: "Con ulteriore ritardo" },
+]
+
 export function RecurringFormDialog({
   open,
   onOpenChange,
@@ -43,6 +49,7 @@ export function RecurringFormDialog({
   const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
   const [startDate, setStartDate] = useState("")
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
+  const [confirmationDelay, setConfirmationDelay] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -58,17 +65,26 @@ export function RecurringFormDialog({
       setFrequency(recurring?.frequency ?? "monthly")
       setStartDate(recurring?.start_date ?? "")
       setRequiresConfirmation(recurring?.requires_confirmation ?? false)
+      setConfirmationDelay(recurring?.confirmation_delay ?? 0)
       setError(null)
     }
   }, [open, recurring])
 
-  // Auto-set requires_confirmation default based on type
+  // Auto-set defaults based on type (only for new records)
   function handleTypeChange(newType: "income" | "expense") {
     setType(newType)
     setCategoryId("")
     if (!recurring) {
-      setRequiresConfirmation(newType === "income")
+      const isIncome = newType === "income"
+      setRequiresConfirmation(isIncome)
+      setConfirmationDelay(isIncome ? 1 : 0)
     }
+  }
+
+  // When toggling confirmation off, reset delay
+  function handleConfirmationToggle(checked: boolean) {
+    setRequiresConfirmation(checked)
+    if (!checked) setConfirmationDelay(0)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,7 +100,6 @@ export function RecurringFormDialog({
       setError("La categoria è obbligatoria.")
       return
     }
-
     if (!startDate) {
       setError("La data di inizio è obbligatoria.")
       return
@@ -101,6 +116,7 @@ export function RecurringFormDialog({
         frequency,
         start_date: startDate,
         requires_confirmation: requiresConfirmation,
+        confirmation_delay: requiresConfirmation ? confirmationDelay : 0,
       }
 
       const result = isEdit
@@ -275,17 +291,48 @@ export function RecurringFormDialog({
           </div>
 
           {/* Requires confirmation */}
-          <div className="flex items-center gap-3">
-            <input
-              id="rec-confirm"
-              type="checkbox"
-              checked={requiresConfirmation}
-              onChange={(e) => setRequiresConfirmation(e.target.checked)}
-              className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
-            />
-            <label htmlFor="rec-confirm" className="text-xs text-zinc-300 cursor-pointer">
-              Richiedi conferma importo prima di registrare
-            </label>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <input
+                id="rec-confirm"
+                type="checkbox"
+                checked={requiresConfirmation}
+                onChange={(e) => handleConfirmationToggle(e.target.checked)}
+                className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
+              />
+              <label htmlFor="rec-confirm" className="text-xs text-zinc-300 cursor-pointer">
+                Richiedi conferma importo prima di registrare
+              </label>
+            </div>
+
+            {/* Confirmation delay — visible only when requires_confirmation is on */}
+            {requiresConfirmation && (
+              <div className="ml-7 space-y-1.5">
+                <p className="text-xs text-zinc-400">Quando chiedere conferma?</p>
+                <div className="flex gap-2">
+                  {DELAY_OPTIONS.map(({ value, label, hint }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setConfirmationDelay(value)}
+                      title={hint}
+                      className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                        confirmationDelay === value
+                          ? "border-sky-500 bg-sky-500/20 text-sky-400"
+                          : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {confirmationDelay > 0 && (
+                  <p className="text-[11px] text-zinc-500">
+                    {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {error && <p className="text-xs text-rose-400">{error}</p>}

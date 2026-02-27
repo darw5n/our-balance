@@ -15,6 +15,7 @@ export type CreateRecurringInput = {
   frequency: RecurringFrequency
   start_date: string
   requires_confirmation: boolean
+  confirmation_delay: number
 }
 
 export type UpdateRecurringInput = Partial<CreateRecurringInput>
@@ -33,6 +34,15 @@ function advanceDate(dateStr: string, frequency: RecurringFrequency): string {
     date.setUTCFullYear(date.getUTCFullYear() + 1)
   }
   return date.toISOString().split("T")[0]
+}
+
+// Returns the date after advancing by `cycles` frequency cycles
+function advanceDateByCycles(dateStr: string, frequency: RecurringFrequency, cycles: number): string {
+  let date = dateStr
+  for (let i = 0; i < cycles; i++) {
+    date = advanceDate(date, frequency)
+  }
+  return date
 }
 
 function rewindDate(dateStr: string, frequency: RecurringFrequency): string {
@@ -69,6 +79,7 @@ export async function createRecurringTransaction(
       start_date: input.start_date,
       next_due_date: input.start_date,
       requires_confirmation: input.requires_confirmation,
+      confirmation_delay: input.confirmation_delay ?? 0,
       pending_confirmation: false,
       is_active: true,
     })
@@ -109,6 +120,7 @@ export async function updateRecurringTransaction(
     if (input.frequency !== undefined) payload.frequency = input.frequency
     if (input.start_date !== undefined) payload.start_date = input.start_date
     if (input.requires_confirmation !== undefined) payload.requires_confirmation = input.requires_confirmation
+    if (input.confirmation_delay !== undefined) payload.confirmation_delay = input.confirmation_delay ?? 0
 
     const supabase = await createSupabaseServerClient()
 
@@ -185,10 +197,17 @@ export async function processRecurringTransactions(userId: string): Promise<void
     }
 
     for (const rec of due ?? []) {
+      const freq = rec.frequency as RecurringFrequency
+      const delay: number = rec.confirmation_delay ?? 0
+
       if (!rec.requires_confirmation) {
-        // Auto-create one transaction per missed occurrence
+        // Auto-create one transaction per missed occurrence.
+        // With delay: the occurrence at `currentDue` is processed only when
+        // `currentDue + delay cycles <= today`.
         let currentDue = rec.next_due_date as string
         while (currentDue <= today) {
+          const triggerDate = advanceDateByCycles(currentDue, freq, delay)
+          if (triggerDate > today) break // too early — wait for delay to pass
           await supabase.from("transactions").insert({
             user_id: userId,
             type: rec.type,
@@ -199,15 +218,18 @@ export async function processRecurringTransactions(userId: string): Promise<void
             date: currentDue,
             status: "confirmed",
           })
-          currentDue = advanceDate(currentDue, rec.frequency as RecurringFrequency)
+          currentDue = advanceDate(currentDue, freq)
         }
         await supabase
           .from("recurring_transactions")
           .update({ next_due_date: currentDue })
           .eq("id", rec.id)
       } else if (!rec.pending_confirmation) {
-        // Flag the oldest missed occurrence for confirmation; advance next_due_date by one cycle
-        const nextDue = advanceDate(rec.next_due_date, rec.frequency as RecurringFrequency)
+        // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`
+        const triggerDate = advanceDateByCycles(rec.next_due_date as string, freq, delay)
+        if (triggerDate > today) continue // not yet time to ask for confirmation
+
+        const nextDue = advanceDate(rec.next_due_date, freq)
         await supabase
           .from("recurring_transactions")
           .update({ pending_confirmation: true, next_due_date: nextDue })

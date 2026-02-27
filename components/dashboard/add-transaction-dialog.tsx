@@ -242,6 +242,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
           frequency,
           start_date: formattedDate,
           requires_confirmation: requiresConfirmation,
+          confirmation_delay: 0,
         })
       } else {
         result = await createTransaction({

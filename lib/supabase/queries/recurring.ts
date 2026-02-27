@@ -13,6 +13,7 @@ export type RecurringTransaction = {
   start_date: string
   next_due_date: string
   requires_confirmation: boolean
+  confirmation_delay: number
   pending_confirmation: boolean
   is_active: boolean
   created_at: string
