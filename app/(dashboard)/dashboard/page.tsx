@@ -1,4 +1,5 @@
 import { BalanceCards } from "@/components/dashboard/balance-cards"
+import { formatCurrency } from "@/lib/utils"
 import { CashflowChart } from "@/components/dashboard/cashflow-chart"
 import { TopCategoriesChart } from "@/components/dashboard/top-categories-chart"
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog"
@@ -168,7 +169,7 @@ export default async function DashboardPage({
                       )}
                     </div>
                     <span className="shrink-0 text-xs text-zinc-400">
-                      € {budget.spent.toFixed(2)} / € {budget.amount_limit.toFixed(2)}
+                      {formatCurrency(budget.spent)} / {formatCurrency(budget.amount_limit)}
                     </span>
                   </div>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">

@@ -52,7 +52,7 @@ export function RecurringFormDialog({
     if (open) {
       setType(recurring?.type ?? "expense")
       setScope(recurring?.scope ?? "personal")
-      setAmount(recurring ? String(recurring.amount) : "")
+      setAmount(recurring ? Number(recurring.amount).toFixed(2).replace(".", ",") : "")
       setDescription(recurring?.description ?? "")
       setCategoryId(recurring?.category_id ?? "")
       setFrequency(recurring?.frequency ?? "monthly")
@@ -198,8 +198,7 @@ export function RecurringFormDialog({
             </label>
             <Input
               id="rec-amount"
-              type="number"
-              step="0.01"
+              type="text"
               inputMode="decimal"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}

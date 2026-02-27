@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { CheckCircle, SkipForward } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { formatCurrency } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { confirmRecurringTransaction, skipRecurringConfirmation } from "@/app/actions/recurring"
@@ -69,8 +70,8 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
           </p>
           <p className="text-xs text-zinc-400">
             {FREQUENCY_LABEL[item.frequency]} ·{" "}
-            {item.type === "income" ? "Entrata prevista" : "Uscita prevista"}: €{" "}
-            {Number(item.amount).toFixed(2)}
+            {item.type === "income" ? "Entrata prevista" : "Uscita prevista"}:{" "}
+            {formatCurrency(Number(item.amount))}
           </p>
           <p className="text-xs text-amber-400/80">
             Competenza: {getPendingDate(item.next_due_date, item.frequency)}
@@ -79,8 +80,7 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
 
         <div className="flex items-center gap-2 shrink-0">
           <Input
-            type="number"
-            step="0.01"
+            type="text"
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}

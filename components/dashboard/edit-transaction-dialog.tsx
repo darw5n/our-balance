@@ -51,7 +51,7 @@ export function EditTransactionDialog({
       setScope(transaction.scope === "family" ? "family" : "personal")
       const dateValue = transaction.date ?? transaction.created_at ?? ""
       setDate(dateValue ? dateValue.split("T")[0] : "")
-      setAmount(transaction.amount != null ? String(Math.abs(transaction.amount)) : "")
+      setAmount(transaction.amount != null ? Math.abs(transaction.amount).toFixed(2).replace(".", ",") : "")
       setCategoryId(transaction.category_id ?? "")
       setDescription(transaction.description ?? "")
       setError(null)
@@ -196,8 +196,7 @@ export function EditTransactionDialog({
             </label>
             <Input
               id="edit-amount"
-              type="number"
-              step="0.01"
+              type="text"
               inputMode="decimal"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}

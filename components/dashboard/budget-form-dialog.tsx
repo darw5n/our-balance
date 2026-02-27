@@ -40,7 +40,7 @@ export function BudgetFormDialog({
   useEffect(() => {
     if (open) {
       setCategoryId(budget?.category_id ?? (categories[0]?.id ?? ""))
-      setAmountLimit(budget?.amount_limit ? String(budget.amount_limit) : "")
+      setAmountLimit(budget?.amount_limit ? Number(budget.amount_limit).toFixed(2).replace(".", ",") : "")
       setError(null)
     }
   }, [open, budget, categories])
@@ -114,9 +114,8 @@ export function BudgetFormDialog({
             </label>
             <Input
               id="budget-amount"
-              type="number"
-              min="0.01"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               value={amountLimit}
               onChange={(e) => setAmountLimit(e.target.value)}
               placeholder="Es. 300"

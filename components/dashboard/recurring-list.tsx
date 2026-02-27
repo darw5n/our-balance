@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus, TrendingUp, TrendingDown, RefreshCw } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RecurringFormDialog } from "@/components/dashboard/recurring-form-dialog"
@@ -121,8 +122,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                             rec.type === "income" ? "text-emerald-400" : "text-rose-400"
                           }`}
                         >
-                          {rec.type === "income" ? "+" : "-"}€{" "}
-                          {Number(rec.amount).toFixed(2)}
+                          {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
                         </span>
                         <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
                           {FREQUENCY_LABEL[rec.frequency]}

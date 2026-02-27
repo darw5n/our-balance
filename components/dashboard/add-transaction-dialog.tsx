@@ -388,8 +388,7 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
               </label>
               <Input
                 id="amount"
-                type="number"
-                step="0.01"
+                type="text"
                 inputMode="decimal"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}

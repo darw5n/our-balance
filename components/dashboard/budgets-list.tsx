@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -168,10 +169,10 @@ export function BudgetsList({
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-400">
-                        € {budget.spent.toFixed(2)} spesi
+                        {formatCurrency(budget.spent)} spesi
                       </span>
                       <span className="text-xs text-zinc-500">
-                        limite € {budget.amount_limit.toFixed(2)}
+                        limite {formatCurrency(budget.amount_limit)}
                       </span>
                     </div>
                   </div>

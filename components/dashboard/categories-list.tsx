@@ -11,6 +11,7 @@ import type { Category } from "@/lib/supabase/queries/categories"
 import type { BudgetWithProgress } from "@/lib/supabase/queries/budgets"
 import { useToast } from "@/components/ui/toast-provider"
 import { useConfirm } from "@/components/ui/confirm-dialog"
+import { formatAmount } from "@/lib/utils"
 
 type CategoriesListProps = {
   categories: Category[]
@@ -177,7 +178,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                         <div className="flex items-center justify-between text-[10px] text-zinc-500">
                           <span>Budget mensile</span>
                           <span className={b.is_exceeded ? "text-rose-400 font-medium" : ""}>
-                            € {b.spent.toFixed(0)} / € {b.amount_limit.toFixed(0)}
+                            {formatAmount(b.spent, 0)} € / {formatAmount(b.amount_limit, 0)} €
                           </span>
                         </div>
                         <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-800">
