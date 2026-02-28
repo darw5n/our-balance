@@ -2,7 +2,7 @@
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card } from "@/components/ui/card"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -52,8 +52,8 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
                 tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                 axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                 tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                width={72}
-                tickFormatter={(v) => formatCurrency(Number(v))}
+                width={80}
+                tickFormatter={(v) => formatCurrencyAxis(Number(v))}
               />
               <Tooltip
                 cursor={{ stroke: "rgba(255,255,255,0.12)" }}

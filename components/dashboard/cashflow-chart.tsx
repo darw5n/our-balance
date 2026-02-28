@@ -14,7 +14,7 @@ import {
   YAxis,
 } from "@/components/ui/chart"
 import { Card } from "@/components/ui/card"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type CashflowChartProps = {
@@ -61,8 +61,8 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
                   tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                   axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                   tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  width={64}
-                  tickFormatter={(v) => formatCurrency(Number(v))}
+                  width={80}
+                  tickFormatter={(v) => formatCurrencyAxis(Number(v))}
                 />
                 <ChartTooltip
                   formatter={(value: any, name) => {

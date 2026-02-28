@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { Card } from "@/components/ui/card"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -68,8 +68,8 @@ export function CashflowReportChart({ data, year }: Props) {
                 tick={AXIS_TICK}
                 axisLine={AXIS_LINE}
                 tickLine={AXIS_LINE}
-                width={72}
-                tickFormatter={(v) => formatCurrency(Number(v))}
+                width={80}
+                tickFormatter={(v) => formatCurrencyAxis(Number(v))}
               />
               <Tooltip
                 cursor={{ fill: "rgba(255,255,255,0.04)" }}
