@@ -3,7 +3,6 @@ import { BalanceCards } from "@/components/dashboard/balance-cards"
 import { formatCurrency } from "@/lib/utils"
 import { CashflowChart } from "@/components/dashboard/cashflow-chart"
 import { TopCategoriesChart } from "@/components/dashboard/top-categories-chart"
-import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { PendingConfirmations } from "@/components/dashboard/pending-confirmations"
 import { UpcomingRecurring } from "@/components/dashboard/upcoming-recurring"
@@ -15,7 +14,6 @@ import {
   getTopCategories,
   type ViewMode,
 } from "@/lib/supabase/queries/transactions"
-import { getCategories } from "@/lib/supabase/queries/categories"
 import { getBudgetsWithProgress } from "@/lib/supabase/queries/budgets"
 import { getPendingConfirmations, getUpcomingRecurring } from "@/lib/supabase/queries/recurring"
 import { processRecurringTransactions } from "@/app/actions/recurring"
@@ -197,11 +195,6 @@ async function ChartsSection({ userId, viewMode }: { userId: string; viewMode: V
   )
 }
 
-async function DialogSection({ userId }: { userId: string }) {
-  const categories = await getCategories(userId)
-  return <AddTransactionDialog categories={categories} />
-}
-
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function DashboardPage({
@@ -251,12 +244,6 @@ export default async function DashboardPage({
         )}
       </div>
 
-      {/* Dialog aggiunta transazione — carica categorie in background */}
-      {user && (
-        <Suspense fallback={null}>
-          <DialogSection userId={user.id} />
-        </Suspense>
-      )}
     </>
   )
 }

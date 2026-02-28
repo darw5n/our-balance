@@ -51,11 +51,20 @@ export function buildGroupedOptions(categories: CategoryOption[], txType: string
 
 type AddTransactionDialogProps = {
   categories?: CategoryOption[]
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function AddTransactionDialog({ categories = [] }: AddTransactionDialogProps) {
+export function AddTransactionDialog({
+  categories = [],
+  open: externalOpen,
+  onOpenChange: externalSetOpen,
+}: AddTransactionDialogProps) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const isControlled = externalOpen !== undefined
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = isControlled ? externalOpen! : internalOpen
+  const setOpen = isControlled ? externalSetOpen! : setInternalOpen
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [amount, setAmount] = useState("")
   const [type, setType] = useState<TransactionType>("expense")
@@ -286,16 +295,18 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
 
   return (
     <>
-      {mounted ? (
+      {(mounted || isControlled) ? (
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button
-              className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-emerald-500 text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 focus-visible:ring-emerald-300 md:bottom-6"
-              size="icon"
-            >
-              <Plus className="h-6 w-6" />
-            </Button>
-          </DialogTrigger>
+          {!isControlled && (
+            <DialogTrigger asChild>
+              <Button
+                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-emerald-500 text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 focus-visible:ring-emerald-300 md:bottom-6"
+                size="icon"
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </DialogTrigger>
+          )}
 
           <DialogContent>
           <DialogHeader>
@@ -526,8 +537,8 @@ export function AddTransactionDialog({ categories = [] }: AddTransactionDialogPr
           </DialogContent>
         </Dialog>
       ) : (
-        // Placeholder durante SSR per evitare layout shift
-        <div className="fixed bottom-6 right-6 z-40 h-14 w-14" />
+        // Placeholder durante SSR — solo in modalità non controllata (FAB)
+        !isControlled && <div className="fixed bottom-6 right-6 z-40 h-14 w-14" />
       )}
     </>
   )
