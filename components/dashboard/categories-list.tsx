@@ -6,20 +6,51 @@ import {
   Pencil,
   Trash2,
   Plus,
+  // Group icons (section headers)
+  UtensilsCrossed,
+  PawPrint,
   Home,
   Zap,
-  ShoppingBag,
-  Car,
-  Plane,
+  BarChart2,
   BookOpen,
   Activity,
+  ShoppingBag,
   Smile,
-  UtensilsCrossed,
+  Car,
+  Plane,
   Wallet,
-  BarChart2,
-  PawPrint,
   MoreHorizontal,
   Tag,
+  // Per-category icons
+  ChefHat,
+  ShoppingBasket,
+  Bone,
+  Stethoscope,
+  Package,
+  Building2,
+  Armchair,
+  Wrench,
+  Droplets,
+  Flame,
+  Wifi,
+  Lightbulb,
+  TrendingUp,
+  Receipt,
+  GraduationCap,
+  HeartPulse,
+  Pill,
+  Shirt,
+  Laptop,
+  Palette,
+  Popcorn,
+  Dumbbell,
+  Gift,
+  Fuel,
+  ParkingCircle,
+  Compass,
+  BedDouble,
+  Briefcase,
+  Banknote,
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -32,6 +63,7 @@ import { useToast } from "@/components/ui/toast-provider"
 import { useConfirm } from "@/components/ui/confirm-dialog"
 import { formatAmount } from "@/lib/utils"
 
+// Icon per group (section header)
 const GROUP_ICONS: Record<string, LucideIcon> = {
   Alimentari: UtensilsCrossed,
   Animali: PawPrint,
@@ -48,8 +80,59 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Entrate: Wallet,
 }
 
+// Icon unica per ogni sottocategoria (per nome)
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  // Alimentari
+  "Ristoranti & Asporto": ChefHat,
+  "Spesa supermercato": ShoppingBasket,
+  // Animali
+  "Cibo & Accessori": Bone,
+  "Veterinario": Stethoscope,
+  // Altro
+  "Spese varie": Package,
+  // Casa
+  "Affitto / Mutuo": Building2,
+  "Arredamento": Armchair,
+  "Manutenzione": Wrench,
+  // Utenze
+  "Acqua": Droplets,
+  "Gas": Flame,
+  "Internet": Wifi,
+  "Luce": Lightbulb,
+  "Rifiuti": Trash2,
+  // Finanza
+  "Investimenti": TrendingUp,
+  "Tasse & Imposte": Receipt,
+  // Formazione
+  "Corsi & Libri": BookOpen,
+  "Scuola & Università": GraduationCap,
+  // Salute
+  "Dentista": HeartPulse,
+  "Farmaci": Pill,
+  "Visite mediche": Stethoscope,
+  // Shopping
+  "Abbigliamento": Shirt,
+  "Tecnologia": Laptop,
+  // Svago
+  "Hobby": Palette,
+  "Intrattenimento": Popcorn,
+  "Palestra & Sport": Dumbbell,
+  "Regali": Gift,
+  // Trasporti
+  "Carburante": Fuel,
+  "Manutenzione auto": Car,
+  "Parcheggio & Pedaggi": ParkingCircle,
+  // Viaggi
+  "Attività & Escursioni": Compass,
+  "Hotel & Alloggio": BedDouble,
+  "Voli & Treni": Plane,
+  // Entrate
+  "Freelance & Extra": Briefcase,
+  "Stipendio": Banknote,
+}
+
 function getCategoryIcon(cat: Category): LucideIcon {
-  return (cat.group_name && GROUP_ICONS[cat.group_name]) || Tag
+  return CATEGORY_ICONS[cat.name] ?? GROUP_ICONS[cat.group_name ?? ""] ?? Tag
 }
 
 type CategoriesListProps = {
@@ -105,7 +188,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
     }
   }
 
-  // Group categories by group_name for visual sectioning
+  // Group by group_name
   const grouped = new Map<string, Category[]>()
   for (const cat of categories) {
     const key = cat.group_name?.trim() || "Altro"
@@ -151,7 +234,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
           <div className="space-y-6">
             {sortedGroups.map((groupName) => {
               const items = grouped.get(groupName)!
-              const GroupIcon = GROUP_ICONS[groupName] || Tag
+              const GroupIcon = GROUP_ICONS[groupName] ?? Tag
               return (
                 <div key={groupName}>
                   <div className="mb-2 flex items-center gap-2">
@@ -173,12 +256,14 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div
-                                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                                   style={{ backgroundColor: `${cat.color}28` }}
                                 >
                                   <Icon className="h-4 w-4" style={{ color: cat.color }} />
                                 </div>
-                                <span className="truncate text-sm font-medium text-zinc-100">{cat.name}</span>
+                                <span className="truncate text-sm font-medium text-zinc-100">
+                                  {cat.name}
+                                </span>
                               </div>
                               <div className="flex items-center gap-1 shrink-0">
                                 <Button

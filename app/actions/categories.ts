@@ -131,54 +131,56 @@ type DefaultCategory = {
   group_name: string | null
 }
 
+// Colori progettati con palette coesiva per gruppo:
+// categorie dello stesso gruppo condividono la stessa famiglia di hue
 const DEFAULT_CATEGORIES: DefaultCategory[] = [
-  // Alimentari
-  { name: "Ristoranti & Asporto",      color: "#f97316", type: "expense", macro_category: "svago",        group_name: "Alimentari" },
-  { name: "Spesa supermercato",        color: "#22c55e", type: "expense", macro_category: "necessita",    group_name: "Alimentari" },
-  // Animali
-  { name: "Cibo & Accessori",          color: "#fb923c", type: "expense", macro_category: "necessita",    group_name: "Animali" },
-  { name: "Veterinario",               color: "#ea580c", type: "expense", macro_category: "necessita",    group_name: "Animali" },
-  // Altro
-  { name: "Spese varie",               color: "#71717a", type: "expense", macro_category: "svago",        group_name: "Altro" },
-  // Casa
-  { name: "Affitto / Mutuo",           color: "#f59e0b", type: "expense", macro_category: "necessita",    group_name: "Casa" },
-  { name: "Arredamento",               color: "#d97706", type: "expense", macro_category: "necessita",    group_name: "Casa" },
-  { name: "Manutenzione",              color: "#92400e", type: "expense", macro_category: "necessita",    group_name: "Casa" },
-  // Utenze
-  { name: "Acqua",                     color: "#22d3ee", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
-  { name: "Gas",                       color: "#fb923c", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
-  { name: "Internet",                  color: "#818cf8", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
-  { name: "Luce",                      color: "#fbbf24", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
-  { name: "Rifiuti",                   color: "#6b7280", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
-  // Finanza
-  { name: "Investimenti",              color: "#10b981", type: "expense", macro_category: "investimenti", group_name: "Finanza" },
-  { name: "Tasse & Imposte",           color: "#64748b", type: "expense", macro_category: "necessita",    group_name: "Finanza" },
-  // Formazione
-  { name: "Corsi & Libri",             color: "#60a5fa", type: "expense", macro_category: "svago",        group_name: "Formazione" },
-  { name: "Scuola & Università",       color: "#3b82f6", type: "expense", macro_category: "necessita",    group_name: "Formazione" },
-  // Salute
-  { name: "Dentista",                  color: "#f472b6", type: "expense", macro_category: "necessita",    group_name: "Salute" },
-  { name: "Farmaci",                   color: "#ec4899", type: "expense", macro_category: "necessita",    group_name: "Salute" },
-  { name: "Visite mediche",            color: "#db2777", type: "expense", macro_category: "necessita",    group_name: "Salute" },
-  // Shopping
-  { name: "Abbigliamento",             color: "#f43f5e", type: "expense", macro_category: "svago",        group_name: "Shopping" },
-  { name: "Tecnologia",                color: "#94a3b8", type: "expense", macro_category: "svago",        group_name: "Shopping" },
-  // Svago
-  { name: "Hobby",                     color: "#4ade80", type: "expense", macro_category: "svago",        group_name: "Svago" },
-  { name: "Intrattenimento",           color: "#7c3aed", type: "expense", macro_category: "svago",        group_name: "Svago" },
-  { name: "Palestra & Sport",          color: "#14b8a6", type: "expense", macro_category: "svago",        group_name: "Svago" },
-  { name: "Regali",                    color: "#fb7185", type: "expense", macro_category: "svago",        group_name: "Svago" },
-  // Trasporti
-  { name: "Carburante",                color: "#8b5cf6", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
-  { name: "Manutenzione auto",         color: "#4f46e5", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
-  { name: "Parcheggio & Pedaggi",      color: "#6366f1", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
-  // Viaggi
-  { name: "Attività & Escursioni",     color: "#2dd4bf", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
-  { name: "Hotel & Alloggio",          color: "#0284c7", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
-  { name: "Voli & Treni",              color: "#0ea5e9", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
-  // Entrate
-  { name: "Freelance & Extra",         color: "#2dd4bf", type: "income",  macro_category: null,           group_name: "Entrate" },
-  { name: "Stipendio",                 color: "#34d399", type: "income",  macro_category: null,           group_name: "Entrate" },
+  // Alimentari → arancio
+  { name: "Ristoranti & Asporto",  color: "#f97316", type: "expense", macro_category: "svago",        group_name: "Alimentari" },
+  { name: "Spesa supermercato",    color: "#fb923c", type: "expense", macro_category: "necessita",    group_name: "Alimentari" },
+  // Animali → ambra scura
+  { name: "Cibo & Accessori",      color: "#d97706", type: "expense", macro_category: "necessita",    group_name: "Animali" },
+  { name: "Veterinario",           color: "#b45309", type: "expense", macro_category: "necessita",    group_name: "Animali" },
+  // Altro → grigio
+  { name: "Spese varie",           color: "#71717a", type: "expense", macro_category: "svago",        group_name: "Altro" },
+  // Casa → giallo-ambra
+  { name: "Affitto / Mutuo",       color: "#eab308", type: "expense", macro_category: "necessita",    group_name: "Casa" },
+  { name: "Arredamento",           color: "#ca8a04", type: "expense", macro_category: "necessita",    group_name: "Casa" },
+  { name: "Manutenzione",          color: "#a16207", type: "expense", macro_category: "necessita",    group_name: "Casa" },
+  // Utenze → blu-cielo (con eccezione semantica per luce=giallo, rifiuti=ardesia)
+  { name: "Acqua",                 color: "#38bdf8", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
+  { name: "Gas",                   color: "#0ea5e9", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
+  { name: "Internet",              color: "#0284c7", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
+  { name: "Luce",                  color: "#fbbf24", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
+  { name: "Rifiuti",               color: "#64748b", type: "expense", macro_category: "necessita",    group_name: "Utenze" },
+  // Finanza → verde
+  { name: "Investimenti",          color: "#22c55e", type: "expense", macro_category: "investimenti", group_name: "Finanza" },
+  { name: "Tasse & Imposte",       color: "#16a34a", type: "expense", macro_category: "necessita",    group_name: "Finanza" },
+  // Formazione → blu
+  { name: "Corsi & Libri",         color: "#60a5fa", type: "expense", macro_category: "svago",        group_name: "Formazione" },
+  { name: "Scuola & Università",   color: "#3b82f6", type: "expense", macro_category: "necessita",    group_name: "Formazione" },
+  // Salute → rosa-rosso
+  { name: "Dentista",              color: "#fb7185", type: "expense", macro_category: "necessita",    group_name: "Salute" },
+  { name: "Farmaci",               color: "#f43f5e", type: "expense", macro_category: "necessita",    group_name: "Salute" },
+  { name: "Visite mediche",        color: "#e11d48", type: "expense", macro_category: "necessita",    group_name: "Salute" },
+  // Shopping → fucsia
+  { name: "Abbigliamento",         color: "#e879f9", type: "expense", macro_category: "svago",        group_name: "Shopping" },
+  { name: "Tecnologia",            color: "#d946ef", type: "expense", macro_category: "svago",        group_name: "Shopping" },
+  // Svago → viola
+  { name: "Hobby",                 color: "#c084fc", type: "expense", macro_category: "svago",        group_name: "Svago" },
+  { name: "Intrattenimento",       color: "#a855f7", type: "expense", macro_category: "svago",        group_name: "Svago" },
+  { name: "Palestra & Sport",      color: "#9333ea", type: "expense", macro_category: "svago",        group_name: "Svago" },
+  { name: "Regali",                color: "#7c3aed", type: "expense", macro_category: "svago",        group_name: "Svago" },
+  // Trasporti → indaco
+  { name: "Carburante",            color: "#818cf8", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
+  { name: "Manutenzione auto",     color: "#6366f1", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
+  { name: "Parcheggio & Pedaggi",  color: "#4f46e5", type: "expense", macro_category: "necessita",    group_name: "Trasporti" },
+  // Viaggi → teal
+  { name: "Attività & Escursioni", color: "#2dd4bf", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
+  { name: "Hotel & Alloggio",      color: "#14b8a6", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
+  { name: "Voli & Treni",          color: "#0d9488", type: "expense", macro_category: "svago",        group_name: "Viaggi" },
+  // Entrate → smeraldo
+  { name: "Freelance & Extra",     color: "#34d399", type: "income",  macro_category: null,           group_name: "Entrate" },
+  { name: "Stipendio",             color: "#10b981", type: "income",  macro_category: null,           group_name: "Entrate" },
 ]
 
 export async function createDefaultCategories(): Promise<{ success: boolean; created: number; error?: string }> {
