@@ -10,6 +10,9 @@ import { Card } from "@/components/ui/card"
 import { BudgetFormDialog, type CategoryOption } from "@/components/dashboard/budget-form-dialog"
 import { deleteBudget } from "@/app/actions/budgets"
 import type { BudgetWithProgress } from "@/lib/supabase/queries/budgets"
+import { useToast } from "@/components/ui/toast-provider"
+import { useConfirm } from "@/components/ui/confirm-dialog"
+import { getCategoryIcon } from "@/lib/category-icons"
 
 type BudgetsListProps = {
   budgets: BudgetWithProgress[]
@@ -29,6 +32,8 @@ export function BudgetsList({
   hasCategories,
 }: BudgetsListProps) {
   const router = useRouter()
+  const toast = useToast()
+  const confirm = useConfirm()
   const [budgets, setBudgets] = useState(initialBudgets)
   const [categoriesWithoutBudget, setCategoriesWithoutBudget] = useState(initialCategoriesWithoutBudget)
 
@@ -57,13 +62,20 @@ export function BudgetsList({
   }
 
   async function handleDelete(budget: BudgetWithProgress) {
-    if (!confirm(`Eliminare il budget per "${budget.category_name}"?`)) return
+    const ok = await confirm({
+      title: "Elimina budget",
+      message: `Eliminare il budget per "${budget.category_name}"?`,
+      destructive: true,
+      confirmLabel: "Elimina",
+    })
+    if (!ok) return
     const result = await deleteBudget(budget.id)
     if (result.success) {
       setBudgets((prev) => prev.filter((b) => b.id !== budget.id))
+      toast(`Budget per "${budget.category_name}" eliminato.`, "success")
       router.refresh()
     } else {
-      alert(result.error)
+      toast(result.error ?? "Errore durante l'eliminazione.", "error")
     }
   }
 
@@ -125,10 +137,17 @@ export function BudgetsList({
                 <Card className="border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="h-3 w-3 shrink-0 rounded-full"
-                        style={{ backgroundColor: budget.category_color }}
-                      />
+                      {(() => {
+                        const Icon = getCategoryIcon(budget.category_name)
+                        return (
+                          <div
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                            style={{ backgroundColor: `${budget.category_color}28` }}
+                          >
+                            <Icon className="h-3.5 w-3.5" style={{ color: budget.category_color }} />
+                          </div>
+                        )
+                      })()}
                       <span className="truncate text-sm font-medium text-zinc-100">
                         {budget.category_name}
                       </span>

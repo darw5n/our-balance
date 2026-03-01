@@ -28,7 +28,6 @@ const PRIMARY_NAV = [
 const SECONDARY_NAV = [
   { href: "/budgets", label: "Budget", icon: Wallet },
   { href: "/categories", label: "Categorie", icon: Tag },
-  { href: "/recurring", label: "Programmati", icon: Repeat },
 ]
 
 type Props = {

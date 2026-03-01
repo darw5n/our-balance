@@ -25,7 +25,7 @@ export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraPa
             prefetch
             replace
             scroll={false}
-            className={`flex-1 rounded-md px-3 py-1.5 text-center text-xs font-medium transition-colors ${
+            className={`flex-1 rounded-md px-2.5 py-1 text-center text-xs font-medium transition-colors ${
               currentView === value
                 ? "bg-zinc-700 text-zinc-50"
                 : "text-zinc-400 hover:text-zinc-200"
