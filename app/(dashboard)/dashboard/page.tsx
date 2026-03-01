@@ -108,12 +108,11 @@ async function PendingSection({ userId }: { userId: string }) {
   )
 }
 
-async function SummarySection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
-  const selectedDate = parseMonthParam(month)
-  const selectedYear = selectedDate ? selectedDate.getUTCFullYear() : new Date().getUTCFullYear()
+async function SummarySection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
+  const currentYear = new Date().getUTCFullYear()
   const [summary, summaryYTD] = await Promise.all([
-    getDashboardSummary(userId, viewMode, month),
-    getDashboardSummaryYear(userId, viewMode, selectedYear),
+    getDashboardSummary(userId, viewMode),
+    getDashboardSummaryYear(userId, viewMode, currentYear),
   ])
   const hasAnyData =
     summary.entrate !== 0 ||
@@ -132,8 +131,8 @@ async function SummarySection({ userId, viewMode, month }: { userId: string; vie
   )
 }
 
-async function BudgetsSection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
-  const budgets = await getBudgetsWithProgress(userId, viewMode, month)
+async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
+  const budgets = await getBudgetsWithProgress(userId, viewMode)
   if (budgets.length === 0) return null
   const exceededBudgets = budgets.filter((b) => b.is_exceeded)
   return (
@@ -189,10 +188,10 @@ async function BudgetsSection({ userId, viewMode, month }: { userId: string; vie
   )
 }
 
-async function ChartsSection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
+async function ChartsSection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
   const [cashflow, topCategories] = await Promise.all([
     getCashflowMonthly(userId, 12, viewMode),
-    getTopCategories(userId, 5, viewMode, month),
+    getTopCategories(userId, 5, viewMode),
   ])
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
