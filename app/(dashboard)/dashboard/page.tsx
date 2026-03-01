@@ -1,6 +1,5 @@
 import { Suspense } from "react"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
 import { BalanceCards } from "@/components/dashboard/balance-cards"
 import { formatCurrency } from "@/lib/utils"
 import { CashflowChart } from "@/components/dashboard/cashflow-chart"
@@ -251,56 +250,51 @@ export default async function DashboardPage({
   return (
     <>
       <div className="space-y-6">
-        <div className="flex items-center justify-between gap-3">
-          {/* Title (hidden on mobile — bottom nav indicates page) */}
-          <div className="hidden sm:block">
-            <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-            <p className="text-xs text-zinc-400">
-              Riepilogo di entrate, uscite e categorie principali.
-            </p>
-          </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          {/* Month navigation — arrows on sides, title centered (mirrors Reports layout) */}
+          <div className="flex w-full items-center justify-between sm:w-auto sm:justify-start sm:gap-3">
+            <Link
+              href={navBase(prevMonth)}
+              scroll={false}
+              replace
+              prefetch
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
+              aria-label="Mese precedente"
+            >
+              ←
+            </Link>
 
-          {/* Controls: month nav + view switcher */}
-          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
-            {/* Month navigation */}
-            <div className="flex items-center gap-1">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl font-semibold tracking-tight">{monthLabel}</h1>
+              <p className="text-xs text-zinc-400">Riepilogo entrate e uscite del mese.</p>
+            </div>
+
+            {isCurrentMonth ? (
+              <span
+                className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-white/5 text-zinc-700"
+                aria-disabled="true"
+              >
+                →
+              </span>
+            ) : (
               <Link
-                href={navBase(prevMonth)}
+                href={navBase(nextMonth)}
                 scroll={false}
                 replace
                 prefetch
-                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-                aria-label="Mese precedente"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
+                aria-label="Mese successivo"
               >
-                <ChevronLeft className="h-4 w-4" />
+                →
               </Link>
-              <span className="min-w-[110px] text-center text-sm font-medium text-zinc-100 sm:min-w-[130px]">
-                {monthLabel}
-              </span>
-              {isCurrentMonth ? (
-                <span className="flex h-7 w-7 items-center justify-center text-zinc-700">
-                  <ChevronRight className="h-4 w-4" />
-                </span>
-              ) : (
-                <Link
-                  href={navBase(nextMonth)}
-                  scroll={false}
-                  replace
-                  prefetch
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-                  aria-label="Mese successivo"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
-              )}
-            </div>
-
-            <ViewModeSwitcher
-              currentView={viewMode}
-              basePath="/dashboard"
-              extraParams={isCurrentMonth ? undefined : { month: selectedMonth }}
-            />
+            )}
           </div>
+
+          <ViewModeSwitcher
+            currentView={viewMode}
+            basePath="/dashboard"
+            extraParams={isCurrentMonth ? undefined : { month: selectedMonth }}
+          />
         </div>
 
         {user && (
