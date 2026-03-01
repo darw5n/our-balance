@@ -63,12 +63,12 @@ export function CashflowReportChart({ data, year }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} />
+              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={(v: string) => v.charAt(0).toUpperCase()} />
               <YAxis
                 tick={AXIS_TICK}
                 axisLine={AXIS_LINE}
                 tickLine={AXIS_LINE}
-                width={80}
+                width={55}
                 tickFormatter={(v) => formatCurrencyAxis(Number(v))}
               />
               <Tooltip
