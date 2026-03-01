@@ -47,12 +47,13 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
                 tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                 axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                 tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
+                tickFormatter={(v: string) => v.charAt(0).toUpperCase()}
               />
               <YAxis
                 tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                 axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                 tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                width={80}
+                width={55}
                 tickFormatter={(v) => formatCurrencyAxis(Number(v))}
               />
               <Tooltip

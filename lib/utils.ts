@@ -30,9 +30,14 @@ export function formatAmountInput(amount: number): string {
   return amount.toFixed(2).replace(".", ",")
 }
 
-/** Compact currency for chart Y-axis: thousands sep + no cents (e.g. "1.000 €") */
+/** Compact currency for chart Y-axis: K suffix above 1000 (e.g. "1,5K €"), plain below */
 export function formatCurrencyAxis(amount: number): string {
   const sign = amount < 0 ? "-" : ""
-  const rounded = String(Math.round(Math.abs(amount)))
-  return `${sign}${groupThousands(rounded)} €`
+  const abs = Math.abs(amount)
+  if (abs >= 1000) {
+    const k = abs / 1000
+    const formatted = k % 1 === 0 ? `${k}K` : `${k.toFixed(1).replace(".", ",")}K`
+    return `${sign}${formatted} €`
+  }
+  return `${sign}${Math.round(abs)} €`
 }
