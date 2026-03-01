@@ -98,7 +98,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
     const rows = [
       ["Data", "Descrizione", "Tipo", "Importo", "Stato", "Categoria"],
       ...transactions.map((tx) => [
-        tx.date ? new Date(tx.date).toLocaleDateString("it-IT") : "",
+        tx.date ? new Date(tx.date).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" }) : "",
         tx.description ?? "",
         tx.type ?? "",
         (tx.amount ?? 0).toString().replace(".", ","),
@@ -174,7 +174,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
           {transactions.map((tx) => {
             const dateValue = tx.date ?? tx.created_at
             const dateLabel = dateValue
-              ? new Date(dateValue).toLocaleDateString("it-IT")
+              ? new Date(dateValue).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })
               : "-"
             const amount = tx.amount ?? 0
             const formattedAmount = formatCurrency(amount)

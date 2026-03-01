@@ -389,9 +389,7 @@ export function AddTransactionDialog({
               </label>
               <Input
                 id="date"
-                type="text"
-                inputMode="numeric"
-                placeholder="AAAA-MM-GG"
+                type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
