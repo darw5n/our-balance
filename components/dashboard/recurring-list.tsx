@@ -10,6 +10,8 @@ import { RecurringFormDialog } from "@/components/dashboard/recurring-form-dialo
 import { deleteRecurringTransaction } from "@/app/actions/recurring"
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
+import { useToast } from "@/components/ui/toast-provider"
+import { useConfirm } from "@/components/ui/confirm-dialog"
 
 const FREQUENCY_LABEL: Record<string, string> = {
   weekly: "Settimanale",
@@ -24,6 +26,8 @@ type RecurringListProps = {
 
 export function RecurringList({ recurring: initialRecurring, categories }: RecurringListProps) {
   const router = useRouter()
+  const toast = useToast()
+  const confirm = useConfirm()
   const [recurring, setRecurring] = useState(initialRecurring)
   const [formOpen, setFormOpen] = useState(false)
   const [editingRecurring, setEditingRecurring] = useState<RecurringTransaction | null>(null)
@@ -50,14 +54,21 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
 
   async function handleDelete(rec: RecurringTransaction) {
     const label = rec.description || "questa ricorrenza"
-    if (!confirm(`Eliminare "${label}"? Le transazioni già create non verranno rimosse.`)) return
+    const ok = await confirm({
+      title: "Elimina ricorrenza",
+      message: `Eliminare "${label}"? Le transazioni già create non verranno rimosse.`,
+      destructive: true,
+      confirmLabel: "Elimina",
+    })
+    if (!ok) return
 
     const result = await deleteRecurringTransaction(rec.id)
     if (result.success) {
       setRecurring((prev) => prev.filter((r) => r.id !== rec.id))
+      toast(`"${label}" eliminata.`, "success")
       router.refresh()
     } else {
-      alert(result.error)
+      toast(result.error ?? "Errore durante l'eliminazione.", "error")
     }
   }
 

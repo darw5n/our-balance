@@ -153,7 +153,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-10">
+            <TableHead className="hidden w-10 md:table-cell">
               <input
                 type="checkbox"
                 checked={allSelected}
@@ -165,8 +165,8 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
             <TableHead>Data</TableHead>
             <TableHead>Descrizione</TableHead>
             <TableHead className="text-right">Importo</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Stato</TableHead>
+            <TableHead className="hidden md:table-cell">Tipo</TableHead>
+            <TableHead className="hidden md:table-cell">Stato</TableHead>
             <TableHead className="w-20" />
           </TableRow>
         </TableHeader>
@@ -181,7 +181,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
 
             return (
               <TableRow key={tx.id} data-selected={selected.has(tx.id) ? "true" : undefined}>
-                <TableCell>
+                <TableCell className="hidden md:table-cell">
                   <input
                     type="checkbox"
                     checked={selected.has(tx.id)}
@@ -191,7 +191,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   />
                 </TableCell>
                 <TableCell>{dateLabel}</TableCell>
-                <TableCell className="max-w-[220px] truncate text-xs text-zinc-200">
+                <TableCell className="max-w-[160px] truncate text-xs text-zinc-200 md:max-w-[220px]">
                   {tx.description || "-"}
                 </TableCell>
                 <TableCell className="text-right">
@@ -199,11 +199,27 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     {formattedAmount}
                   </span>
                 </TableCell>
-                <TableCell className="text-xs capitalize text-zinc-300">
-                  {tx.type || "-"}
+                <TableCell className="hidden md:table-cell">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    tx.type === "income"
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : tx.type === "expense"
+                      ? "bg-rose-500/20 text-rose-400"
+                      : "bg-zinc-800 text-zinc-400"
+                  }`}>
+                    {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
+                  </span>
                 </TableCell>
-                <TableCell className="text-xs capitalize text-zinc-300">
-                  {tx.status || "-"}
+                <TableCell className="hidden md:table-cell">
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    tx.status === "confirmed"
+                      ? "bg-zinc-700 text-zinc-300"
+                      : tx.status === "pending"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : "bg-zinc-800 text-zinc-400"
+                  }`}>
+                    {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
+                  </span>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1">

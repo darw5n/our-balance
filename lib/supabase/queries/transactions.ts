@@ -51,6 +51,12 @@ function getYearRange(year: number) {
   return { startISO: start.toISOString(), endISO: end.toISOString() }
 }
 
+function parseMonthParam(month?: string): Date | undefined {
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
+  const [year, mon] = month.split("-").map(Number)
+  return new Date(Date.UTC(year, mon - 1, 1))
+}
+
 function toNumber(value: number | string | null | undefined): number {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value === "string") {
@@ -101,12 +107,14 @@ const EMPTY_SUMMARY: DashboardSummary = { entrate: 0, uscite: 0, netto: 0, pendi
 
 export const getDashboardSummary = cache(async function getDashboardSummary(
   userId: string,
-  viewMode: ViewMode
+  viewMode: ViewMode,
+  month?: string  // "YYYY-MM", defaults to current month
 ): Promise<DashboardSummary> {
   if (!userId) return { ...EMPTY_SUMMARY }
 
   const supabase = await createSupabaseServerClient()
-  const { startISO, endISO } = getMonthRange()
+  const dateForRange = parseMonthParam(month)
+  const { startISO, endISO } = getMonthRange(dateForRange)
 
   let query = supabase
     .from("transactions")
@@ -262,12 +270,14 @@ type TopCategoryRow = {
 export const getTopCategories = cache(async function getTopCategories(
   userId: string,
   limit: number = 5,
-  viewMode: ViewMode = "personal"
+  viewMode: ViewMode = "personal",
+  month?: string  // "YYYY-MM", defaults to current month
 ): Promise<TopCategory[]> {
   if (!userId || limit <= 0) return []
 
   const supabase = await createSupabaseServerClient()
-  const { startISO, endISO } = getMonthRange()
+  const dateForRange = parseMonthParam(month)
+  const { startISO, endISO } = getMonthRange(dateForRange)
 
   let query = supabase
     .from("transactions")

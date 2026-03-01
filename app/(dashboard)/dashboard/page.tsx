@@ -1,4 +1,6 @@
 import { Suspense } from "react"
+import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { BalanceCards } from "@/components/dashboard/balance-cards"
 import { formatCurrency } from "@/lib/utils"
 import { CashflowChart } from "@/components/dashboard/cashflow-chart"
@@ -18,6 +20,7 @@ import { getBudgetsWithProgress } from "@/lib/supabase/queries/budgets"
 import { getPendingConfirmations, getUpcomingRecurring } from "@/lib/supabase/queries/recurring"
 import { processRecurringTransactions } from "@/app/actions/recurring"
 import { getServerUser } from "@/lib/supabase-server"
+import { getCategoryIcon } from "@/lib/category-icons"
 
 // ─── Skeletons ────────────────────────────────────────────────────────────────
 
@@ -107,11 +110,12 @@ async function PendingSection({ userId }: { userId: string }) {
   )
 }
 
-async function SummarySection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
-  const currentYear = new Date().getUTCFullYear()
+async function SummarySection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
+  const selectedDate = parseMonthParam(month)
+  const selectedYear = selectedDate ? selectedDate.getUTCFullYear() : new Date().getUTCFullYear()
   const [summary, summaryYTD] = await Promise.all([
-    getDashboardSummary(userId, viewMode),
-    getDashboardSummaryYear(userId, viewMode, currentYear),
+    getDashboardSummary(userId, viewMode, month),
+    getDashboardSummaryYear(userId, viewMode, selectedYear),
   ])
   const hasAnyData =
     summary.entrate !== 0 ||
@@ -130,8 +134,8 @@ async function SummarySection({ userId, viewMode }: { userId: string; viewMode: 
   )
 }
 
-async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
-  const budgets = await getBudgetsWithProgress(userId, viewMode)
+async function BudgetsSection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
+  const budgets = await getBudgetsWithProgress(userId, viewMode, month)
   if (budgets.length === 0) return null
   const exceededBudgets = budgets.filter((b) => b.is_exceeded)
   return (
@@ -146,14 +150,18 @@ async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: 
         )}
       </div>
       <ul className="space-y-3">
-        {budgets.map((budget) => (
+        {budgets.map((budget) => {
+          const BudgetIcon = getCategoryIcon(budget.category_name)
+          return (
           <li key={budget.id}>
             <div className="mb-1 flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: budget.category_color }}
-                />
+                <div
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md"
+                  style={{ backgroundColor: `${budget.category_color}28` }}
+                >
+                  <BudgetIcon className="h-3 w-3" style={{ color: budget.category_color }} />
+                </div>
                 <span className="truncate text-xs text-zinc-300">{budget.category_name}</span>
                 {budget.is_exceeded && (
                   <span className="shrink-0 text-xs text-rose-400">Superato!</span>
@@ -176,16 +184,17 @@ async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: 
               />
             </div>
           </li>
-        ))}
+        )
+        })}
       </ul>
     </div>
   )
 }
 
-async function ChartsSection({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
+async function ChartsSection({ userId, viewMode, month }: { userId: string; viewMode: ViewMode; month?: string }) {
   const [cashflow, topCategories] = await Promise.all([
     getCashflowMonthly(userId, 12, viewMode),
-    getTopCategories(userId, 5, viewMode),
+    getTopCategories(userId, 5, viewMode, month),
   ])
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
@@ -197,26 +206,101 @@ async function ChartsSection({ userId, viewMode }: { userId: string; viewMode: V
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
+function parseMonthParam(month?: string): Date | undefined {
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
+  const [year, mon] = month.split("-").map(Number)
+  return new Date(Date.UTC(year, mon - 1, 1))
+}
+
+function toMonthParam(date: Date): string {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>
+  searchParams: Promise<{ view?: string; month?: string }>
 }) {
-  const { view } = await searchParams
+  const { view, month: monthParam } = await searchParams
   const viewMode: ViewMode = view === "family" ? "family" : "personal"
   const user = await getServerUser()
+
+  // Resolve selected month (cap at current month)
+  const nowUTC = new Date()
+  const currentMonthDate = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1))
+  const parsedMonth = parseMonthParam(monthParam)
+  const selectedDate = parsedMonth && parsedMonth <= currentMonthDate ? parsedMonth : currentMonthDate
+  const isCurrentMonth = selectedDate.getTime() === currentMonthDate.getTime()
+  const selectedMonth = toMonthParam(selectedDate)
+
+  // Prev/next dates for navigation
+  const prevDate = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth() - 1, 1))
+  const nextDate = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth() + 1, 1))
+  const prevMonth = toMonthParam(prevDate)
+  const nextMonth = toMonthParam(nextDate)
+
+  // Italian month label (e.g. "Marzo 2026")
+  const monthLabel = selectedDate.toLocaleDateString("it-IT", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).replace(/^\p{L}/u, (c) => c.toUpperCase())
+
+  const navBase = (m: string) => `/dashboard?view=${viewMode}&month=${m}`
 
   return (
     <>
       <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-3">
+          {/* Title (hidden on mobile — bottom nav indicates page) */}
+          <div className="hidden sm:block">
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
             <p className="text-xs text-zinc-400">
-              Riepilogo di entrate, uscite e categorie principali per il mese corrente.
+              Riepilogo di entrate, uscite e categorie principali.
             </p>
           </div>
-          <ViewModeSwitcher currentView={viewMode} basePath="/dashboard" />
+
+          {/* Controls: month nav + view switcher */}
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+            {/* Month navigation */}
+            <div className="flex items-center gap-1">
+              <Link
+                href={navBase(prevMonth)}
+                scroll={false}
+                replace
+                prefetch
+                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                aria-label="Mese precedente"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+              <span className="min-w-[110px] text-center text-sm font-medium text-zinc-100 sm:min-w-[130px]">
+                {monthLabel}
+              </span>
+              {isCurrentMonth ? (
+                <span className="flex h-7 w-7 items-center justify-center text-zinc-700">
+                  <ChevronRight className="h-4 w-4" />
+                </span>
+              ) : (
+                <Link
+                  href={navBase(nextMonth)}
+                  scroll={false}
+                  replace
+                  prefetch
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                  aria-label="Mese successivo"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Link>
+              )}
+            </div>
+
+            <ViewModeSwitcher
+              currentView={viewMode}
+              basePath="/dashboard"
+              extraParams={isCurrentMonth ? undefined : { month: selectedMonth }}
+            />
+          </div>
         </div>
 
         {user && (
@@ -228,17 +312,17 @@ export default async function DashboardPage({
 
             {/* Balance cards — skeleton immediato */}
             <Suspense fallback={<BalanceCardsSkeleton />}>
-              <SummarySection userId={user.id} viewMode={viewMode} />
+              <SummarySection userId={user.id} viewMode={viewMode} month={selectedMonth} />
             </Suspense>
 
             {/* Budget — skeleton immediato */}
             <Suspense fallback={<BudgetsSkeleton />}>
-              <BudgetsSection userId={user.id} viewMode={viewMode} />
+              <BudgetsSection userId={user.id} viewMode={viewMode} month={selectedMonth} />
             </Suspense>
 
             {/* Grafici — skeleton immediato */}
             <Suspense fallback={<ChartsSkeleton />}>
-              <ChartsSection userId={user.id} viewMode={viewMode} />
+              <ChartsSection userId={user.id} viewMode={viewMode} month={selectedMonth} />
             </Suspense>
           </>
         )}

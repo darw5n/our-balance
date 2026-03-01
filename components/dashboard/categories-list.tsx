@@ -21,38 +21,9 @@ import {
   Wallet,
   MoreHorizontal,
   Tag,
-  // Per-category icons
-  ChefHat,
-  ShoppingBasket,
-  Bone,
-  Stethoscope,
-  Package,
-  Building2,
-  Armchair,
-  Wrench,
-  Droplets,
-  Flame,
-  Wifi,
-  Lightbulb,
-  TrendingUp,
-  Receipt,
-  GraduationCap,
-  HeartPulse,
-  Pill,
-  Shirt,
-  Laptop,
-  Palette,
-  Popcorn,
-  Dumbbell,
-  Gift,
-  Fuel,
-  ParkingCircle,
-  Compass,
-  BedDouble,
-  Briefcase,
-  Banknote,
   type LucideIcon,
 } from "lucide-react"
+import { CATEGORY_ICONS } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CategoryFormDialog } from "@/components/dashboard/category-form-dialog"
@@ -78,57 +49,6 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   Trasporti: Car,
   Viaggi: Plane,
   Entrate: Wallet,
-}
-
-// Icon unica per ogni sottocategoria (per nome)
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  // Alimentari
-  "Ristoranti & Asporto": ChefHat,
-  "Spesa supermercato": ShoppingBasket,
-  // Animali
-  "Cibo & Accessori": Bone,
-  "Veterinario": Stethoscope,
-  // Altro
-  "Spese varie": Package,
-  // Casa
-  "Affitto / Mutuo": Building2,
-  "Arredamento": Armchair,
-  "Manutenzione": Wrench,
-  // Utenze
-  "Acqua": Droplets,
-  "Gas": Flame,
-  "Internet": Wifi,
-  "Luce": Lightbulb,
-  "Rifiuti": Trash2,
-  // Finanza
-  "Investimenti": TrendingUp,
-  "Tasse & Imposte": Receipt,
-  // Formazione
-  "Corsi & Libri": BookOpen,
-  "Scuola & Università": GraduationCap,
-  // Salute
-  "Dentista": HeartPulse,
-  "Farmaci": Pill,
-  "Visite mediche": Stethoscope,
-  // Shopping
-  "Abbigliamento": Shirt,
-  "Tecnologia": Laptop,
-  // Svago
-  "Hobby": Palette,
-  "Intrattenimento": Popcorn,
-  "Palestra & Sport": Dumbbell,
-  "Regali": Gift,
-  // Trasporti
-  "Carburante": Fuel,
-  "Manutenzione auto": Car,
-  "Parcheggio & Pedaggi": ParkingCircle,
-  // Viaggi
-  "Attività & Escursioni": Compass,
-  "Hotel & Alloggio": BedDouble,
-  "Voli & Treni": Plane,
-  // Entrate
-  "Freelance & Extra": Briefcase,
-  "Stipendio": Banknote,
 }
 
 function getCategoryIcon(cat: Category): LucideIcon {

@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { CalendarClock } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
@@ -19,8 +20,13 @@ function daysUntil(dateStr: string): number {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 }
 
+const LIMIT = 4
+
 export function UpcomingRecurring({ items }: Props) {
   if (items.length === 0) return null
+
+  const displayed = items.slice(0, LIMIT)
+  const hasMore = items.length > LIMIT
 
   return (
     <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
@@ -30,7 +36,7 @@ export function UpcomingRecurring({ items }: Props) {
         <span className="ml-auto text-xs text-zinc-500">prossimi 14 giorni</span>
       </div>
       <ul className="space-y-2">
-        {items.map((item) => {
+        {displayed.map((item) => {
           const days = daysUntil(item.next_due_date)
           return (
             <li key={item.id} className="flex items-center gap-3">
@@ -58,6 +64,14 @@ export function UpcomingRecurring({ items }: Props) {
           )
         })}
       </ul>
+      {hasMore && (
+        <Link
+          href="/recurring"
+          className="mt-3 block text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          Vedi tutti ({items.length}) →
+        </Link>
+      )}
     </div>
   )
 }
