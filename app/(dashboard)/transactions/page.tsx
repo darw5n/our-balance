@@ -1,6 +1,7 @@
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
+import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 
 async function getTransactions(
@@ -60,53 +61,13 @@ export default async function TransactionsPage({
           </p>
         </div>
 
-        <form className="flex flex-wrap gap-2 text-xs" action="/transactions" method="get">
-          <input
-            type="date"
-            name="from"
-            defaultValue={from}
-            className="h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none"
-          />
-          <input
-            type="date"
-            name="to"
-            defaultValue={to}
-            className="h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none"
-          />
-          <input
-            type="search"
-            name="q"
-            defaultValue={q}
-            placeholder="Cerca descrizione..."
-            className="h-8 w-36 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none placeholder:text-zinc-500"
-          />
-          <select
-            name="category"
-            defaultValue={category}
-            className="h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none"
-          >
-            <option value="">Tutte le categorie</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="h-8 rounded-md border border-emerald-500 bg-emerald-500 px-3 text-xs font-medium text-zinc-950 hover:bg-emerald-400"
-          >
-            Filtra
-          </button>
-          {(q || from || to || category) && (
-            <a
-              href="/transactions"
-              className="flex h-8 items-center rounded-md border border-white/15 px-3 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-            >
-              Reset
-            </a>
-          )}
-        </form>
+        <TransactionsFilters
+          q={q}
+          from={from}
+          to={to}
+          category={category}
+          categories={categories}
+        />
       </div>
 
       <section>

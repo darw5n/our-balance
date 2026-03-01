@@ -112,50 +112,54 @@ export function AddTransactionDialog({
     }
 
     debounceRef.current = setTimeout(async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
 
-      function mostCommon(rows: { category_id: string | null }[]): string | null {
-        const counts = new Map<string, number>()
-        for (const row of rows) {
-          if (row.category_id)
-            counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+        function mostCommon(rows: { category_id: string | null }[]): string | null {
+          const counts = new Map<string, number>()
+          for (const row of rows) {
+            if (row.category_id)
+              counts.set(row.category_id, (counts.get(row.category_id) ?? 0) + 1)
+          }
+          return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
         }
-        return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
-      }
 
-      // 1. Try full description match
-      const { data: exact } = await supabase
-        .from("transactions")
-        .select("category_id")
-        .eq("user_id", user.id)
-        .eq("type", type)
-        .not("category_id", "is", null)
-        .ilike("description", `%${trimmed}%`)
-        .order("date", { ascending: false })
-        .limit(20)
+        // 1. Try full description match
+        const { data: exact } = await supabase
+          .from("transactions")
+          .select("category_id")
+          .eq("user_id", user.id)
+          .eq("type", type)
+          .not("category_id", "is", null)
+          .ilike("description", `%${trimmed}%`)
+          .order("date", { ascending: false })
+          .limit(20)
 
-      let suggested = exact?.length ? mostCommon(exact as { category_id: string | null }[]) : null
+        let suggested = exact?.length ? mostCommon(exact as { category_id: string | null }[]) : null
 
-      // 2. Fallback: individual words ≥ 3 chars
-      if (!suggested) {
-        const words = trimmed.split(/\s+/).filter((w) => w.length >= 3)
-        if (words.length > 0) {
-          const orFilter = words.map((w) => `description.ilike.%${w}%`).join(",")
-          const { data: partial } = await supabase
-            .from("transactions")
-            .select("category_id")
-            .eq("user_id", user.id)
-            .eq("type", type)
-            .not("category_id", "is", null)
-            .or(orFilter)
-            .order("date", { ascending: false })
-            .limit(30)
-          suggested = partial?.length ? mostCommon(partial as { category_id: string | null }[]) : null
+        // 2. Fallback: individual words ≥ 3 chars
+        if (!suggested) {
+          const words = trimmed.split(/\s+/).filter((w) => w.length >= 3)
+          if (words.length > 0) {
+            const orFilter = words.map((w) => `description.ilike.%${w}%`).join(",")
+            const { data: partial } = await supabase
+              .from("transactions")
+              .select("category_id")
+              .eq("user_id", user.id)
+              .eq("type", type)
+              .not("category_id", "is", null)
+              .or(orFilter)
+              .order("date", { ascending: false })
+              .limit(30)
+            suggested = partial?.length ? mostCommon(partial as { category_id: string | null }[]) : null
+          }
         }
-      }
 
-      setSuggestedCategoryId(suggested ?? null)
+        setSuggestedCategoryId(suggested ?? null)
+      } catch {
+        // category suggestion is best-effort — ignore network errors
+      }
     }, 400)
 
     return () => {
@@ -514,24 +518,27 @@ export function AddTransactionDialog({
 
             {error && <p className="text-xs text-rose-400">{error}</p>}
 
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
-                onClick={() => setOpen(false)}
-                disabled={submitting}
-              >
-                Annulla
-              </Button>
+            {/* Footer: sticky su mobile, normale su desktop */}
+            <div className="sticky bottom-0 -mx-5 -mb-5 bg-zinc-950 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
+              <div className="flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+                  onClick={() => setOpen(false)}
+                  disabled={submitting}
+                >
+                  Annulla
+                </Button>
 
-              <Button
-                type="submit"
-                className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
-                disabled={submitting}
-              >
-                {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
-              </Button>
+                <Button
+                  type="submit"
+                  className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                  disabled={submitting}
+                >
+                  {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
+                </Button>
+              </div>
             </div>
           </form>
           </DialogContent>

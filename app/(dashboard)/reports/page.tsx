@@ -78,7 +78,7 @@ export default async function ReportsPage({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex w-full items-center justify-between sm:w-auto sm:justify-start sm:gap-3">
           <a
             href={makeUrl(safeYear - 1)}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
@@ -86,7 +86,7 @@ export default async function ReportsPage({
           >
             ←
           </a>
-          <div>
+          <div className="text-center sm:text-left">
             <h1 className="text-2xl font-semibold tracking-tight">Report {safeYear}</h1>
             <p className="text-xs text-zinc-400">Riepilogo entrate e uscite per il {safeYear}.</p>
           </div>
