@@ -29,9 +29,9 @@ type RecurringFormDialogProps = {
 }
 
 const DELAY_OPTIONS: { value: number; label: string; hint: string }[] = [
-  { value: 0, label: "Immediato", hint: "Alla scadenza" },
-  { value: 1, label: "+1 ciclo", hint: "Es. stipendio gen → conferma feb" },
-  { value: 2, label: "+2 cicli", hint: "Con ulteriore ritardo" },
+  { value: 0, label: "Immediato", hint: "Si conferma nel mese di competenza" },
+  { value: 1, label: "+1 ciclo", hint: "Es. bolletta gen → conferma feb" },
+  { value: 2, label: "+2 cicli", hint: "Es. bolletta gen → conferma mar" },
 ]
 
 export function RecurringFormDialog({
@@ -81,10 +81,14 @@ export function RecurringFormDialog({
     }
   }
 
-  // When toggling confirmation off, reset delay
+  // When toggling confirmation off, reset delay; when turning ON for a new record default to +1 cycle
   function handleConfirmationToggle(checked: boolean) {
     setRequiresConfirmation(checked)
-    if (!checked) setConfirmationDelay(0)
+    if (!checked) {
+      setConfirmationDelay(0)
+    } else if (!isEdit) {
+      setConfirmationDelay(1)
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -326,11 +330,9 @@ export function RecurringFormDialog({
                     </button>
                   ))}
                 </div>
-                {confirmationDelay > 0 && (
-                  <p className="text-[11px] text-zinc-500">
-                    {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
-                  </p>
-                )}
+                <p className="text-[11px] text-zinc-500">
+                  {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
+                </p>
               </div>
             )}
           </div>
