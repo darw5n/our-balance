@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect, useState } from "react"
 
 import {
   Bar,
@@ -22,8 +23,22 @@ type CashflowChartProps = {
   hideIncome?: boolean
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)")
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+  return isMobile
+}
+
 export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) {
+  const isMobile = useIsMobile()
   const hasData = data.length > 0
+  const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
 
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
@@ -56,7 +71,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
                   tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                   axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                   tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  tickFormatter={(v: string) => v.charAt(0).toUpperCase()}
+                  tickFormatter={formatMonth}
                 />
                 <YAxis
                   tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
