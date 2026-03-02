@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
   ComposedChart,
   Bar,
@@ -37,7 +38,21 @@ const LEGEND_LABELS: Record<string, string> = {
   netto: "Netto",
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)")
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+  return isMobile
+}
+
 export function CashflowReportChart({ data, year }: Props) {
+  const isMobile = useIsMobile()
+  const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
   const chartData = data.map((p) => ({
     month: p.month,
     entrate: p.entrate,
@@ -63,7 +78,7 @@ export function CashflowReportChart({ data, year }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={(v: string) => v.charAt(0).toUpperCase()} />
+              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
               <YAxis
                 tick={AXIS_TICK}
                 axisLine={AXIS_LINE}

@@ -34,13 +34,13 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-0 z-50 flex items-stretch justify-center sm:items-center sm:px-4",
+        "fixed inset-0 z-50 flex items-stretch justify-center md:items-center md:px-4",
         "data-[state=closed]:animate-out data-[state=open]:animate-in",
         className
       )}
       {...props}
     >
-      <div className="w-full flex-1 overflow-y-auto rounded-none border-0 bg-zinc-950 p-5 text-zinc-50 shadow-xl sm:max-h-[90vh] sm:flex-none sm:max-w-md sm:rounded-xl sm:border sm:border-white/10 sm:bg-zinc-950/95 sm:backdrop-blur">
+      <div className="w-full flex-1 overflow-y-auto rounded-none border-0 bg-zinc-950 p-5 text-zinc-50 shadow-xl md:max-h-[85vh] md:flex-none md:max-w-lg md:rounded-xl md:border md:border-white/10 md:bg-zinc-950/95 md:backdrop-blur">
         {children}
       </div>
     </DialogPrimitive.Content>

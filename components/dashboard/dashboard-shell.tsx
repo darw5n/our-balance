@@ -76,7 +76,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       {/* Header */}
-      <header className="relative z-50 border-b border-white/10 bg-zinc-950/60 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/60 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           {/* Left: logo + primary nav (desktop) */}
           <div className="flex items-center gap-2">
@@ -155,6 +155,14 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
 
       <main className="mx-auto max-w-5xl px-4 py-8 pb-24 md:pb-8">{children}</main>
 
+      {/* Footer — desktop only (mobile ha bottom nav) */}
+      <footer className="hidden border-t border-white/10 md:block">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-zinc-600">
+          <span>OurBalance</span>
+          <span>© {new Date().getFullYear()}</span>
+        </div>
+      </footer>
+
       {/* Bottom nav — mobile only */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-zinc-950/95 backdrop-blur md:hidden">
         <div className="flex">
@@ -211,14 +219,16 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </nav>
 
-      {/* Desktop FAB */}
-      <button
-        onClick={() => setAddOpen(true)}
-        className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
-        aria-label="Aggiungi transazione"
-      >
-        <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
-      </button>
+      {/* Desktop FAB — solo su dashboard e transazioni */}
+      {(pathname === "/dashboard" || pathname.startsWith("/transactions")) && (
+        <button
+          onClick={() => setAddOpen(true)}
+          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
+          aria-label="Aggiungi transazione"
+        >
+          <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
+        </button>
+      )}
 
       {/* Global add transaction dialog */}
       <AddTransactionDialog

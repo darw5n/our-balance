@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { Card } from "@/components/ui/card"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
@@ -17,7 +18,21 @@ type ChartPoint = {
   prev: number
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)")
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+  return isMobile
+}
+
 export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
+  const isMobile = useIsMobile()
+  const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
   const data: ChartPoint[] = currentYear.map((point, i) => ({
     month: point.month,
     current: point.entrate - point.uscite,
@@ -47,7 +62,7 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
                 tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
                 axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
                 tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                tickFormatter={(v: string) => v.charAt(0).toUpperCase()}
+                tickFormatter={formatMonth}
               />
               <YAxis
                 tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
