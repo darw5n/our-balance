@@ -45,6 +45,15 @@ function advanceDateByCycles(dateStr: string, frequency: RecurringFrequency, cyc
   return date
 }
 
+// Pins the day-of-month to targetDay, clamped to the month's last day.
+// Used to correct month-end drift (e.g. Jan 31 → Feb 28 → Mar 28 should stay on the 31st/last).
+function pinDayOfMonth(dateStr: string, targetDay: number): string {
+  const date = new Date(dateStr + "T00:00:00Z")
+  const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate()
+  date.setUTCDate(Math.min(targetDay, lastDay))
+  return date.toISOString().split("T")[0]
+}
+
 function rewindDate(dateStr: string, frequency: RecurringFrequency): string {
   const date = new Date(dateStr + "T00:00:00Z")
   if (frequency === "weekly") {
@@ -200,13 +209,21 @@ export async function processRecurringTransactions(userId: string): Promise<void
       const freq = rec.frequency as RecurringFrequency
       const delay: number = rec.confirmation_delay ?? 0
 
+      // For monthly/yearly: pin trigger dates to the original day-of-month from start_date
+      // to avoid drift caused by month-end clamping (e.g. Jan 31 → Feb 28 → Mar 28).
+      const startDay =
+        freq !== "weekly" && rec.start_date
+          ? new Date(rec.start_date + "T00:00:00Z").getUTCDate()
+          : null
+
       if (!rec.requires_confirmation) {
         // Auto-create one transaction per missed occurrence.
         // With delay: the occurrence at `currentDue` is processed only when
         // `currentDue + delay cycles <= today`.
         let currentDue = rec.next_due_date as string
         while (currentDue <= today) {
-          const triggerDate = advanceDateByCycles(currentDue, freq, delay)
+          const rawTrigger = advanceDateByCycles(currentDue, freq, delay)
+          const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
           if (triggerDate > today) break // too early — wait for delay to pass
           await supabase.from("transactions").insert({
             user_id: userId,
@@ -225,8 +242,10 @@ export async function processRecurringTransactions(userId: string): Promise<void
           .update({ next_due_date: currentDue })
           .eq("id", rec.id)
       } else if (!rec.pending_confirmation) {
-        // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`
-        const triggerDate = advanceDateByCycles(rec.next_due_date as string, freq, delay)
+        // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`.
+        // Pin the trigger day-of-month to start_date's day to avoid month-end drift.
+        const rawTrigger = advanceDateByCycles(rec.next_due_date as string, freq, delay)
+        const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
         if (triggerDate > today) continue // not yet time to ask for confirmation
 
         const nextDue = advanceDate(rec.next_due_date, freq)
