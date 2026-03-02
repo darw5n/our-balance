@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Download, Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
@@ -93,47 +93,12 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
     }
   }
 
-  function handleExportCSV() {
-    const categoryMap = new Map(categories.map((c) => [c.id, c.name]))
-    const rows = [
-      ["Data", "Descrizione", "Tipo", "Importo", "Stato", "Categoria"],
-      ...transactions.map((tx) => [
-        tx.date ? new Date(tx.date).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" }) : "",
-        tx.description ?? "",
-        tx.type ?? "",
-        (tx.amount ?? 0).toString().replace(".", ","),
-        tx.status ?? "",
-        tx.category_id ? (categoryMap.get(tx.category_id) ?? "") : "",
-      ]),
-    ]
-    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n")
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `transazioni_${new Date().toISOString().slice(0, 10)}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   if (transactions.length === 0) {
     return <p className="text-xs text-zinc-400">Nessuna transazione trovata.</p>
   }
 
   return (
     <>
-      <div className="mb-3 flex items-center justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-7 gap-1.5 border-white/15 bg-transparent text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
-          onClick={handleExportCSV}
-        >
-          <Download className="h-3.5 w-3.5" />
-          Esporta CSV
-        </Button>
-      </div>
-
       {selected.size > 0 && (
         <div className="mb-3 flex items-center gap-3 rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-2">
           <span className="text-xs text-rose-300">

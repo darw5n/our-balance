@@ -2,7 +2,9 @@ import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
 import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
+import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
+import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 
 async function getTransactions(
   userId: string,
@@ -53,25 +55,28 @@ export default async function TransactionsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Transazioni</h1>
-          <p className="text-xs text-zinc-400">
-            Vista lista delle tue transazioni. Filtra per data, descrizione o categoria.
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Transazioni</h1>
+        <p className="text-xs text-zinc-400">
+          Vista lista delle tue transazioni. Filtra per data, descrizione o categoria.
+        </p>
+      </div>
 
-        <TransactionsFilters
-          q={q}
-          from={from}
-          to={to}
-          category={category}
-          categories={categories}
-        />
+      <div className="flex items-start gap-3">
+        <div className="flex-1">
+          <TransactionsFilters
+            q={q}
+            from={from}
+            to={to}
+            category={category}
+            categories={categories as CategoryOption[]}
+          />
+        </div>
+        <ExportCsvButton transactions={transactions} categories={categories as CategoryOption[]} />
       </div>
 
       <section>
-        <TransactionsTable transactions={transactions} categories={categories} />
+        <TransactionsTable transactions={transactions} categories={categories as CategoryOption[]} />
       </section>
     </div>
   )

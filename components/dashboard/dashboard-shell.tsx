@@ -211,14 +211,16 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </nav>
 
-      {/* Desktop FAB */}
-      <button
-        onClick={() => setAddOpen(true)}
-        className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
-        aria-label="Aggiungi transazione"
-      >
-        <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
-      </button>
+      {/* Desktop FAB — solo su dashboard e transazioni */}
+      {(pathname === "/dashboard" || pathname.startsWith("/transactions")) && (
+        <button
+          onClick={() => setAddOpen(true)}
+          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
+          aria-label="Aggiungi transazione"
+        >
+          <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
+        </button>
+      )}
 
       {/* Global add transaction dialog */}
       <AddTransactionDialog

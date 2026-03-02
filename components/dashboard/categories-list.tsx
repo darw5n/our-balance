@@ -134,7 +134,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
             size="sm"
           >
             <Plus className="mr-2 h-4 w-4" />
-            Aggiungi
+            Aggiungi categoria
           </Button>
         </div>
 

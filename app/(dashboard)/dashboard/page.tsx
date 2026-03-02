@@ -194,7 +194,7 @@ async function ChartsSection({ userId, viewMode }: { userId: string; viewMode: V
     getTopCategories(userId, 5, viewMode),
   ])
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
+    <div className="space-y-4">
       <CashflowChart data={cashflow} hideIncome={viewMode === "family"} />
       <TopCategoriesChart data={topCategories} />
     </div>
@@ -215,7 +215,7 @@ export default async function DashboardPage({
   return (
     <>
       <div className="space-y-6">
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
             <p className="text-xs text-zinc-400">Riepilogo di entrate, uscite e categorie principali per il mese corrente.</p>
