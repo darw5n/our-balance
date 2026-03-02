@@ -155,6 +155,14 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
 
       <main className="mx-auto max-w-5xl px-4 py-8 pb-24 md:pb-8">{children}</main>
 
+      {/* Footer — desktop only (mobile ha bottom nav) */}
+      <footer className="hidden border-t border-white/10 md:block">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-zinc-600">
+          <span>OurBalance</span>
+          <span>© {new Date().getFullYear()}</span>
+        </div>
+      </footer>
+
       {/* Bottom nav — mobile only */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-zinc-950/95 backdrop-blur md:hidden">
         <div className="flex">
