@@ -76,7 +76,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       {/* Header */}
-      <header className="relative z-50 border-b border-white/10 bg-zinc-950/60 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/60 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           {/* Left: logo + primary nav (desktop) */}
           <div className="flex items-center gap-2">
