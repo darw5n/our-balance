@@ -74,6 +74,7 @@ export function AddTransactionDialog({
   const [isRecurring, setIsRecurring] = useState(false)
   const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
+  const [confirmationDelay, setConfirmationDelay] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -255,7 +256,7 @@ export function AddTransactionDialog({
           frequency,
           start_date: formattedDate,
           requires_confirmation: requiresConfirmation,
-          confirmation_delay: 0,
+          confirmation_delay: requiresConfirmation ? confirmationDelay : 0,
         })
       } else {
         result = await createTransaction({
@@ -286,6 +287,7 @@ export function AddTransactionDialog({
       setIsRecurring(false)
       setFrequency("monthly")
       setRequiresConfirmation(false)
+      setConfirmationDelay(0)
       setError(null)
 
       router.refresh()
@@ -502,7 +504,10 @@ export function AddTransactionDialog({
                       id="req-confirm"
                       type="checkbox"
                       checked={requiresConfirmation}
-                      onChange={(e) => setRequiresConfirmation(e.target.checked)}
+                      onChange={(e) => {
+                        setRequiresConfirmation(e.target.checked)
+                        if (!e.target.checked) setConfirmationDelay(0)
+                      }}
                       className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
                     />
                     <label htmlFor="req-confirm" className="text-xs text-zinc-300 cursor-pointer">
@@ -510,6 +515,40 @@ export function AddTransactionDialog({
                       <span className="text-zinc-500">(utile per stipendi variabili)</span>
                     </label>
                   </div>
+
+                  {requiresConfirmation && (
+                    <div className="ml-7 space-y-1.5">
+                      <p className="text-xs text-zinc-400">Quando chiedere conferma?</p>
+                      <div className="flex gap-2">
+                        {([
+                          { value: 0, label: "Immediato", hint: "Si conferma nel mese di competenza" },
+                          { value: 1, label: "+1 ciclo", hint: "Es. stipendio feb → conferma mar" },
+                          { value: 2, label: "+2 cicli", hint: "Es. stipendio gen → conferma mar" },
+                        ] as const).map(({ value, label, hint }) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setConfirmationDelay(value)}
+                            title={hint}
+                            className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                              confirmationDelay === value
+                                ? "border-sky-500 bg-sky-500/20 text-sky-400"
+                                : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-zinc-500">
+                        {[
+                          { value: 0, hint: "Si conferma nel mese di competenza" },
+                          { value: 1, hint: "Es. stipendio feb → conferma mar" },
+                          { value: 2, hint: "Es. stipendio gen → conferma mar" },
+                        ].find((o) => o.value === confirmationDelay)?.hint}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
