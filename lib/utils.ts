@@ -30,6 +30,13 @@ export function formatAmountInput(amount: number): string {
   return amount.toFixed(2).replace(".", ",")
 }
 
+/** Parse an Italian-formatted amount string to a number.
+ *  Handles "1234,56" and "1.234,56" (dot = thousands sep, comma = decimal). */
+export function parseItalianAmount(value: string): number {
+  const normalized = value.replace(/\./g, "").replace(",", ".")
+  return parseFloat(normalized)
+}
+
 /** Compact currency for chart Y-axis: K suffix above 1000 (e.g. "1,5K €"), plain below */
 export function formatCurrencyAxis(amount: number): string {
   const sign = amount < 0 ? "-" : ""

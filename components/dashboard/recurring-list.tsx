@@ -146,7 +146,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                         Prossima scadenza:{" "}
                         {new Date(rec.next_due_date).toLocaleDateString("it-IT", {
                           day: "2-digit",
-                          month: "long",
+                          month: "2-digit",
                           year: "numeric",
                         })}
                       </p>

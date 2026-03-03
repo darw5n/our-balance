@@ -11,6 +11,7 @@ import { createTransaction, type TransactionType } from "@/app/actions/transacti
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
+import { parseItalianAmount } from "@/lib/utils"
 
 export type CategoryOption = {
   id: string
@@ -210,7 +211,7 @@ export function AddTransactionDialog({
       return
     }
 
-    const parsedAmount = parseFloat(amount.replace(",", "."))
+    const parsedAmount = parseItalianAmount(amount)
     if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
       setError("Importo non valido.")
       return

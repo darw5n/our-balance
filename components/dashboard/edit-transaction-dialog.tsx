@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { updateTransaction, type TransactionType } from "@/app/actions/transactions"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
+import { parseItalianAmount } from "@/lib/utils"
 
 export type Transaction = {
   id: string
@@ -72,7 +73,7 @@ export function EditTransactionDialog({
       return
     }
 
-    const parsedAmount = parseFloat(amount.replace(",", "."))
+    const parsedAmount = parseItalianAmount(amount)
     if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
       setError("Importo non valido.")
       return

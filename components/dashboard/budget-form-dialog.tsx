@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { upsertBudget } from "@/app/actions/budgets"
+import { parseItalianAmount } from "@/lib/utils"
 import type { BudgetWithProgress } from "@/lib/supabase/queries/budgets"
 import type { Category } from "@/lib/supabase/queries/categories"
 
@@ -49,7 +50,7 @@ export function BudgetFormDialog({
     e.preventDefault()
     setError(null)
 
-    const amount = parseFloat(amountLimit.replace(",", "."))
+    const amount = parseItalianAmount(amountLimit)
     if (!Number.isFinite(amount) || amount <= 0) {
       setError("Inserisci un importo valido maggiore di zero.")
       return

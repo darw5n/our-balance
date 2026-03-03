@@ -19,6 +19,7 @@ import {
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
+import { parseItalianAmount } from "@/lib/utils"
 
 type RecurringFormDialogProps = {
   open: boolean
@@ -95,7 +96,7 @@ export function RecurringFormDialog({
     e.preventDefault()
     setError(null)
 
-    const parsedAmount = parseFloat(amount.replace(",", "."))
+    const parsedAmount = parseItalianAmount(amount)
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       setError("Importo non valido.")
       return

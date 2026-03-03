@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { CheckCircle, SkipForward } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, parseItalianAmount } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { confirmRecurringTransaction, skipRecurringConfirmation } from "@/app/actions/recurring"
@@ -28,7 +28,7 @@ function getPendingDate(nextDueDate: string, frequency: string): string {
     return String(date.getUTCFullYear())
   }
   // weekly: show the specific date
-  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })
+  return date.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })
 }
 
 type PendingConfirmationsProps = {
@@ -42,7 +42,7 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
 
   function handleConfirm() {
     setError(null)
-    const parsed = parseFloat(amount.replace(",", "."))
+    const parsed = parseItalianAmount(amount)
     if (!Number.isFinite(parsed) || parsed <= 0) {
       setError("Importo non valido.")
       return
