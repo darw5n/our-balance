@@ -13,6 +13,7 @@ import {
   Repeat,
   LogOut,
   User,
+  Settings,
 } from "lucide-react"
 
 import { supabase } from "@/lib/supabase"
@@ -29,6 +30,7 @@ const SECONDARY_NAV = [
   { href: "/recurring", label: "Programmati", icon: Repeat },
   { href: "/budgets", label: "Budget", icon: Wallet },
   { href: "/categories", label: "Categorie", icon: Tag },
+  { href: "/settings", label: "Impostazioni", icon: Settings },
 ]
 
 type Props = {
