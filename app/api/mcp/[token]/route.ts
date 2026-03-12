@@ -48,7 +48,8 @@ const TOOLS = [
         scope: {
           type: "string",
           enum: ["personal", "family"],
-          description: "'personal' (default) o 'family' per spese condivise",
+          description:
+            "Ambito della spesa. Usa 'family' se l'utente dice 'in comune', 'condivisa', 'nostra', 'famiglia' o simili. Usa 'personal' (default) per spese personali.",
         },
       },
       required: ["amount", "type", "date"],
