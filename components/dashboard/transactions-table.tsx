@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency } from "@/lib/utils"
@@ -165,15 +165,23 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   </span>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                    tx.type === "income"
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : tx.type === "expense"
-                      ? "bg-rose-500/20 text-rose-400"
-                      : "bg-zinc-800 text-zinc-400"
-                  }`}>
-                    {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                      tx.type === "income"
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : tx.type === "expense"
+                        ? "bg-rose-500/20 text-rose-400"
+                        : "bg-zinc-800 text-zinc-400"
+                    }`}>
+                      {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
+                    </span>
+                    {tx.scope === "family" && (
+                      <span className="flex items-center gap-0.5 rounded-full bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+                        <Users className="h-2.5 w-2.5" />
+                        comune
+                      </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${

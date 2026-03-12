@@ -14,7 +14,7 @@ async function getTransactions(
 
   let query = supabase
     .from("transactions")
-    .select("id, date, created_at, amount, description, type, status, category_id")
+    .select("id, date, created_at, amount, description, type, status, scope, category_id")
     .eq("user_id", userId) as any
 
   if (filter?.from) query = query.gte("date", filter.from)
