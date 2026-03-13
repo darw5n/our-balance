@@ -157,7 +157,7 @@ export const getCashflowForYear = cache(async function getCashflowForYear(
     const date = new Date(Date.UTC(year, i, 1))
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
     const bucket = buckets.get(i) ?? { entrate: 0, uscite: 0 }
-    return { month: monthLabel, entrate: bucket.entrate, uscite: bucket.uscite }
+    return { month: monthLabel, entrate: bucket.entrate, uscite: bucket.uscite, entrate_provvisorie: 0 }
   })
 })
 
@@ -165,7 +165,7 @@ function buildEmptyYear(year: number): CashflowMonthlyPoint[] {
   return Array.from({ length: 12 }, (_, i) => {
     const date = new Date(Date.UTC(year, i, 1))
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
-    return { month: monthLabel, entrate: 0, uscite: 0 }
+    return { month: monthLabel, entrate: 0, uscite: 0, entrate_provvisorie: 0 }
   })
 }
 

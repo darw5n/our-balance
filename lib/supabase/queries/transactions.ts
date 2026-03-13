@@ -9,12 +9,14 @@ export type DashboardSummary = {
   netto: number
   pending: number
   spese_comuni: number  // totale lordo spese scope=family (utile in vista personal)
+  entrate_provvisorie: number  // income pending confirmation (provisional)
 }
 
 export type CashflowMonthlyPoint = {
   month: string
   entrate: number
   uscite: number
+  entrate_provvisorie: number
 }
 
 export type TopCategory = {
@@ -76,6 +78,7 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
   let uscite = 0
   let pending = 0
   let spese_comuni = 0
+  let entrate_provvisorie = 0
 
   for (const row of data) {
     const rawAmount = Math.abs(toNumber(row.amount))
@@ -83,7 +86,9 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
     const type = row.type ?? ""
     const status = row.status ?? ""
 
-    if (status === "pending") {
+    if (status === "pending" && type === "income") {
+      entrate_provvisorie += amount
+    } else if (status === "pending") {
       pending += amount
     }
 
@@ -100,10 +105,10 @@ function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSu
     }
   }
 
-  return { entrate, uscite, netto: entrate - uscite, pending, spese_comuni }
+  return { entrate, uscite, netto: entrate - uscite, pending, spese_comuni, entrate_provvisorie }
 }
 
-const EMPTY_SUMMARY: DashboardSummary = { entrate: 0, uscite: 0, netto: 0, pending: 0, spese_comuni: 0 }
+const EMPTY_SUMMARY: DashboardSummary = { entrate: 0, uscite: 0, netto: 0, pending: 0, spese_comuni: 0, entrate_provvisorie: 0 }
 
 export const getDashboardSummary = cache(async function getDashboardSummary(
   userId: string,
@@ -216,7 +221,7 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
 
   if (error || !data) return []
 
-  const buckets = new Map<string, { date: Date; entrate: number; uscite: number }>()
+  const buckets = new Map<string, { date: Date; entrate: number; uscite: number; entrate_provvisorie: number }>()
 
   for (const row of data as TransactionRow[]) {
     if (!row.date) continue
@@ -224,7 +229,7 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
     const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`
 
     if (!buckets.has(key)) {
-      buckets.set(key, { date: new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)), entrate: 0, uscite: 0 })
+      buckets.set(key, { date: new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)), entrate: 0, uscite: 0, entrate_provvisorie: 0 })
     }
 
     const bucket = buckets.get(key)!
@@ -232,6 +237,11 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
     const amount = applyScope(rawAmount, row.scope, viewMode)
     const type = row.type ?? ""
     const status = row.status ?? ""
+
+    if (status === "pending" && type === "income") {
+      bucket.entrate_provvisorie += amount
+      continue
+    }
 
     if (status !== "confirmed") continue
 
@@ -244,9 +254,9 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
 
   const sorted = Array.from(buckets.values()).sort((a, b) => a.date.getTime() - b.date.getTime())
 
-  return sorted.map(({ date, entrate, uscite }) => {
+  return sorted.map(({ date, entrate, uscite, entrate_provvisorie }) => {
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
-    return { month: monthLabel, entrate, uscite }
+    return { month: monthLabel, entrate, uscite, entrate_provvisorie }
   })
 })
 

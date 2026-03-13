@@ -68,6 +68,7 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
     month: p.month,
     entrate: p.entrate,
     uscite: p.uscite,
+    entrate_provvisorie: p.entrate_provvisorie,
     netto: p.entrate - p.uscite,
   }))
 
@@ -108,7 +109,7 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
                 labelFormatter={(v) => MONTH_FULL[String(v).toLowerCase()] ?? v}
                 formatter={(value: unknown, name?: string) => [
                   formatCurrency(Number(value)),
-                  LEGEND_LABELS[name as string] ?? name,
+                  name === "entrate_provvisorie" ? "Provvisorie" : (LEGEND_LABELS[name as string] ?? name),
                 ]}
               />
               <Legend
@@ -116,7 +117,12 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
                 formatter={(value) => LEGEND_LABELS[value] ?? value}
               />
               {!isFamily && <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />}
-              {!isFamily && <Bar dataKey="entrate" fill="rgba(52,211,153,0.85)" radius={[4, 4, 0, 0]} />}
+              {!isFamily && (
+                <>
+                  <Bar dataKey="entrate" stackId="e" fill="rgba(52,211,153,0.85)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="entrate_provvisorie" stackId="e" fill="rgba(52,211,153,0.3)" radius={[4, 4, 0, 0]} />
+                </>
+              )}
               <Bar dataKey="uscite" fill="rgba(251,113,133,0.85)" radius={[4, 4, 0, 0]} />
               {!isFamily && (
                 <Line
