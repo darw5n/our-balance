@@ -269,25 +269,11 @@ export async function processRecurringTransactions(userId: string): Promise<void
           })
         }
       } else if (!rec.pending_confirmation) {
-        // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`.
-        const rawTrigger = advanceDateByCycles(rec.next_due_date as string, freq, delay)
-        const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
-        if (triggerDate > today) continue
-
         const dueDateForTx = rec.next_due_date as string
-        const nextDue = advanceDate(rec.next_due_date, freq)
 
-        // Optimistic lock: only set pending_confirmation if not already set.
-        const { data: claimed } = await supabase
-          .from("recurring_transactions")
-          .update({ pending_confirmation: true, next_due_date: nextDue })
-          .eq("id", rec.id)
-          .eq("pending_confirmation", false)
-          .select("id")
-        if (!claimed?.length) continue
-
-        // For income: create a provisional pending transaction so the current month
-        // shows the expected income while the user hasn't confirmed yet.
+        // For income: create a provisional pending transaction as soon as the due
+        // date passes — even if the confirmation trigger hasn't arrived yet.
+        // This ensures the current month shows expected income from day one.
         if (rec.type === "income") {
           const { data: existingPending } = await supabase
             .from("transactions")
@@ -310,6 +296,22 @@ export async function processRecurringTransactions(userId: string): Promise<void
             })
           }
         }
+
+        // Only flag for confirmation once `next_due_date + delay cycles <= today`.
+        const rawTrigger = advanceDateByCycles(dueDateForTx, freq, delay)
+        const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
+        if (triggerDate > today) continue
+
+        const nextDue = advanceDate(dueDateForTx, freq)
+
+        // Optimistic lock: only set pending_confirmation if not already set.
+        const { data: claimed } = await supabase
+          .from("recurring_transactions")
+          .update({ pending_confirmation: true, next_due_date: nextDue })
+          .eq("id", rec.id)
+          .eq("pending_confirmation", false)
+          .select("id")
+        if (!claimed?.length) continue
       }
       // If already pending_confirmation=true → skip (user must confirm first)
     }
