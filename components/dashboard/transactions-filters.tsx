@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { SlidersHorizontal } from "lucide-react"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
+import { DateInput } from "@/components/ui/date-input"
 
 type Props = {
   q: string
@@ -14,6 +15,8 @@ type Props = {
 
 export function TransactionsFilters({ q, from, to, category, categories }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [fromDate, setFromDate] = useState(from)
+  const [toDate, setToDate] = useState(to)
   const activeCount = [from, to, category].filter(Boolean).length
   const hasReset = !!(q || from || to || category)
 
@@ -52,23 +55,19 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       </button>
 
       {/* Data da — mobile: solo se aperto; desktop: sempre visibile */}
-      <input
-        type="date"
+      <DateInput
         name="from"
-        defaultValue={from}
-        className={`h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none md:block ${
-          filtersOpen ? "block w-full" : "hidden"
-        }`}
+        value={fromDate}
+        onChange={setFromDate}
+        className={`h-8 text-xs md:block ${filtersOpen ? "block w-full" : "hidden"}`}
       />
 
       {/* Data a */}
-      <input
-        type="date"
+      <DateInput
         name="to"
-        defaultValue={to}
-        className={`h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none md:block ${
-          filtersOpen ? "block w-full" : "hidden"
-        }`}
+        value={toDate}
+        onChange={setToDate}
+        className={`h-8 text-xs md:block ${filtersOpen ? "block w-full" : "hidden"}`}
       />
 
       {/* Categoria */}
