@@ -37,6 +37,16 @@ export function parseItalianAmount(value: string): number {
   return parseFloat(normalized)
 }
 
+/** Format a YYYY-MM-DD date string to Italian dd/mm/yyyy.
+ *  Reads the string directly to avoid timezone shifts. */
+export function formatDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return "-"
+  const parts = dateStr.slice(0, 10).split("-")
+  if (parts.length !== 3) return "-"
+  const [year, month, day] = parts
+  return `${day}/${month}/${year}`
+}
+
 /** Compact currency for chart Y-axis: K suffix above 1000 (e.g. "1,5K €"), plain below */
 export function formatCurrencyAxis(amount: number): string {
   const sign = amount < 0 ? "-" : ""

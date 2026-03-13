@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus, TrendingUp, TrendingDown, RefreshCw } from "lucide-react"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RecurringFormDialog } from "@/components/dashboard/recurring-form-dialog"
@@ -144,11 +144,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                       </div>
                       <p className="text-xs text-zinc-500 mt-0.5">
                         Prossima scadenza:{" "}
-                        {new Date(rec.next_due_date).toLocaleDateString("it-IT", {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        })}
+                        {formatDate(rec.next_due_date)}
                       </p>
                     </div>
                   </div>
