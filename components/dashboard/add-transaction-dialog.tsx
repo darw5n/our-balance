@@ -393,6 +393,7 @@ export function AddTransactionDialog({
               <Input
                 id="date"
                 type="date"
+                lang="it"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required

@@ -2,6 +2,7 @@
 
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { formatDate } from "@/lib/utils"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 
@@ -18,7 +19,7 @@ export function ExportCsvButton({ transactions, categories }: Props) {
     const rows = [
       ["Data", "Descrizione", "Tipo", "Importo", "Stato", "Categoria"],
       ...transactions.map((tx) => [
-        tx.date ? new Date(tx.date).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" }) : "",
+        formatDate(tx.date),
         tx.description ?? "",
         tx.type ?? "",
         (tx.amount ?? 0).toString().replace(".", ","),

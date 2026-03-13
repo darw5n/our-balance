@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, formatDate } from "@/lib/utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
 import { EditTransactionDialog, type Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
@@ -138,9 +138,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
         <TableBody>
           {transactions.map((tx) => {
             const dateValue = tx.date ?? tx.created_at
-            const dateLabel = dateValue
-              ? new Date(dateValue).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })
-              : "-"
+            const dateLabel = formatDate(dateValue)
             const amount = tx.amount ?? 0
             const formattedAmount = formatCurrency(amount)
 

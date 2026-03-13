@@ -183,6 +183,7 @@ export function EditTransactionDialog({
             <Input
               id="edit-date"
               type="date"
+              lang="it"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
