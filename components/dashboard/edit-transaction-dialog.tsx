@@ -9,6 +9,7 @@ import { updateTransaction, type TransactionType } from "@/app/actions/transacti
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 import { parseItalianAmount } from "@/lib/utils"
+import { DateInput } from "@/components/ui/date-input"
 
 export type Transaction = {
   id: string
@@ -180,12 +181,10 @@ export function EditTransactionDialog({
             <label className="text-xs font-medium text-zinc-300" htmlFor="edit-date">
               Data <span className="text-rose-400">*</span>
             </label>
-            <Input
+            <DateInput
               id="edit-date"
-              type="date"
-              lang="it"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={setDate}
               required
             />
           </div>
