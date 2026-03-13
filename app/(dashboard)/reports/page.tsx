@@ -175,7 +175,9 @@ export default async function ReportsPage({
                 <p className="text-xs text-zinc-400">Netto {safeYear}</p>
                 <p className="text-xl font-semibold text-sky-400">{formatCurrency(summary.netto)}</p>
                 {savingsRate !== null && (
-                  <p className="text-[10px] text-zinc-500">{savingsRate > 0 ? "+" : ""}{savingsRate}% risparmiato</p>
+                  <p className="text-[10px] text-zinc-500">
+                    {savingsRate > 0 ? savingsRate : 0}% delle entrate risparmiato
+                  </p>
                 )}
               </div>
               <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">

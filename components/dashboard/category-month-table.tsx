@@ -122,7 +122,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                     ))}
 
                     {/* Totale */}
-                    <td className="py-2 pl-4 text-right font-medium text-zinc-100 tabular-nums">
+                    <td className="py-2 pl-4 text-right font-medium text-zinc-100 tabular-nums whitespace-nowrap">
                       {formatCurrency(row.total)}
                     </td>
                   </tr>
@@ -136,7 +136,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                     Totale
                   </td>
                   {monthTotals.map((v, i) => (
-                    <td key={i} className="pt-3 text-right px-1.5 tabular-nums text-zinc-300">
+                    <td key={i} className="pt-3 text-right px-2 tabular-nums text-zinc-300 whitespace-nowrap">
                       {v > 0 ? formatCurrency(v) : <span className="font-normal text-zinc-700">—</span>}
                     </td>
                   ))}
