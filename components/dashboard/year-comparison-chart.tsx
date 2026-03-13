@@ -10,6 +10,7 @@ type Props = {
   currentYear: CashflowMonthlyPoint[]
   prevYear: CashflowMonthlyPoint[]
   year: number
+  viewMode?: "personal" | "family"
 }
 
 type ChartPoint = {
@@ -30,13 +31,17 @@ function useIsMobile() {
   return isMobile
 }
 
-export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
+export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "personal" }: Props) {
   const isMobile = useIsMobile()
+  const isFamily = viewMode === "family"
   const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
+
   const data: ChartPoint[] = currentYear.map((point, i) => ({
     month: point.month,
-    current: point.entrate - point.uscite,
-    prev: prevYear[i] ? prevYear[i].entrate - prevYear[i].uscite : 0,
+    current: isFamily ? point.uscite : point.entrate - point.uscite,
+    prev: prevYear[i]
+      ? isFamily ? prevYear[i].uscite : prevYear[i].entrate - prevYear[i].uscite
+      : 0,
   }))
 
   const hasCurrentData = currentYear.some((p) => p.entrate > 0 || p.uscite > 0)
@@ -44,8 +49,12 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
-        <h2 className="text-sm font-medium text-zinc-200">Netto mensile: {year} vs {year - 1}</h2>
-        <p className="text-xs text-zinc-400">Confronto entrate − uscite mese per mese.</p>
+        <h2 className="text-sm font-medium text-zinc-200">
+          {isFamily ? `Uscite mensili: ${year} vs ${year - 1}` : `Netto mensile: ${year} vs ${year - 1}`}
+        </h2>
+        <p className="text-xs text-zinc-400">
+          {isFamily ? "Confronto spese mese per mese." : "Confronto entrate − uscite mese per mese."}
+        </p>
       </div>
 
       <div className="h-72 w-full">
@@ -93,7 +102,7 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
               <Line
                 type="monotone"
                 dataKey="current"
-                stroke="rgba(52,211,153,0.9)"
+                stroke="rgba(255,255,255,0.85)"
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4 }}
@@ -101,7 +110,7 @@ export function YearComparisonChart({ currentYear, prevYear, year }: Props) {
               <Line
                 type="monotone"
                 dataKey="prev"
-                stroke="rgba(161,161,170,0.6)"
+                stroke="rgba(161,161,170,0.45)"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}

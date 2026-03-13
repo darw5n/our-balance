@@ -43,6 +43,14 @@ export function CategoryMonthTable({ data, year }: Props) {
   const displayData = showAll ? data : data.slice(0, VISIBLE_ROWS)
   const hasMore = data.length > VISIBLE_ROWS
 
+  // Valore massimo per heatmap
+  const maxCellValue = Math.max(...data.flatMap((row) => row.months).filter((v) => v > 0), 1)
+  function heatmapBg(v: number) {
+    if (v <= 0) return undefined
+    const intensity = Math.min(v / maxCellValue, 1)
+    return `rgba(251,113,133,${(intensity * 0.35).toFixed(2)})`
+  }
+
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
@@ -61,7 +69,7 @@ export function CategoryMonthTable({ data, year }: Props) {
         <>
           {/* Scroll orizzontale su mobile, prima colonna sticky */}
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-xs">
+            <table className="w-full min-w-[960px] text-xs">
               <thead>
                 <tr className="border-b border-white/10">
                   {/* Prima colonna: categoria — sticky su mobile */}
@@ -69,7 +77,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                     Categoria
                   </th>
                   {MONTH_LABELS.map((m) => (
-                    <th key={m} className="pb-2 text-right font-medium text-zinc-500 px-1.5">
+                    <th key={m} className="pb-2 text-right font-medium text-zinc-500 px-2 min-w-[72px] whitespace-nowrap">
                       {m}
                     </th>
                   ))}
@@ -100,7 +108,11 @@ export function CategoryMonthTable({ data, year }: Props) {
 
                     {/* 12 mesi */}
                     {row.months.map((v, i) => (
-                      <td key={i} className="py-2 text-right px-1.5 tabular-nums">
+                      <td
+                        key={i}
+                        className="py-2 text-right px-2 tabular-nums whitespace-nowrap rounded"
+                        style={{ backgroundColor: heatmapBg(v) }}
+                      >
                         {v > 0 ? (
                           <span className="text-zinc-200">{formatCurrency(v)}</span>
                         ) : (
@@ -110,7 +122,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                     ))}
 
                     {/* Totale */}
-                    <td className="py-2 pl-4 text-right font-medium text-zinc-100 tabular-nums">
+                    <td className="py-2 pl-4 text-right font-medium text-zinc-100 tabular-nums whitespace-nowrap">
                       {formatCurrency(row.total)}
                     </td>
                   </tr>
@@ -124,7 +136,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                     Totale
                   </td>
                   {monthTotals.map((v, i) => (
-                    <td key={i} className="pt-3 text-right px-1.5 tabular-nums text-zinc-300">
+                    <td key={i} className="pt-3 text-right px-2 tabular-nums text-zinc-300 whitespace-nowrap">
                       {v > 0 ? formatCurrency(v) : <span className="font-normal text-zinc-700">—</span>}
                     </td>
                   ))}
