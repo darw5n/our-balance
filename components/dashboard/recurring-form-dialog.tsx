@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DateInput } from "@/components/ui/date-input"
 import {
   createRecurringTransaction,
   updateRecurringTransaction,
@@ -284,11 +285,10 @@ export function RecurringFormDialog({
             <label className="text-xs font-medium text-zinc-300" htmlFor="rec-start">
               Data inizio <span className="text-rose-400">*</span>
             </label>
-            <Input
+            <DateInput
               id="rec-start"
-              type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={setStartDate}
               className="border-white/15 bg-zinc-950 text-zinc-50"
             />
           </div>

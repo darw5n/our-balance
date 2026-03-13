@@ -7,6 +7,7 @@ import { Plus, TrendingUp, TrendingDown, User, Users } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { DateInput } from "@/components/ui/date-input"
 import { createTransaction, type TransactionType } from "@/app/actions/transactions"
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
@@ -217,19 +218,12 @@ export function AddTransactionDialog({
       return
     }
 
-    // Format date to ISO string (YYYY-MM-DD)
-    let formattedDate: string
-    try {
-      const dateObj = new Date(date)
-      if (isNaN(dateObj.getTime())) {
-        setError("Formato data non valido.")
-        return
-      }
-      formattedDate = dateObj.toISOString().split("T")[0]
-    } catch {
+    // date is already YYYY-MM-DD from DateInput
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       setError("Formato data non valido.")
       return
     }
+    const formattedDate = date
 
     setSubmitting(true)
 
@@ -390,12 +384,10 @@ export function AddTransactionDialog({
                 {isRecurring ? "Data di inizio" : "Data"}{" "}
                 <span className="text-rose-400">*</span>
               </label>
-              <Input
+              <DateInput
                 id="date"
-                type="date"
-                lang="it"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={setDate}
                 required
               />
             </div>
