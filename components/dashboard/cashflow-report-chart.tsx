@@ -40,6 +40,12 @@ const LEGEND_LABELS: Record<string, string> = {
   netto: "Netto",
 }
 
+const MONTH_FULL: Record<string, string> = {
+  gen: "Gennaio", feb: "Febbraio", mar: "Marzo", apr: "Aprile",
+  mag: "Maggio", giu: "Giugno", lug: "Luglio", ago: "Agosto",
+  set: "Settembre", ott: "Ottobre", nov: "Novembre", dic: "Dicembre",
+}
+
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false)
   useEffect(() => {
@@ -98,7 +104,8 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
               <Tooltip
                 cursor={{ fill: "rgba(255,255,255,0.04)" }}
                 contentStyle={TOOLTIP_STYLE}
-                labelStyle={{ color: "rgba(244,244,245,0.9)" }}
+                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
+                labelFormatter={(v) => MONTH_FULL[String(v).toLowerCase()] ?? v}
                 formatter={(value: unknown, name?: string) => [
                   formatCurrency(Number(value)),
                   LEGEND_LABELS[name as string] ?? name,
