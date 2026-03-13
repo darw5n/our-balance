@@ -69,7 +69,7 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
     entrate: p.entrate,
     uscite: p.uscite,
     entrate_provvisorie: p.entrate_provvisorie,
-    netto: p.entrate - p.uscite,
+    netto: p.entrate + p.entrate_provvisorie - p.uscite,
   }))
 
   const hasData = data.some((p) => p.entrate > 0 || p.uscite > 0)

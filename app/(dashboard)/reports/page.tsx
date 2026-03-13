@@ -42,6 +42,10 @@ export default async function ReportsPage({
       getCategoryMonthlyBreakdown(user.id, viewMode, safeYear),
     ])
 
+  // Include provisional income in totals (only relevant for current year)
+  const entrateTotale = summary.entrate + summary.entrate_provvisorie
+  const nettoTotale = summary.netto + summary.entrate_provvisorie
+
   // Previsione: solo per anno corrente parziale
   let previsione: number | null = null
   if (isCurrentYear) {
@@ -54,20 +58,20 @@ export default async function ReportsPage({
       const prevRemainingNetto = cashflowPrev
         .slice(currentMonthIndex + 1)
         .reduce((sum, p) => sum + p.entrate - p.uscite, 0)
-      previsione = summary.netto + prevRemainingNetto
+      previsione = nettoTotale + prevRemainingNetto
     } else {
       // Fallback: estrapolazione lineare
       const monthsElapsed = currentMonthIndex + 1
       if (monthsElapsed > 0) {
-        previsione = (summary.netto / monthsElapsed) * 12
+        previsione = (nettoTotale / monthsElapsed) * 12
       }
     }
   }
 
   // Savings rate (solo vista personal, quando ci sono entrate)
   const savingsRate =
-    viewMode === "personal" && summary.entrate > 0
-      ? Math.round((summary.netto / summary.entrate) * 100)
+    viewMode === "personal" && entrateTotale > 0
+      ? Math.round((nettoTotale / entrateTotale) * 100)
       : null
 
   // Media uscite mensile: per anno corrente usa i mesi trascorsi
@@ -149,7 +153,7 @@ export default async function ReportsPage({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <p className="text-xs text-zinc-400">Entrate {safeYear}</p>
-                <p className="text-xl font-semibold text-emerald-400">{formatCurrency(summary.entrate)}</p>
+                <p className="text-xl font-semibold text-emerald-400">{formatCurrency(entrateTotale)}</p>
               </div>
               <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
                 <TrendingUp className="h-4 w-4 text-emerald-400" />
@@ -173,7 +177,7 @@ export default async function ReportsPage({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <p className="text-xs text-zinc-400">Netto {safeYear}</p>
-                <p className="text-xl font-semibold text-sky-400">{formatCurrency(summary.netto)}</p>
+                <p className="text-xl font-semibold text-sky-400">{formatCurrency(nettoTotale)}</p>
                 {savingsRate !== null && (
                   <p className="text-[10px] text-zinc-500">
                     {savingsRate > 0 ? savingsRate : 0}% delle entrate risparmiato
@@ -195,7 +199,7 @@ export default async function ReportsPage({
                 <p className="text-xl font-semibold text-amber-400">
                   {isCurrentYear && previsione !== null
                     ? formatCurrency(previsione)
-                    : formatCurrency(summary.netto / 12)}
+                    : formatCurrency(nettoTotale / 12)}
                 </p>
               </div>
               <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">

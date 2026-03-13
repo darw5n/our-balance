@@ -44,9 +44,9 @@ export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "p
 
   const data: ChartPoint[] = currentYear.map((point, i) => ({
     month: point.month,
-    current: isFamily ? point.uscite : point.entrate - point.uscite,
+    current: isFamily ? point.uscite : point.entrate + point.entrate_provvisorie - point.uscite,
     prev: prevYear[i]
-      ? isFamily ? prevYear[i].uscite : prevYear[i].entrate - prevYear[i].uscite
+      ? isFamily ? prevYear[i].uscite : prevYear[i].entrate + prevYear[i].entrate_provvisorie - prevYear[i].uscite
       : 0,
   }))
 
