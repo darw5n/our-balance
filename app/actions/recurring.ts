@@ -269,12 +269,40 @@ export async function processRecurringTransactions(userId: string): Promise<void
           })
         }
       } else if (!rec.pending_confirmation) {
-        // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`.
-        const rawTrigger = advanceDateByCycles(rec.next_due_date as string, freq, delay)
+        const dueDateForTx = rec.next_due_date as string
+
+        // For income: create a provisional pending transaction as soon as the due
+        // date passes — even if the confirmation trigger hasn't arrived yet.
+        // This ensures the current month shows expected income from day one.
+        if (rec.type === "income") {
+          const { data: existingPending } = await supabase
+            .from("transactions")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("date", dueDateForTx)
+            .eq("status", "pending")
+            .eq("type", "income")
+            .limit(1)
+          if (!existingPending?.length) {
+            await supabase.from("transactions").insert({
+              user_id: userId,
+              type: rec.type,
+              scope: rec.scope,
+              amount: rec.amount,
+              description: rec.description,
+              category_id: rec.category_id,
+              date: dueDateForTx,
+              status: "pending",
+            })
+          }
+        }
+
+        // Only flag for confirmation once `next_due_date + delay cycles <= today`.
+        const rawTrigger = advanceDateByCycles(dueDateForTx, freq, delay)
         const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
         if (triggerDate > today) continue
 
-        const nextDue = advanceDate(rec.next_due_date, freq)
+        const nextDue = advanceDate(dueDateForTx, freq)
 
         // Optimistic lock: only set pending_confirmation if not already set.
         const { data: claimed } = await supabase
@@ -319,19 +347,40 @@ export async function confirmRecurringTransaction(
     // so the actual occurrence date is one cycle back.
     const pendingDate = rewindDate(rec.next_due_date, rec.frequency as RecurringFrequency)
 
-    const { error: txError } = await supabase.from("transactions").insert({
-      user_id: user.id,
-      type: rec.type,
-      scope: rec.scope,
-      amount: Number(amount),
-      description: rec.description,
-      category_id: rec.category_id,
-      date: pendingDate,
-      status: "confirmed",
-    })
+    // Try to find and update the provisional pending transaction
+    const { data: pendingTx } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("date", pendingDate)
+      .eq("status", "pending")
+      .eq("type", rec.type)
+      .limit(1)
+
+    let txError: { message: string } | null = null
+    if (pendingTx?.length) {
+      const { error } = await supabase
+        .from("transactions")
+        .update({ amount: Number(amount), status: "confirmed" })
+        .eq("id", pendingTx[0].id)
+      txError = error
+    } else {
+      // Fallback: insert (no provisional transaction existed)
+      const { error } = await supabase.from("transactions").insert({
+        user_id: user.id,
+        type: rec.type,
+        scope: rec.scope,
+        amount: Number(amount),
+        description: rec.description,
+        category_id: rec.category_id,
+        date: pendingDate,
+        status: "confirmed",
+      })
+      txError = error
+    }
 
     if (txError) {
-      console.error("[confirmRecurringTransaction] tx insert error:", txError)
+      console.error("[confirmRecurringTransaction] tx error:", txError)
       return { success: false, error: txError.message }
     }
 
@@ -367,6 +416,14 @@ export async function skipRecurringConfirmation(recurringId: string): Promise<Re
 
     const supabase = await createSupabaseServerClient()
 
+    // Fetch the recurring to get the due date for deleting the provisional transaction
+    const { data: rec } = await supabase
+      .from("recurring_transactions")
+      .select("next_due_date, frequency, type")
+      .eq("id", recurringId)
+      .eq("user_id", user.id)
+      .single()
+
     const { error } = await supabase
       .from("recurring_transactions")
       .update({ pending_confirmation: false })
@@ -378,7 +435,20 @@ export async function skipRecurringConfirmation(recurringId: string): Promise<Re
       return { success: false, error: error.message }
     }
 
+    // Delete the provisional pending transaction if it exists
+    if (rec?.type === "income" && rec.next_due_date) {
+      const dueDateForTx = rewindDate(rec.next_due_date as string, rec.frequency as RecurringFrequency)
+      await supabase
+        .from("transactions")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("date", dueDateForTx)
+        .eq("status", "pending")
+        .eq("type", "income")
+    }
+
     revalidatePath("/dashboard")
+    revalidatePath("/transactions")
     return { success: true }
   } catch (error) {
     console.error("[skipRecurringConfirmation] Unexpected error:", error)

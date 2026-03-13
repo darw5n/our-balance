@@ -82,6 +82,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
                 />
                 <ChartTooltip
                   formatter={(value: any, name) => {
+                    if (name === "entrate_provvisorie") return [formatCurrency(Number(value)), "Provvisorie"]
                     const label = name === "entrate" ? "Entrate" : "Uscite"
                     return [formatCurrency(Number(value)), label]
                   }}
@@ -93,7 +94,10 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
                   />
                 )}
                 {!hideIncome && (
-                  <Bar dataKey="entrate" fill="rgba(52,211,153,0.9)" radius={[6, 6, 0, 0]} />
+                  <>
+                    <Bar dataKey="entrate" stackId="e" fill="rgba(52,211,153,0.9)" radius={[0, 0, 0, 0]} />
+                    <Bar dataKey="entrate_provvisorie" stackId="e" fill="rgba(52,211,153,0.35)" radius={[6, 6, 0, 0]} />
+                  </>
                 )}
                 <Bar dataKey="uscite" fill="rgba(248,113,113,0.9)" radius={[6, 6, 0, 0]} />
               </BarChart>

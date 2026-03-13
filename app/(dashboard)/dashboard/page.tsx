@@ -118,7 +118,8 @@ async function SummarySection({ userId, viewMode }: { userId: string; viewMode: 
     summary.entrate !== 0 ||
     summary.uscite !== 0 ||
     summary.netto !== 0 ||
-    summary.pending !== 0
+    summary.pending !== 0 ||
+    summary.entrate_provvisorie !== 0
   return (
     <>
       {!hasAnyData && (

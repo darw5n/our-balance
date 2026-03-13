@@ -134,30 +134,34 @@ export const getCashflowForYear = cache(async function getCashflowForYear(
 
   if (error || !data) return buildEmptyYear(year)
 
-  const buckets = new Map<number, { entrate: number; uscite: number }>()
+  const buckets = new Map<number, { entrate: number; uscite: number; entrate_provvisorie: number }>()
 
   for (const row of data as Array<{ amount: number | null; type: string | null; status: string | null; date: string | null; scope?: string | null }>) {
-    if (!row.date || row.status !== "confirmed") continue
+    if (!row.date) continue
     const d = new Date(row.date)
     const month = d.getUTCMonth() // 0-indexed
 
     if (!buckets.has(month)) {
-      buckets.set(month, { entrate: 0, uscite: 0 })
+      buckets.set(month, { entrate: 0, uscite: 0, entrate_provvisorie: 0 })
     }
 
     const bucket = buckets.get(month)!
     const rawAmount = Math.abs(toNumber(row.amount))
     const amount = applyScope(rawAmount, row.scope, viewMode)
 
-    if (row.type === "income") bucket.entrate += amount
-    else if (row.type === "expense") bucket.uscite += amount
+    if (row.status === "pending" && row.type === "income") {
+      bucket.entrate_provvisorie += amount
+    } else if (row.status === "confirmed") {
+      if (row.type === "income") bucket.entrate += amount
+      else if (row.type === "expense") bucket.uscite += amount
+    }
   }
 
   return Array.from({ length: 12 }, (_, i) => {
     const date = new Date(Date.UTC(year, i, 1))
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
-    const bucket = buckets.get(i) ?? { entrate: 0, uscite: 0 }
-    return { month: monthLabel, entrate: bucket.entrate, uscite: bucket.uscite }
+    const bucket = buckets.get(i) ?? { entrate: 0, uscite: 0, entrate_provvisorie: 0 }
+    return { month: monthLabel, entrate: bucket.entrate, uscite: bucket.uscite, entrate_provvisorie: bucket.entrate_provvisorie }
   })
 })
 
@@ -165,7 +169,7 @@ function buildEmptyYear(year: number): CashflowMonthlyPoint[] {
   return Array.from({ length: 12 }, (_, i) => {
     const date = new Date(Date.UTC(year, i, 1))
     const monthLabel = new Intl.DateTimeFormat("it-IT", { month: "short" }).format(date)
-    return { month: monthLabel, entrate: 0, uscite: 0 }
+    return { month: monthLabel, entrate: 0, uscite: 0, entrate_provvisorie: 0 }
   })
 }
 

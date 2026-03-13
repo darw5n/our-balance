@@ -100,8 +100,13 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
           <div className="space-y-1">
             <p className="text-sm text-zinc-400">Entrate mese</p>
             <p className="text-2xl font-semibold tracking-tight text-emerald-400">
-              {formatCurrency(current.entrate)}
+              {formatCurrency(current.entrate + current.entrate_provvisorie)}
             </p>
+            {current.entrate_provvisorie > 0 && (
+              <p className="text-[11px] text-zinc-500">
+                di cui ~{formatCurrency(current.entrate_provvisorie)} provvisori
+              </p>
+            )}
           </div>
           <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
             <TrendingUp className="h-5 w-5 text-emerald-400" />
@@ -130,9 +135,12 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
           <div className="space-y-1.5">
             <p className="text-sm text-zinc-400">Netto mese</p>
             <p className="text-2xl font-semibold tracking-tight text-sky-400">
-              {formatCurrency(current.netto)}
+              {formatCurrency(current.netto + current.entrate_provvisorie)}
             </p>
-            <HealthBadge entrate={current.entrate} uscite={current.uscite} />
+            <HealthBadge
+              entrate={current.entrate + current.entrate_provvisorie}
+              uscite={current.uscite}
+            />
           </div>
           <div className="rounded-md border border-white/10 bg-zinc-950/30 p-2">
             <Wallet className="h-5 w-5 text-sky-400" />
