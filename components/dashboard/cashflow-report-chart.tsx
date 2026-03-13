@@ -20,6 +20,7 @@ import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 type Props = {
   data: CashflowMonthlyPoint[]
   year: number
+  viewMode?: "personal" | "family"
 }
 
 const TOOLTIP_STYLE = {
@@ -51,9 +52,12 @@ function useIsMobile() {
   return isMobile
 }
 
-export function CashflowReportChart({ data, year }: Props) {
+export function CashflowReportChart({ data, year, viewMode = "personal" }: Props) {
   const isMobile = useIsMobile()
   const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
+
+  const isFamily = viewMode === "family"
+
   const chartData = data.map((p) => ({
     month: p.month,
     entrate: p.entrate,
@@ -66,8 +70,12 @@ export function CashflowReportChart({ data, year }: Props) {
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
-        <h2 className="text-sm font-medium text-zinc-200">Cashflow mensile {year}</h2>
-        <p className="text-xs text-zinc-400">Entrate, uscite e netto mese per mese.</p>
+        <h2 className="text-sm font-medium text-zinc-200">
+          {isFamily ? `Uscite mensili ${year}` : `Cashflow mensile ${year}`}
+        </h2>
+        <p className="text-xs text-zinc-400">
+          {isFamily ? "Spese in comune mese per mese." : "Entrate, uscite e netto mese per mese."}
+        </p>
       </div>
 
       <div className="h-72 w-full">
@@ -100,17 +108,19 @@ export function CashflowReportChart({ data, year }: Props) {
                 wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
                 formatter={(value) => LEGEND_LABELS[value] ?? value}
               />
-              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />
-              <Bar dataKey="entrate" fill="rgba(52,211,153,0.85)" radius={[4, 4, 0, 0]} />
+              {!isFamily && <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />}
+              {!isFamily && <Bar dataKey="entrate" fill="rgba(52,211,153,0.85)" radius={[4, 4, 0, 0]} />}
               <Bar dataKey="uscite" fill="rgba(251,113,133,0.85)" radius={[4, 4, 0, 0]} />
-              <Line
-                type="monotone"
-                dataKey="netto"
-                stroke="rgba(56,189,248,0.9)"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, fill: "rgba(56,189,248,0.9)" }}
-              />
+              {!isFamily && (
+                <Line
+                  type="monotone"
+                  dataKey="netto"
+                  stroke="rgba(56,189,248,0.9)"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "rgba(56,189,248,0.9)" }}
+                />
+              )}
             </ComposedChart>
           </ResponsiveContainer>
         )}

@@ -21,9 +21,6 @@ export function MacroBreakdownChart({ data }: Props) {
   const hasData = totale_entrate > 0 || (necessita + svago + investimenti) > 0
   const barBase = Math.max(totale_entrate, necessita + svago)
 
-  // Investimenti è un sub-bucket di risparmi; liquidità = resto del risparmio
-  const liquidita = Math.max(0, risparmi - investimenti)
-
   const pct = (value: number) =>
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
 
@@ -32,7 +29,7 @@ export function MacroBreakdownChart({ data }: Props) {
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-zinc-200">Suddivisione macro-categorie</h2>
         <p className="text-xs text-zinc-400">
-          Come si distribuiscono le entrate tra necessità, svago e risparmi (liquidità + investimenti).
+          Come si distribuiscono le entrate tra necessità, svago e risparmi.
         </p>
       </div>
 
@@ -112,47 +109,17 @@ export function MacroBreakdownChart({ data }: Props) {
 
                 {/* Risparmiato totale */}
                 {risparmi > 0 && (
-                  <>
-                    <tr>
-                      <td className="py-2">
-                        <div className="flex items-center gap-2">
-                          <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
-                          <span className="text-emerald-400">Risparmiato</span>
-                        </div>
-                      </td>
-                      <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi / 12)}</td>
-                      <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi)}</td>
-                      <td className="py-2 text-right text-zinc-400">{pct(risparmi)}%</td>
-                    </tr>
-                    {/* Sub-row: Investimenti */}
-                    {investimenti > 0 && (
-                      <tr className="text-zinc-500">
-                        <td className="py-1.5 pl-5">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-sm bg-blue-400" />
-                            <span className="text-blue-400">Investimenti</span>
-                          </div>
-                        </td>
-                        <td className="py-1.5 text-right">{formatCurrency(Math.min(investimenti, risparmi) / 12)}</td>
-                        <td className="py-1.5 text-right">{formatCurrency(Math.min(investimenti, risparmi))}</td>
-                        <td className="py-1.5 text-right">{pct(Math.min(investimenti, risparmi))}%</td>
-                      </tr>
-                    )}
-                    {/* Sub-row: Liquidità */}
-                    {liquidita > 0 && (
-                      <tr className="text-zinc-500">
-                        <td className="py-1.5 pl-5">
-                          <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-sm bg-teal-400" />
-                            <span className="text-teal-400">Liquidità</span>
-                          </div>
-                        </td>
-                        <td className="py-1.5 text-right">{formatCurrency(liquidita / 12)}</td>
-                        <td className="py-1.5 text-right">{formatCurrency(liquidita)}</td>
-                        <td className="py-1.5 text-right">{pct(liquidita)}%</td>
-                      </tr>
-                    )}
-                  </>
+                  <tr>
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
+                        <span className="text-emerald-400">Risparmiato</span>
+                      </div>
+                    </td>
+                    <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi / 12)}</td>
+                    <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi)}</td>
+                    <td className="py-2 text-right text-zinc-400">{pct(risparmi)}%</td>
+                  </tr>
                 )}
               </tbody>
               <tfoot>

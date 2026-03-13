@@ -207,10 +207,10 @@ export default async function ReportsPage({
       )}
 
       {/* Cashflow mensile con linea netto */}
-      <CashflowReportChart data={cashflowCurrent} year={safeYear} />
+      <CashflowReportChart data={cashflowCurrent} year={safeYear} viewMode={viewMode} />
 
       {/* Confronto anno precedente — vicino al cashflow per continuità narrativa */}
-      <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} />
+      <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} viewMode={viewMode} />
 
       {/* Ripartizione macro-categorie (50-30-20) */}
       <MacroBreakdownChart data={macroBreakdown} />
