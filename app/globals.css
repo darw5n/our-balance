@@ -116,6 +116,16 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Safe area padding for mobile bottom nav */
+.pb-safe-nav {
+  padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 768px) {
+  .pb-safe-nav {
+    padding-bottom: 2rem;
+  }
+}
+
 @keyframes shimmer {
   0%   { background-position: -400% 0; }
   100% { background-position:  400% 0; }
