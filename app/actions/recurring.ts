@@ -98,8 +98,12 @@ export async function createRecurringTransaction(
       return { success: false, error: error.message }
     }
 
+    // Immediately process the new recurring (creates any past-due transactions).
+    await processRecurringTransactions(user.id)
+
     revalidatePath("/dashboard")
     revalidatePath("/recurring")
+    revalidatePath("/transactions")
     return { success: true }
   } catch (error) {
     console.error("[createRecurringTransaction] Unexpected error:", error)
@@ -217,14 +221,42 @@ export async function processRecurringTransactions(userId: string): Promise<void
           : null
 
       if (!rec.requires_confirmation) {
-        // Auto-create one transaction per missed occurrence.
-        // With delay: the occurrence at `currentDue` is processed only when
-        // `currentDue + delay cycles <= today`.
+        // Pre-calculate all dates to create and the new next_due_date.
         let currentDue = rec.next_due_date as string
+        const datesToCreate: string[] = []
         while (currentDue <= today) {
           const rawTrigger = advanceDateByCycles(currentDue, freq, delay)
           const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
-          if (triggerDate > today) break // too early — wait for delay to pass
+          if (triggerDate > today) break
+          datesToCreate.push(currentDue)
+          currentDue = advanceDate(currentDue, freq)
+        }
+        if (datesToCreate.length === 0) continue
+
+        // Optimistic lock: advance next_due_date BEFORE inserting transactions.
+        // If another concurrent call already updated this row, skip (0 rows returned).
+        const { data: claimed } = await supabase
+          .from("recurring_transactions")
+          .update({ next_due_date: currentDue })
+          .eq("id", rec.id)
+          .eq("next_due_date", rec.next_due_date)
+          .select("id")
+        if (!claimed?.length) continue
+
+        for (const date of datesToCreate) {
+          // Skip if an identical transaction already exists (same date, amount, description).
+          const dupQuery = supabase
+            .from("transactions")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("date", date)
+            .eq("amount", rec.amount)
+            .limit(1)
+          const { data: dup } = rec.description
+            ? await dupQuery.eq("description", rec.description)
+            : await dupQuery.is("description", null)
+          if (dup?.length) continue
+
           await supabase.from("transactions").insert({
             user_id: userId,
             type: rec.type,
@@ -232,27 +264,26 @@ export async function processRecurringTransactions(userId: string): Promise<void
             amount: rec.amount,
             description: rec.description,
             category_id: rec.category_id,
-            date: currentDue,
+            date,
             status: "confirmed",
           })
-          currentDue = advanceDate(currentDue, freq)
         }
-        await supabase
-          .from("recurring_transactions")
-          .update({ next_due_date: currentDue })
-          .eq("id", rec.id)
       } else if (!rec.pending_confirmation) {
         // With delay: only flag for confirmation once `next_due_date + delay cycles <= today`.
-        // Pin the trigger day-of-month to start_date's day to avoid month-end drift.
         const rawTrigger = advanceDateByCycles(rec.next_due_date as string, freq, delay)
         const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
-        if (triggerDate > today) continue // not yet time to ask for confirmation
+        if (triggerDate > today) continue
 
         const nextDue = advanceDate(rec.next_due_date, freq)
-        await supabase
+
+        // Optimistic lock: only set pending_confirmation if not already set.
+        const { data: claimed } = await supabase
           .from("recurring_transactions")
           .update({ pending_confirmation: true, next_due_date: nextDue })
           .eq("id", rec.id)
+          .eq("pending_confirmation", false)
+          .select("id")
+        if (!claimed?.length) continue
       }
       // If already pending_confirmation=true → skip (user must confirm first)
     }
