@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts"
 import { Card } from "@/components/ui/card"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
@@ -17,6 +17,12 @@ type ChartPoint = {
   month: string
   current: number
   prev: number
+}
+
+const MONTH_FULL: Record<string, string> = {
+  gen: "Gennaio", feb: "Febbraio", mar: "Marzo", apr: "Aprile",
+  mag: "Maggio", giu: "Giugno", lug: "Luglio", ago: "Agosto",
+  set: "Settembre", ott: "Ottobre", nov: "Novembre", dic: "Dicembre",
 }
 
 function useIsMobile() {
@@ -89,12 +95,14 @@ export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "p
                   color: "rgba(244,244,245,0.95)",
                   fontSize: 12,
                 }}
-                labelStyle={{ color: "rgba(244,244,245,0.9)" }}
+                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
+                labelFormatter={(v) => MONTH_FULL[String(v).toLowerCase()] ?? v}
                 formatter={(value: unknown, name?: string) => {
                   const label = name === "current" ? String(year) : String(year - 1)
                   return [formatCurrency(Number(value)), label]
                 }}
               />
+              {!isFamily && <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />}
               <Legend
                 wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
                 formatter={(value) => (value === "current" ? String(year) : String(year - 1))}
