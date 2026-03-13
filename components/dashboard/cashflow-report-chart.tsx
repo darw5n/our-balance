@@ -5,6 +5,7 @@ import {
   ComposedChart,
   Bar,
   Line,
+  ReferenceLine,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -99,6 +100,7 @@ export function CashflowReportChart({ data, year }: Props) {
                 wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
                 formatter={(value) => LEGEND_LABELS[value] ?? value}
               />
+              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />
               <Bar dataKey="entrate" fill="rgba(52,211,153,0.85)" radius={[4, 4, 0, 0]} />
               <Bar dataKey="uscite" fill="rgba(251,113,133,0.85)" radius={[4, 4, 0, 0]} />
               <Line
