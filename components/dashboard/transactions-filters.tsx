@@ -68,7 +68,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       <select
         name="category"
         defaultValue={category}
-        className={`h-8 rounded-md border border-border-subtle bg-background px-2 text-xs text-foreground outline-none md:block md:w-auto ${
+        className={`h-8 rounded-md border border-border-subtle bg-surface-2 px-2 text-xs text-foreground outline-none md:block md:w-auto ${
           filtersOpen ? "block w-full" : "hidden"
         }`}
       >

@@ -135,7 +135,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                         >
                           {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
                         </span>
-                        <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+                        <span className="rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-2 py-0.5 text-xs">
                           {FREQUENCY_LABEL[rec.frequency]}
                         </span>
                         {rec.category && (

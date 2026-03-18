@@ -195,7 +195,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
           <div className="flex h-16 flex-1 items-center justify-center">
             <button
               onClick={() => setAddOpen(true)}
-              className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-transform active:scale-95"
+              className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/40 ring-2 ring-white transition-transform active:scale-95 dark:ring-0"
               aria-label="Aggiungi transazione"
             >
               <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
@@ -228,7 +228,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
       {(pathname === "/dashboard" || pathname.startsWith("/transactions")) && (
         <button
           onClick={() => setAddOpen(true)}
-          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
+          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/40 ring-2 ring-white transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 dark:ring-0 md:flex"
           aria-label="Aggiungi transazione"
         >
           <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />

@@ -166,15 +166,15 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   <div className="flex items-center gap-1.5">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                       tx.type === "income"
-                        ? "bg-emerald-500/20 text-emerald-400"
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
                         : tx.type === "expense"
-                        ? "bg-rose-500/20 text-rose-400"
+                        ? "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
                         : "bg-surface-active text-text-2"
                     }`}>
                       {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
                     </span>
                     {tx.scope === "family" && (
-                      <span className="flex items-center gap-0.5 rounded-full bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+                      <span className="flex items-center gap-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400 px-1.5 py-0.5 text-[10px] font-medium">
                         <Users className="h-2.5 w-2.5" />
                         comune
                       </span>
@@ -186,7 +186,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     tx.status === "confirmed"
                       ? "border-border-strong bg-surface-active text-text-1"
                       : tx.status === "pending"
-                      ? "border-amber-500/30 bg-amber-500/15 text-amber-500"
+                      ? "border-amber-300 bg-amber-100 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-400"
                       : "border-border-subtle bg-surface-3 text-text-2"
                   }`}>
                     {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
