@@ -77,7 +77,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   const isSecondaryActive = SECONDARY_NAV.some((l) => isActive(l.href))
 
   return (
-    <div className="grid min-h-screen grid-rows-[auto_1fr_auto] bg-surface-0 text-text-1">
+    <div className="flex min-h-screen flex-col bg-surface-0 text-text-1">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-overlay backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
@@ -156,7 +156,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
+      <main className="mx-auto w-full flex-1 max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
 
       {/* Footer — desktop only (mobile ha bottom nav) */}
       <footer className="hidden border-t border-border-subtle md:block">
