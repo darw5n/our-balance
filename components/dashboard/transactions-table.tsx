@@ -184,10 +184,10 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                 <TableCell className="hidden md:table-cell">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                     tx.status === "confirmed"
-                      ? "bg-black/10 text-foreground/80 dark:bg-zinc-700 dark:text-zinc-300"
+                      ? "bg-surface-active text-foreground/80"
                       : tx.status === "pending"
                       ? "bg-amber-500/20 text-amber-400"
-                      : "bg-black/10 text-[var(--subtle-text)] dark:bg-zinc-800"
+                      : "bg-surface-3 text-text-2"
                   }`}>
                     {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
                   </span>

@@ -12,10 +12,10 @@ export function TopCategoriesChart({ data }: TopCategoriesChartProps) {
   const hasData = data.length > 0
 
   return (
-    <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
-        <h2 className="text-sm font-medium text-zinc-200">Top categorie spesa</h2>
-        <p className="text-xs text-zinc-400">
+        <h2 className="text-sm font-medium text-text-1">Top categorie spesa</h2>
+        <p className="text-xs text-text-2">
           {hasData ? "Mese corrente, maggiori categorie di uscita." : "Nessuna spesa registrata per il mese corrente."}
         </p>
       </div>
@@ -30,14 +30,14 @@ export function TopCategoriesChart({ data }: TopCategoriesChartProps) {
                     className="h-2.5 w-2.5 rounded-full"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <span className="text-zinc-100">{cat.name}</span>
+                  <span className="text-text-1">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-zinc-100">{formatCurrency(cat.amount)}</span>
-                  <span className="text-zinc-500">{cat.percentage.toFixed(1)}%</span>
+                  <span className="text-text-1">{formatCurrency(cat.amount)}</span>
+                  <span className="text-text-3">{cat.percentage.toFixed(1)}%</span>
                 </div>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
                 <div
                   className="h-full rounded-full"
                   style={{
@@ -50,11 +50,10 @@ export function TopCategoriesChart({ data }: TopCategoriesChartProps) {
           ))}
         </div>
       ) : (
-        <div className="flex h-36 items-center justify-center text-xs text-zinc-500">
+        <div className="flex h-36 items-center justify-center text-xs text-text-3">
           Nessun dato da visualizzare.
         </div>
       )}
     </Card>
   )
 }
-

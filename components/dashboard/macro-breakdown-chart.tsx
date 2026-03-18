@@ -25,16 +25,16 @@ export function MacroBreakdownChart({ data }: Props) {
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
 
   return (
-    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">Suddivisione macro-categorie</h2>
-        <p className="text-xs text-[var(--subtle-text)]">
+        <p className="text-xs text-text-2">
           Come si distribuiscono le entrate tra necessità, svago e risparmi.
         </p>
       </div>
 
       {!hasData ? (
-        <div className="flex flex-col items-center justify-center gap-2 py-10 text-xs text-[var(--muted-text)]">
+        <div className="flex flex-col items-center justify-center gap-2 py-10 text-xs text-text-3">
           <p>Nessuna categoria ha una macro-categoria assegnata.</p>
           <Link href="/categories" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
             Vai a Categorie →
@@ -43,7 +43,7 @@ export function MacroBreakdownChart({ data }: Props) {
       ) : (
         <>
           {/* Stacked horizontal bar: necessità | svago | risparmiato = 100% entrate */}
-          <div className="mb-4 flex h-7 w-full overflow-hidden rounded-lg bg-black/10 dark:bg-zinc-800">
+          <div className="mb-4 flex h-7 w-full overflow-hidden rounded-lg bg-surface-3">
             {BAR_SEGMENTS.map((s) => {
               const value = data[s.key]
               const width = barBase > 0 ? (value / barBase) * 100 : 0
@@ -73,14 +73,14 @@ export function MacroBreakdownChart({ data }: Props) {
           <div className="w-full overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[var(--card-border)] text-[var(--muted-text)]">
+                <tr className="border-b border-border-subtle text-text-3">
                   <th className="pb-2 text-left font-medium">Macro-categoria</th>
                   <th className="pb-2 text-right font-medium">Media/mese</th>
                   <th className="pb-2 text-right font-medium">Totale anno</th>
                   <th className="pb-2 text-right font-medium">% entrate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--card-border)]">
+              <tbody className="divide-y divide-border-subtle">
                 {/* Necessità */}
                 <tr>
                   <td className="py-2">
@@ -91,7 +91,7 @@ export function MacroBreakdownChart({ data }: Props) {
                   </td>
                   <td className="py-2 text-right text-foreground/90">{formatCurrency(necessita / 12)}</td>
                   <td className="py-2 text-right text-foreground/90">{formatCurrency(necessita)}</td>
-                  <td className="py-2 text-right text-[var(--subtle-text)]">{pct(necessita)}%</td>
+                  <td className="py-2 text-right text-text-2">{pct(necessita)}%</td>
                 </tr>
 
                 {/* Svago */}
@@ -104,7 +104,7 @@ export function MacroBreakdownChart({ data }: Props) {
                   </td>
                   <td className="py-2 text-right text-foreground/90">{formatCurrency(svago / 12)}</td>
                   <td className="py-2 text-right text-foreground/90">{formatCurrency(svago)}</td>
-                  <td className="py-2 text-right text-[var(--subtle-text)]">{pct(svago)}%</td>
+                  <td className="py-2 text-right text-text-2">{pct(svago)}%</td>
                 </tr>
 
                 {/* Risparmiato totale */}
@@ -118,16 +118,16 @@ export function MacroBreakdownChart({ data }: Props) {
                     </td>
                     <td className="py-2 text-right text-foreground/90">{formatCurrency(risparmi / 12)}</td>
                     <td className="py-2 text-right text-foreground/90">{formatCurrency(risparmi)}</td>
-                    <td className="py-2 text-right text-[var(--subtle-text)]">{pct(risparmi)}%</td>
+                    <td className="py-2 text-right text-text-2">{pct(risparmi)}%</td>
                   </tr>
                 )}
               </tbody>
               <tfoot>
-                <tr className="border-t border-[var(--card-border)] font-medium">
+                <tr className="border-t border-border-subtle font-medium">
                   <td className="pt-3 text-foreground/80">Entrate totali</td>
                   <td className="pt-3 text-right text-foreground/90">{formatCurrency(totale_entrate / 12)}</td>
                   <td className="pt-3 text-right text-foreground/90">{formatCurrency(totale_entrate)}</td>
-                  <td className="pt-3 text-right text-[var(--subtle-text)]">100%</td>
+                  <td className="pt-3 text-right text-text-2">100%</td>
                 </tr>
               </tfoot>
             </table>

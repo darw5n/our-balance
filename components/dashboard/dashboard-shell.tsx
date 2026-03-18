@@ -78,9 +78,9 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   const isSecondaryActive = SECONDARY_NAV.some((l) => isActive(l.href))
 
   return (
-    <div className="min-h-screen bg-[var(--shell-bg)] text-foreground">
+    <div className="min-h-screen bg-surface-0 text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-[var(--card-border)] bg-[var(--nav-bg)] backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-overlay backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           {/* Left: logo + primary nav (desktop) */}
           <div className="flex items-center gap-2">
@@ -94,8 +94,8 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                   href={href}
                   className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     isActive(href)
-                      ? "bg-black/10 text-foreground dark:bg-zinc-800"
-                      : "text-[var(--subtle-text)] hover:bg-black/5 hover:text-foreground dark:hover:bg-zinc-800/50"
+                      ? "bg-surface-active text-foreground"
+                      : "text-text-2 hover:bg-surface-hover hover:text-foreground"
                   }`}
                 >
                   {label}
@@ -114,23 +114,23 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 aria-label="Menu account"
                 className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
                   menuOpen || isSecondaryActive
-                    ? "border-[var(--card-border)] bg-black/10 text-foreground dark:bg-zinc-800"
-                    : "border-[var(--card-border)] text-[var(--subtle-text)] hover:bg-black/5 hover:text-foreground dark:hover:bg-zinc-800/50"
+                    ? "border-border-subtle bg-surface-active text-foreground"
+                    : "border-border-subtle text-text-2 hover:bg-surface-hover hover:text-foreground"
                 }`}
               >
                 <User className="h-4 w-4" />
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-1.5 shadow-xl backdrop-blur">
+                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-xl border border-border-subtle bg-surface-1 p-1.5 shadow-xl backdrop-blur">
                   {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
                     <Link
                       key={href}
                       href={href}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                         isActive(href)
-                          ? "bg-black/10 text-foreground dark:bg-zinc-800"
-                          : "text-foreground/80 hover:bg-black/5 hover:text-foreground dark:hover:bg-zinc-800"
+                          ? "bg-surface-active text-foreground"
+                          : "text-foreground/80 hover:bg-surface-hover hover:text-foreground"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -138,15 +138,15 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                     </Link>
                   ))}
 
-                  <div className="my-1.5 border-t border-[var(--card-border)]" />
+                  <div className="my-1.5 border-t border-border-subtle" />
 
                   {userEmail && (
-                    <p className="truncate px-3 py-2 text-xs text-[var(--muted-text)]">{userEmail}</p>
+                    <p className="truncate px-3 py-2 text-xs text-text-3">{userEmail}</p>
                   )}
 
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-black/5 hover:text-rose-400 dark:hover:bg-zinc-800"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-surface-hover hover:text-rose-400"
                   >
                     <LogOut className="h-4 w-4" />
                     Esci
@@ -161,15 +161,15 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
       <main className="mx-auto max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
 
       {/* Footer — desktop only (mobile ha bottom nav) */}
-      <footer className="hidden border-t border-[var(--card-border)] md:block">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-[var(--muted-text)]">
+      <footer className="hidden border-t border-border-subtle md:block">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-text-3">
           <span>OurBalance</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
       </footer>
 
       {/* Bottom nav — mobile only */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--card-border)] bg-[var(--nav-bg)] backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border-subtle bg-surface-overlay backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex">
           {/* Dashboard */}
           {[
@@ -182,7 +182,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 key={href}
                 href={href}
                 className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-emerald-400" : "text-[var(--muted-text)] hover:text-foreground/80"
+                  active ? "text-emerald-400" : "text-text-3 hover:text-foreground/80"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -213,7 +213,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 key={href}
                 href={href}
                 className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-emerald-400" : "text-[var(--muted-text)] hover:text-foreground/80"
+                  active ? "text-emerald-400" : "text-text-3 hover:text-foreground/80"
                 }`}
               >
                 <Icon className="h-5 w-5" />

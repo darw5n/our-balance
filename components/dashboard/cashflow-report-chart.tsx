@@ -75,19 +75,19 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
   const hasData = data.some((p) => p.entrate > 0 || p.uscite > 0)
 
   return (
-    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">
           {isFamily ? `Uscite mensili ${year}` : `Cashflow mensile ${year}`}
         </h2>
-        <p className="text-xs text-[var(--subtle-text)]">
+        <p className="text-xs text-text-2">
           {isFamily ? "Spese in comune mese per mese." : "Entrate, uscite e netto mese per mese."}
         </p>
       </div>
 
       <div className="h-72 w-full">
         {!hasData ? (
-          <div className="flex h-full items-center justify-center text-xs text-[var(--muted-text)]">
+          <div className="flex h-full items-center justify-center text-xs text-text-3">
             Nessun dato da visualizzare per il {year}.
           </div>
         ) : (

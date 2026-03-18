@@ -114,7 +114,7 @@ export function EditTransactionDialog({
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
+            <label className="text-xs font-medium text-text-1">
               Tipo <span className="text-rose-400">*</span>
             </label>
             <div className="flex gap-2">
@@ -124,7 +124,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "income"
                     ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-1 hover:bg-surface-hover"
                 }`}
               >
                 <TrendingUp className="h-4 w-4" />
@@ -136,7 +136,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "expense"
                     ? "border-rose-500 bg-rose-500/20 text-rose-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-1 hover:bg-surface-hover"
                 }`}
               >
                 <TrendingDown className="h-4 w-4" />
@@ -146,7 +146,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
+            <label className="text-xs font-medium text-text-1">
               Visibilità
             </label>
             <div className="flex gap-2">
@@ -156,7 +156,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "personal"
                     ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-1 hover:bg-surface-hover"
                 }`}
               >
                 <User className="h-4 w-4" />
@@ -168,7 +168,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "family"
                     ? "border-violet-500 bg-violet-500/20 text-violet-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-1 hover:bg-surface-hover"
                 }`}
               >
                 <Users className="h-4 w-4" />
@@ -178,7 +178,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-date">
+            <label className="text-xs font-medium text-text-1" htmlFor="edit-date">
               Data <span className="text-rose-400">*</span>
             </label>
             <DateInput
@@ -190,7 +190,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-amount">
+            <label className="text-xs font-medium text-text-1" htmlFor="edit-amount">
               Importo <span className="text-rose-400">*</span>
             </label>
             <Input
@@ -205,7 +205,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
+            <label className="text-xs font-medium text-text-1">
               Categoria <span className="text-rose-400">*</span>
             </label>
             <CategoryCombobox
@@ -217,7 +217,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-description">
+            <label className="text-xs font-medium text-text-1" htmlFor="edit-description">
               Descrizione
             </label>
             <Input
@@ -235,7 +235,7 @@ export function EditTransactionDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-foreground hover:bg-surface-hover"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >

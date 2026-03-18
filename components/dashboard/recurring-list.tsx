@@ -76,7 +76,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     <>
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {recurring.length} {recurring.length === 1 ? "ricorrenza attiva" : "ricorrenze attive"}
           </p>
           <Button
@@ -90,9 +90,9 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
         </div>
 
         {recurring.length === 0 ? (
-          <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
-            <RefreshCw className="mx-auto mb-3 h-8 w-8 text-zinc-600" />
-            <p className="text-sm text-zinc-400">
+          <Card className="border-border-subtle bg-surface-1 p-8 text-center backdrop-blur">
+            <RefreshCw className="mx-auto mb-3 h-8 w-8 text-text-3" />
+            <p className="text-sm text-text-2">
               Nessuna ricorrenza. Aggiungine una per automatizzare entrate e uscite periodiche.
             </p>
             <Button
@@ -108,7 +108,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
           <ul className="space-y-2">
             {recurring.map((rec) => (
               <li key={rec.id}>
-                <Card className="flex items-center justify-between border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+                <Card className="flex items-center justify-between border-border-subtle bg-surface-1 p-4 backdrop-blur">
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
@@ -124,7 +124,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-100">
+                      <p className="truncate text-sm font-medium text-text-1">
                         {rec.description || "Senza descrizione"}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 mt-0.5">
@@ -139,10 +139,10 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                           {FREQUENCY_LABEL[rec.frequency]}
                         </span>
                         {rec.category && (
-                          <span className="text-xs text-zinc-400">{rec.category.name}</span>
+                          <span className="text-xs text-text-2">{rec.category.name}</span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 mt-0.5">
+                      <p className="text-xs text-text-3 mt-0.5">
                         Prossima scadenza:{" "}
                         {formatDate(rec.next_due_date)}
                       </p>
@@ -152,7 +152,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-zinc-50"
+                      className="h-8 w-8 text-text-2 hover:text-text-1"
                       onClick={() => openEdit(rec)}
                       aria-label="Modifica"
                     >
@@ -161,7 +161,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-rose-400"
+                      className="h-8 w-8 text-text-2 hover:text-rose-400"
                       onClick={() => handleDelete(rec)}
                       aria-label="Elimina"
                     >

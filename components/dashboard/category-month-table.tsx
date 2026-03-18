@@ -52,14 +52,14 @@ export function CategoryMonthTable({ data, year }: Props) {
   }
 
   return (
-    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">Spese per categoria — {year}</h2>
-        <p className="text-xs text-[var(--subtle-text)]">Dettaglio mensile di ogni categoria di uscita.</p>
+        <p className="text-xs text-text-2">Dettaglio mensile di ogni categoria di uscita.</p>
       </div>
 
       {!hasData ? (
-        <div className="flex flex-col items-center justify-center gap-2 py-10 text-xs text-[var(--muted-text)]">
+        <div className="flex flex-col items-center justify-center gap-2 py-10 text-xs text-text-3">
           <p>Nessuna spesa registrata per il {year}.</p>
           <Link href="/transactions" className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
             Aggiungi transazioni →
@@ -71,27 +71,27 @@ export function CategoryMonthTable({ data, year }: Props) {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[960px] text-xs">
               <thead>
-                <tr className="border-b border-[var(--card-border)]">
+                <tr className="border-b border-border-subtle">
                   {/* Prima colonna: categoria — sticky su mobile */}
-                  <th className="sticky left-0 z-10 bg-[var(--card-bg)] pb-2 pr-4 text-left font-medium text-[var(--muted-text)] backdrop-blur">
+                  <th className="sticky left-0 z-10 bg-surface-1 pb-2 pr-4 text-left font-medium text-text-3 backdrop-blur">
                     Categoria
                   </th>
                   {MONTH_LABELS.map((m) => (
-                    <th key={m} className="pb-2 text-right font-medium text-[var(--muted-text)] px-2 min-w-[72px] whitespace-nowrap">
+                    <th key={m} className="pb-2 text-right font-medium text-text-3 px-2 min-w-[72px] whitespace-nowrap">
                       {m}
                     </th>
                   ))}
-                  <th className="pb-2 pl-4 text-right font-medium text-[var(--subtle-text)]">
+                  <th className="pb-2 pl-4 text-right font-medium text-text-2">
                     Totale
                   </th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-[var(--card-border)]">
+              <tbody className="divide-y divide-border-subtle">
                 {displayData.map((row) => (
-                  <tr key={row.id} className="group hover:bg-black/[0.02] dark:hover:bg-white/[0.02]">
+                  <tr key={row.id} className="group hover:bg-surface-hover">
                     {/* Categoria — sticky */}
-                    <td className="sticky left-0 z-10 bg-[var(--card-bg)] py-2 pr-4 backdrop-blur group-hover:bg-black/[0.02] dark:group-hover:bg-white/[0.02]">
+                    <td className="sticky left-0 z-10 bg-surface-1 py-2 pr-4 backdrop-blur group-hover:bg-surface-hover">
                       <div className="flex items-center gap-2">
                         <span
                           className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -99,7 +99,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                         />
                         <span className="truncate max-w-[120px] text-foreground/90">{row.name}</span>
                         {row.macro_category && (
-                          <span className={`hidden sm:inline text-[10px] ${MACRO_COLORS[row.macro_category] ?? "text-zinc-500"}`}>
+                          <span className={`hidden sm:inline text-[10px] ${MACRO_COLORS[row.macro_category] ?? "text-text-3"}`}>
                             {MACRO_LABELS[row.macro_category]}
                           </span>
                         )}
@@ -116,7 +116,7 @@ export function CategoryMonthTable({ data, year }: Props) {
                         {v > 0 ? (
                           <span className="text-foreground/90">{formatCurrency(v)}</span>
                         ) : (
-                          <span className="text-[var(--muted-text)]/60">—</span>
+                          <span className="text-text-3/60">—</span>
                         )}
                       </td>
                     ))}
@@ -131,13 +131,13 @@ export function CategoryMonthTable({ data, year }: Props) {
 
               {/* Riga totali */}
               <tfoot>
-                <tr className="border-t border-[var(--card-border)] font-semibold">
-                  <td className="sticky left-0 z-10 bg-[var(--card-bg)] pt-3 pr-4 text-foreground/80 backdrop-blur">
+                <tr className="border-t border-border-subtle font-semibold">
+                  <td className="sticky left-0 z-10 bg-surface-1 pt-3 pr-4 text-foreground/80 backdrop-blur">
                     Totale
                   </td>
                   {monthTotals.map((v, i) => (
                     <td key={i} className="pt-3 text-right px-2 tabular-nums text-foreground/80 whitespace-nowrap">
-                      {v > 0 ? formatCurrency(v) : <span className="font-normal text-[var(--muted-text)]/60">—</span>}
+                      {v > 0 ? formatCurrency(v) : <span className="font-normal text-text-3/60">—</span>}
                     </td>
                   ))}
                   <td className="pt-3 pl-4 text-right text-emerald-400 tabular-nums">
@@ -153,7 +153,7 @@ export function CategoryMonthTable({ data, year }: Props) {
             <div className="mt-4 text-center">
               <button
                 onClick={() => setShowAll((v) => !v)}
-                className="text-xs text-[var(--muted-text)] underline underline-offset-2 hover:text-foreground/80"
+                className="text-xs text-text-3 underline underline-offset-2 hover:text-foreground/80"
               >
                 {showAll
                   ? "Mostra meno"
