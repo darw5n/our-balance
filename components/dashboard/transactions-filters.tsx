@@ -55,20 +55,14 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       </button>
 
       {/* Data da — mobile: solo se aperto; desktop: sempre visibile */}
-      <DateInput
-        name="from"
-        value={fromDate}
-        onChange={setFromDate}
-        className={`h-8 text-xs md:block ${filtersOpen ? "block w-full" : "hidden"}`}
-      />
+      <div className={`md:block ${filtersOpen ? "block w-full" : "hidden"}`}>
+        <DateInput name="from" value={fromDate} onChange={setFromDate} className="h-8 w-full text-xs" />
+      </div>
 
       {/* Data a */}
-      <DateInput
-        name="to"
-        value={toDate}
-        onChange={setToDate}
-        className={`h-8 text-xs md:block ${filtersOpen ? "block w-full" : "hidden"}`}
-      />
+      <div className={`md:block ${filtersOpen ? "block w-full" : "hidden"}`}>
+        <DateInput name="to" value={toDate} onChange={setToDate} className="h-8 w-full text-xs" />
+      </div>
 
       {/* Categoria */}
       <select
