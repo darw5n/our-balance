@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import {
   ComposedChart,
   Bar,
@@ -23,16 +24,25 @@ type Props = {
   viewMode?: "personal" | "family"
 }
 
-const TOOLTIP_STYLE = {
-  background: "rgba(9,9,11,0.92)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: 8,
-  color: "rgba(244,244,245,0.95)",
-  fontSize: 12,
+function useChartTheme() {
+  const { resolvedTheme } = useTheme()
+  const dark = resolvedTheme === "dark"
+  return {
+    axisTick: { fill: dark ? "rgba(244,244,245,0.8)" : "rgba(0,0,0,0.6)", fontSize: 12 as const },
+    axisLine: { stroke: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" },
+    gridStroke: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+    refLine: dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+    legendStyle: { color: dark ? "rgba(244,244,245,0.85)" : "rgba(0,0,0,0.7)", fontSize: 12 },
+    tooltipStyle: {
+      background: dark ? "rgba(9,9,11,0.92)" : "rgba(255,255,255,0.97)",
+      border: dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
+      borderRadius: 8,
+      color: dark ? "rgba(244,244,245,0.95)" : "rgba(0,0,0,0.85)",
+      fontSize: 12,
+    },
+    labelStyle: { color: dark ? "rgba(244,244,245,0.9)" : "rgba(0,0,0,0.8)", fontWeight: 500 as const },
+  }
 }
-
-const AXIS_TICK = { fill: "rgba(244,244,245,0.8)", fontSize: 12 }
-const AXIS_LINE = { stroke: "rgba(255,255,255,0.12)" }
 
 const LEGEND_LABELS: Record<string, string> = {
   entrate: "Entrate",
@@ -60,6 +70,7 @@ function useIsMobile() {
 
 export function CashflowReportChart({ data, year, viewMode = "personal" }: Props) {
   const isMobile = useIsMobile()
+  const { axisTick, axisLine, gridStroke, refLine, legendStyle, tooltipStyle, labelStyle } = useChartTheme()
   const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
 
   const isFamily = viewMode === "family"
@@ -75,7 +86,7 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
   const hasData = data.some((p) => p.entrate > 0 || p.uscite > 0)
 
   return (
-    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">
           {isFamily ? `Uscite mensili ${year}` : `Cashflow mensile ${year}`}
@@ -93,19 +104,19 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
+              <CartesianGrid stroke={gridStroke} vertical={false} />
+              <XAxis dataKey="month" tick={axisTick} axisLine={axisLine} tickLine={axisLine} tickFormatter={formatMonth} />
               <YAxis
-                tick={AXIS_TICK}
-                axisLine={AXIS_LINE}
-                tickLine={AXIS_LINE}
+                tick={axisTick}
+                axisLine={axisLine}
+                tickLine={axisLine}
                 width={55}
                 tickFormatter={(v) => formatCurrencyAxis(Number(v))}
               />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                contentStyle={TOOLTIP_STYLE}
-                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
+                cursor={{ fill: "rgba(128,128,128,0.07)" }}
+                contentStyle={tooltipStyle}
+                labelStyle={labelStyle}
                 labelFormatter={(v) => MONTH_FULL[String(v).toLowerCase()] ?? v}
                 formatter={(value: unknown, name?: string) => [
                   formatCurrency(Number(value)),
@@ -113,10 +124,10 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
                 ]}
               />
               <Legend
-                wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
+                wrapperStyle={legendStyle}
                 formatter={(value) => LEGEND_LABELS[value] ?? value}
               />
-              {!isFamily && <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />}
+              {!isFamily && <ReferenceLine y={0} stroke={refLine} strokeDasharray="4 3" />}
               {!isFamily && (
                 <>
                   <Bar dataKey="entrate" stackId="e" fill="rgba(52,211,153,0.85)" radius={[0, 0, 0, 0]} />

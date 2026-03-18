@@ -43,7 +43,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Uscite questo mese */}
-        <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+        <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-sm text-text-2">Spese questo mese</p>
@@ -58,7 +58,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
         </Card>
 
         {/* Uscite da gennaio */}
-        <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+        <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-sm text-text-2">Spese da gennaio</p>
@@ -74,7 +74,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
 
         {/* Da confermare */}
         {current.pending > 0 && (
-          <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+          <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-text-2">Da confermare</p>
@@ -95,7 +95,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {/* Entrate */}
-      <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+      <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p className="text-sm text-text-2">Entrate mese</p>
@@ -115,7 +115,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
       </Card>
 
       {/* Uscite */}
-      <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+      <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p className="text-sm text-text-2">Uscite mese</p>
@@ -130,7 +130,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
       </Card>
 
       {/* Netto + health badge */}
-      <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+      <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
             <p className="text-sm text-text-2">Netto mese</p>
@@ -150,7 +150,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
 
       {/* Quota in comune oppure Pending */}
       {current.spese_comuni > 0 ? (
-        <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+        <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <p className="text-sm text-text-2">Spese in comune</p>
@@ -168,7 +168,7 @@ export function BalanceCards({ current, ytdUscite, viewMode }: BalanceCardsProps
         </Card>
       ) : (
         current.pending > 0 && (
-          <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+          <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-text-2">Da confermare</p>

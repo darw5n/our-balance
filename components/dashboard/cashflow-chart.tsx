@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import {
   AreaChart,
   Area,
@@ -22,14 +23,22 @@ type CashflowChartProps = {
   hideIncome?: boolean
 }
 
-const AXIS_TICK = { fill: "rgba(244,244,245,0.8)", fontSize: 12 }
-const AXIS_LINE = { stroke: "rgba(255,255,255,0.12)" }
-const TOOLTIP_STYLE = {
-  background: "rgba(9,9,11,0.92)",
-  border: "1px solid rgba(255,255,255,0.12)",
-  borderRadius: 8,
-  color: "rgba(244,244,245,0.95)",
-  fontSize: 12,
+function useChartTheme() {
+  const { resolvedTheme } = useTheme()
+  const dark = resolvedTheme === "dark"
+  return {
+    axisTick: { fill: dark ? "rgba(244,244,245,0.8)" : "rgba(0,0,0,0.6)", fontSize: 12 as const },
+    axisLine: { stroke: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)" },
+    gridStroke: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
+    refLine: dark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+    tooltipStyle: {
+      background: dark ? "rgba(9,9,11,0.92)" : "rgba(255,255,255,0.97)",
+      border: dark ? "1px solid rgba(255,255,255,0.12)" : "1px solid rgba(0,0,0,0.1)",
+      borderRadius: 8,
+      color: dark ? "rgba(244,244,245,0.95)" : "rgba(0,0,0,0.85)",
+      fontSize: 12,
+    },
+  }
 }
 
 function useIsMobile() {
@@ -46,6 +55,7 @@ function useIsMobile() {
 
 export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) {
   const isMobile = useIsMobile()
+  const { axisTick, axisLine, gridStroke, refLine, tooltipStyle } = useChartTheme()
   const hasData = data.length > 0
   const formatMonth = (v: string) =>
     isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
@@ -65,7 +75,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
   const zeroOffset = range === 0 ? 1 : max / range
 
   return (
-    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">
           {hideIncome ? "Spese mensili in comune" : "Netto ultimi 12 mesi"}
@@ -88,12 +98,12 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
           /* Family view — bar chart of uscite */
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
-              <YAxis tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
+              <CartesianGrid stroke={gridStroke} vertical={false} />
+              <XAxis dataKey="month" tick={axisTick} axisLine={axisLine} tickLine={axisLine} tickFormatter={formatMonth} />
+              <YAxis tick={axisTick} axisLine={axisLine} tickLine={axisLine} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                contentStyle={TOOLTIP_STYLE}
+                cursor={{ fill: "rgba(128,128,128,0.07)" }}
+                contentStyle={tooltipStyle}
                 formatter={(v: unknown) => [formatCurrency(Number(v)), "Uscite"]}
               />
               <Bar dataKey="uscite" fill="rgba(248,113,133,0.85)" radius={[6, 6, 0, 0]} />
@@ -115,16 +125,15 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
                   <stop offset={`${zeroOffset * 100}%`} stopColor="rgba(248,113,133,1)" />
                 </linearGradient>
               </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
-              <YAxis tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
+              <CartesianGrid stroke={gridStroke} vertical={false} />
+              <XAxis dataKey="month" tick={axisTick} axisLine={axisLine} tickLine={axisLine} tickFormatter={formatMonth} />
+              <YAxis tick={axisTick} axisLine={axisLine} tickLine={axisLine} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
               <Tooltip
-                cursor={{ stroke: "rgba(255,255,255,0.12)" }}
-                contentStyle={TOOLTIP_STYLE}
-                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
+                cursor={{ stroke: "rgba(128,128,128,0.15)" }}
+                contentStyle={tooltipStyle}
                 formatter={(v: unknown) => [formatCurrency(Number(v)), "Netto"]}
               />
-              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />
+              <ReferenceLine y={0} stroke={refLine} strokeDasharray="4 3" />
               <Area
                 type="monotone"
                 dataKey="netto"

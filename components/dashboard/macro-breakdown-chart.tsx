@@ -25,7 +25,7 @@ export function MacroBreakdownChart({ data }: Props) {
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
 
   return (
-    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">Suddivisione macro-categorie</h2>
         <p className="text-xs text-text-2">

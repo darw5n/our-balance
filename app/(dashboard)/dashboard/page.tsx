@@ -24,7 +24,7 @@ import { getCategoryIcon } from "@/lib/category-icons"
 
 function SkeletonCard() {
   return (
-    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="skeleton h-3 w-24" />
@@ -66,14 +66,14 @@ function BudgetsSkeleton() {
 function ChartsSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-      <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+      <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
         <div className="mb-4 space-y-2">
           <div className="skeleton h-4 w-40" />
           <div className="skeleton h-3 w-56" />
         </div>
         <div className="skeleton h-48 w-full !rounded-lg" />
       </Card>
-      <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+      <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
         <div className="mb-4 space-y-2">
           <div className="skeleton h-4 w-40" />
           <div className="skeleton h-3 w-56" />

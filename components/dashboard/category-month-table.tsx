@@ -52,7 +52,7 @@ export function CategoryMonthTable({ data, year }: Props) {
   }
 
   return (
-    <Card className="border-border-subtle bg-surface-1 p-5 shadow-sm backdrop-blur">
+    <Card className="border-border-subtle bg-surface-1 p-5 backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-foreground/90">Spese per categoria — {year}</h2>
         <p className="text-xs text-text-2">Dettaglio mensile di ogni categoria di uscita.</p>
