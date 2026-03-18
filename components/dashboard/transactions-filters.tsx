@@ -32,7 +32,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
         name="q"
         defaultValue={q}
         placeholder="Cerca..."
-        className="h-8 min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-0 px-2 text-xs text-text-1 outline-none placeholder:text-text-3 md:w-44 md:flex-none"
+        className="h-8 min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-2 px-2 text-xs text-text-1 outline-none placeholder:text-text-3 md:w-44 md:flex-none"
       />
 
       {/* Toggle filtri avanzati — solo mobile */}
@@ -68,7 +68,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       <select
         name="category"
         defaultValue={category}
-        className={`h-8 rounded-md border border-border-subtle bg-surface-0 px-2 text-xs text-text-1 outline-none md:block md:w-auto ${
+        className={`h-8 rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-6 text-xs text-text-1 outline-none md:block md:w-auto ${
           filtersOpen ? "block w-full" : "hidden"
         }`}
       >

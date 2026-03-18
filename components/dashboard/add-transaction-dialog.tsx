@@ -548,7 +548,7 @@ export function AddTransactionDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
+                  className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-3 hover:text-text-1"
                   onClick={() => setOpen(false)}
                   disabled={submitting}
                 >
