@@ -1,5 +1,9 @@
 /* ============================================================
-   BASE — Stili fondamentali e utilità globali
+   BASE — Riferimento stili fondamentali e utilità globali
+   Questo file è documentazione di riferimento.
+   Gli stili effettivi sono definiti inline in globals.css
+   perché Tailwind v4 richiede che le regole @layer base stiano
+   nello stesso file del blocco @theme inline.
    ============================================================ */
 
 /* ---- Safe area padding per bottom nav mobile ---- */

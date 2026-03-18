@@ -1,9 +1,9 @@
 /* ============================================================
-   TOKENS — CSS custom properties
-   Valori di riferimento per l'intera app.
-   In questo branch il tema è dark-first; i valori :root
-   sono placeholder — verranno differenziati quando si farà
-   il merge del branch features/light-dark-mode.
+   TOKENS — Riferimento CSS custom properties
+   Questo file è documentazione di riferimento.
+   I valori effettivi sono definiti inline in globals.css
+   perché Tailwind v4 richiede che le variabili CSS stiano
+   nello stesso file del blocco @theme inline.
    ============================================================ */
 
 :root {
