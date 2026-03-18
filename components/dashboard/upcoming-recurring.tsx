@@ -29,11 +29,11 @@ export function UpcomingRecurring({ items }: Props) {
   const hasMore = items.length > LIMIT
 
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+    <div className="rounded-xl border border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
       <div className="mb-3 flex items-center gap-2">
-        <CalendarClock className="h-4 w-4 text-amber-400" />
-        <h2 className="text-sm font-medium text-zinc-100">In scadenza</h2>
-        <span className="ml-auto text-xs text-zinc-500">prossimi 14 giorni</span>
+        <CalendarClock className="h-4 w-4 text-pending-fg" />
+        <h2 className="text-sm font-medium text-text-1">In scadenza</h2>
+        <span className="ml-auto text-xs text-text-3">prossimi 14 giorni</span>
       </div>
       <ul className="space-y-2">
         {displayed.map((item) => {
@@ -44,19 +44,19 @@ export function UpcomingRecurring({ items }: Props) {
                 className="h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: item.category?.color ?? "#71717a" }}
               />
-              <span className="flex-1 truncate text-xs text-zinc-300">
+              <span className="flex-1 truncate text-xs text-text-2">
                 {item.description ?? item.category?.name ?? "—"}
               </span>
-              <span className="shrink-0 text-xs text-zinc-500">{FREQ_LABEL[item.frequency]}</span>
-              <span className={`shrink-0 text-xs font-medium ${item.type === "expense" ? "text-rose-400" : "text-emerald-400"}`}>
+              <span className="shrink-0 text-xs text-text-3">{FREQ_LABEL[item.frequency]}</span>
+              <span className={`shrink-0 text-xs font-medium ${item.type === "expense" ? "text-expense-fg" : "text-income-fg"}`}>
                 {formatCurrency(item.amount)}
               </span>
               <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                 days <= 3
-                  ? "bg-rose-500/20 text-rose-400"
+                  ? "bg-expense-subtle text-expense-fg"
                   : days <= 7
-                  ? "bg-amber-500/20 text-amber-400"
-                  : "bg-zinc-800 text-zinc-400"
+                  ? "bg-pending-subtle text-pending-fg"
+                  : "bg-surface-3 text-text-2"
               }`}>
                 {days === 0 ? "oggi" : days === 1 ? "domani" : `${days}g`}
               </span>
@@ -67,7 +67,7 @@ export function UpcomingRecurring({ items }: Props) {
       {hasMore && (
         <Link
           href="/recurring"
-          className="mt-3 block text-center text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          className="mt-3 block text-center text-xs text-text-3 hover:text-text-2 transition-colors"
         >
           Vedi tutti ({items.length}) →
         </Link>

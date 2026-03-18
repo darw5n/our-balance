@@ -77,9 +77,9 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   const isSecondaryActive = SECONDARY_NAV.some((l) => isActive(l.href))
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="grid min-h-screen grid-rows-[auto_1fr_auto] bg-surface-0 text-text-1">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-zinc-950/60 backdrop-blur">
+      <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-overlay backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           {/* Left: logo + primary nav (desktop) */}
           <div className="flex items-center gap-2">
@@ -93,8 +93,8 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                   href={href}
                   className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     isActive(href)
-                      ? "bg-zinc-800 text-zinc-50"
-                      : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
+                      ? "bg-surface-3 text-text-1"
+                      : "text-text-2 hover:bg-surface-hover hover:text-text-1"
                   }`}
                 >
                   {label}
@@ -112,23 +112,23 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 aria-label="Menu account"
                 className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
                   menuOpen || isSecondaryActive
-                    ? "border-white/20 bg-zinc-800 text-zinc-50"
-                    : "border-white/10 text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
+                    ? "border-border-strong bg-surface-3 text-text-1"
+                    : "border-border-subtle text-text-2 hover:bg-surface-hover hover:text-text-1"
                 }`}
               >
                 <User className="h-4 w-4" />
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-xl border border-white/10 bg-zinc-900 p-1.5 shadow-xl">
+                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-xl border border-border-subtle bg-surface-1 p-1.5 shadow-xl">
                   {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
                     <Link
                       key={href}
                       href={href}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                         isActive(href)
-                          ? "bg-zinc-800 text-zinc-50"
-                          : "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50"
+                          ? "bg-surface-3 text-text-1"
+                          : "text-text-2 hover:bg-surface-3 hover:text-text-1"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -136,15 +136,15 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                     </Link>
                   ))}
 
-                  <div className="my-1.5 border-t border-white/10" />
+                  <div className="my-1.5 border-t border-border-subtle" />
 
                   {userEmail && (
-                    <p className="truncate px-3 py-2 text-xs text-zinc-500">{userEmail}</p>
+                    <p className="truncate px-3 py-2 text-xs text-text-3">{userEmail}</p>
                   )}
 
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-800 hover:text-rose-400"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-2 transition-colors hover:bg-surface-3 hover:text-expense-fg"
                   >
                     <LogOut className="h-4 w-4" />
                     Esci
@@ -156,18 +156,18 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
 
       {/* Footer — desktop only (mobile ha bottom nav) */}
-      <footer className="hidden border-t border-white/10 md:block">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-zinc-600">
+      <footer className="hidden border-t border-border-subtle md:block">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-text-3">
           <span>OurBalance</span>
           <span>© {new Date().getFullYear()}</span>
         </div>
       </footer>
 
       {/* Bottom nav — mobile only */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-zinc-950/95 backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border-subtle bg-surface-overlay backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex">
           {/* Dashboard */}
           {[
@@ -180,7 +180,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 key={href}
                 href={href}
                 className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-emerald-400" : "text-zinc-500 hover:text-zinc-300"
+                  active ? "text-income-fg" : "text-text-3 hover:text-text-2"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -193,7 +193,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
           <div className="flex h-16 flex-1 items-center justify-center">
             <button
               onClick={() => setAddOpen(true)}
-              className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-transform active:scale-95"
+              className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-income shadow-lg shadow-emerald-500/30 transition-transform active:scale-95"
               aria-label="Aggiungi transazione"
             >
               <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
@@ -211,7 +211,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                 key={href}
                 href={href}
                 className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-emerald-400" : "text-zinc-500 hover:text-zinc-300"
+                  active ? "text-income-fg" : "text-text-3 hover:text-text-2"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -226,7 +226,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
       {(pathname === "/dashboard" || pathname.startsWith("/transactions")) && (
         <button
           onClick={() => setAddOpen(true)}
-          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-emerald-400 active:scale-95 md:flex"
+          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-income shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-income-fg active:scale-95 md:flex"
           aria-label="Aggiungi transazione"
         >
           <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />

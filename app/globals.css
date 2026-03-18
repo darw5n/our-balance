@@ -1,122 +1,268 @@
+/* ============================================================
+   GLOBALS — Entry point CSS
+   Struttura ispirata al pattern partial SCSS:
+     _tokens    → CSS custom properties (:root / .dark)
+     _base      → scrollbar, skeleton, safe-area, layer base
+     _typography → font e scale tipografica (vedi _typography.css)
+   In Tailwind v4 le variabili devono stare inline in questo file
+   per evitare che i default di Tailwind le sovrascrivano.
+   ============================================================ */
+
+/* ---- Dipendenze esterne ---- */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* ---- Variante dark per Tailwind ---- */
 @custom-variant dark (&:is(.dark *));
 
+/* ---- Tema Tailwind — mappa i token CSS in utility classes ---- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
+
+  /* Shadcn: colori base */
+  --color-background:            var(--background);
+  --color-foreground:            var(--foreground);
+  --color-card:                  var(--card);
+  --color-card-foreground:       var(--card-foreground);
+  --color-popover:               var(--popover);
+  --color-popover-foreground:    var(--popover-foreground);
+  --color-primary:               var(--primary);
+  --color-primary-foreground:    var(--primary-foreground);
+  --color-secondary:             var(--secondary);
+  --color-secondary-foreground:  var(--secondary-foreground);
+  --color-muted:                 var(--muted);
+  --color-muted-foreground:      var(--muted-foreground);
+  --color-accent:                var(--accent);
+  --color-accent-foreground:     var(--accent-foreground);
+  --color-destructive:           var(--destructive);
+  --color-border:                var(--border);
+  --color-input:                 var(--input);
+  --color-ring:                  var(--ring);
+
+  /* Shadcn: chart */
   --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Shadcn: radius */
+  --radius-sm:  calc(var(--radius) - 4px);
+  --radius-md:  calc(var(--radius) - 2px);
+  --radius-lg:  var(--radius);
+  --radius-xl:  calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+
+  /* ---- Superfici ---- */
+  --color-surface-0:       var(--surface-0);
+  --color-surface-1:       var(--surface-1);
+  --color-surface-2:       var(--surface-2);
+  --color-surface-3:       var(--surface-3);
+  --color-surface-hover:   var(--surface-hover);
+  --color-surface-active:  var(--surface-active);
+  --color-surface-overlay: var(--surface-overlay);
+
+  /* ---- Testo ---- */
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+
+  /* ---- Bordi ---- */
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  /* ---- Intent: entrate ---- */
+  --color-income:        var(--income);
+  --color-income-fg:     var(--income-fg);
+  --color-income-subtle: var(--income-subtle);
+
+  /* ---- Intent: uscite ---- */
+  --color-expense:        var(--expense);
+  --color-expense-fg:     var(--expense-fg);
+  --color-expense-subtle: var(--expense-subtle);
+
+  /* ---- Intent: in attesa ---- */
+  --color-pending:        var(--pending);
+  --color-pending-fg:     var(--pending-fg);
+  --color-pending-subtle: var(--pending-subtle);
+
+  /* ---- Intent: info ---- */
+  --color-info:        var(--info);
+  --color-info-subtle: var(--info-subtle);
+
+  /* ---- Intent: in comune ---- */
+  --color-shared:        var(--shared);
+  --color-shared-subtle: var(--shared-subtle);
 }
+
+/* ============================================================
+   _tokens — CSS custom properties
+   Valori di riferimento per l'intera app.
+   In questo branch il tema è dark-first; i valori :root
+   sono placeholder — verranno differenziati nel merge di
+   features/light-dark-mode.
+   ============================================================ */
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
+  /* ---- Shadcn defaults ---- */
+  --background:           oklch(0.145 0 0);
+  --foreground:           oklch(0.985 0 0);
+  --card:                 oklch(0.21 0 0);
+  --card-foreground:      oklch(0.985 0 0);
+  --popover:              oklch(0.21 0 0);
+  --popover-foreground:   oklch(0.985 0 0);
+  --primary:              oklch(0.922 0 0);
+  --primary-foreground:   oklch(0.205 0 0);
+  --secondary:            oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --muted:                oklch(0.269 0 0);
+  --muted-foreground:     oklch(0.708 0 0);
+  --accent:               oklch(0.269 0 0);
+  --accent-foreground:    oklch(0.985 0 0);
+  --destructive:          oklch(0.704 0.191 22.216);
+  --border:               oklch(1 0 0 / 10%);
+  --input:                oklch(1 0 0 / 15%);
+  --ring:                 oklch(0.556 0 0);
+  --chart-1:              oklch(0.488 0.243 264.376);
+  --chart-2:              oklch(0.696 0.17 162.48);
+  --chart-3:              oklch(0.769 0.188 70.08);
+  --chart-4:              oklch(0.627 0.265 303.9);
+  --chart-5:              oklch(0.645 0.246 16.439);
+
+  /* ---- Superfici ---- */
+  --surface-0:       oklch(0.145 0 0);         /* bg principale — zinc-950  */
+  --surface-1:       oklch(0.21 0 0);          /* card, modal  — zinc-900  */
+  --surface-2:       oklch(0.248 0 0);         /* input, select            */
+  --surface-3:       oklch(0.274 0 0);         /* hover target — zinc-800  */
+  --surface-hover:   oklch(0.274 0 0 / 60%);  /* hover sottile            */
+  --surface-active:  oklch(0.274 0 0);         /* stato attivo/selezionato */
+  --surface-overlay: oklch(0.145 0 0 / 95%);  /* header blur, nav mobile  */
+
+  /* ---- Testo ---- */
+  --text-1: oklch(0.985 0 0);  /* primario   — zinc-50  */
+  --text-2: oklch(0.646 0 0);  /* secondario — zinc-300 */
+  --text-3: oklch(0.507 0 0);  /* muted      — zinc-500 */
+
+  /* ---- Bordi ---- */
+  --border-subtle: oklch(1 0 0 / 10%);  /* separatori leggeri — white/10 */
+  --border-strong: oklch(1 0 0 / 20%);  /* bordi evidenti     — white/20 */
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track:       oklch(0.145 0 0);  /* zinc-950 */
+  --scrollbar-thumb:       oklch(0.37 0 0);   /* zinc-700 */
+  --scrollbar-thumb-hover: oklch(0.442 0 0);  /* zinc-600 */
+
+  /* ---- Intent: entrate (emerald) ---- */
+  --income:        oklch(0.696 0.17 162.48);           /* emerald-500 */
+  --income-fg:     oklch(0.765 0.177 163.223);         /* emerald-400 */
+  --income-subtle: oklch(0.696 0.17 162.48 / 20%);    /* emerald-500/20 */
+
+  /* ---- Intent: uscite (rose) ---- */
+  --expense:        oklch(0.645 0.246 16.439);         /* rose-500 */
+  --expense-fg:     oklch(0.712 0.194 13.428);         /* rose-400 */
+  --expense-subtle: oklch(0.645 0.246 16.439 / 20%);  /* rose-500/20 */
+
+  /* ---- Intent: in attesa (amber) ---- */
+  --pending:        oklch(0.769 0.188 70.08);          /* amber-500 */
+  --pending-fg:     oklch(0.828 0.189 84.429);         /* amber-400 */
+  --pending-subtle: oklch(0.769 0.188 70.08 / 20%);   /* amber-500/20 */
+
+  /* ---- Intent: info (sky) ---- */
+  --info:        oklch(0.746 0.16 232.661);            /* sky-400 */
+  --info-subtle: oklch(0.746 0.16 232.661 / 20%);     /* sky-400/20 */
+
+  /* ---- Intent: in comune / famiglia (violet) ---- */
+  --shared:        oklch(0.702 0.183 293.541);         /* violet-400 */
+  --shared-subtle: oklch(0.702 0.183 293.541 / 20%);  /* violet-400/20 */
 }
 
-/* Safe area padding for mobile bottom nav */
+/* ---- Dark theme — classe applicata da next-themes su <html> ---- */
+.dark {
+  /* ---- Shadcn defaults ---- */
+  --background:           oklch(0.145 0 0);
+  --foreground:           oklch(0.985 0 0);
+  --card:                 oklch(0.21 0 0);
+  --card-foreground:      oklch(0.985 0 0);
+  --popover:              oklch(0.21 0 0);
+  --popover-foreground:   oklch(0.985 0 0);
+  --primary:              oklch(0.922 0 0);
+  --primary-foreground:   oklch(0.205 0 0);
+  --secondary:            oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted:                oklch(0.269 0 0);
+  --muted-foreground:     oklch(0.708 0 0);
+  --accent:               oklch(0.269 0 0);
+  --accent-foreground:    oklch(0.985 0 0);
+  --destructive:          oklch(0.704 0.191 22.216);
+  --border:               oklch(1 0 0 / 10%);
+  --input:                oklch(1 0 0 / 15%);
+  --ring:                 oklch(0.556 0 0);
+  --chart-1:              oklch(0.488 0.243 264.376);
+  --chart-2:              oklch(0.696 0.17 162.48);
+  --chart-3:              oklch(0.769 0.188 70.08);
+  --chart-4:              oklch(0.627 0.265 303.9);
+  --chart-5:              oklch(0.645 0.246 16.439);
+
+  /* ---- Superfici ---- */
+  --surface-0:       oklch(0.145 0 0);
+  --surface-1:       oklch(0.21 0 0);
+  --surface-2:       oklch(0.248 0 0);
+  --surface-3:       oklch(0.274 0 0);
+  --surface-hover:   oklch(0.274 0 0 / 60%);
+  --surface-active:  oklch(0.274 0 0);
+  --surface-overlay: oklch(0.145 0 0 / 95%);
+
+  /* ---- Testo ---- */
+  --text-1: oklch(0.985 0 0);
+  --text-2: oklch(0.646 0 0);
+  --text-3: oklch(0.507 0 0);
+
+  /* ---- Bordi ---- */
+  --border-subtle: oklch(1 0 0 / 10%);
+  --border-strong: oklch(1 0 0 / 20%);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-track:       oklch(0.145 0 0);
+  --scrollbar-thumb:       oklch(0.37 0 0);
+  --scrollbar-thumb-hover: oklch(0.442 0 0);
+
+  /* ---- Intent: entrate ---- */
+  --income:        oklch(0.696 0.17 162.48);
+  --income-fg:     oklch(0.765 0.177 163.223);
+  --income-subtle: oklch(0.696 0.17 162.48 / 20%);
+
+  /* ---- Intent: uscite ---- */
+  --expense:        oklch(0.645 0.246 16.439);
+  --expense-fg:     oklch(0.712 0.194 13.428);
+  --expense-subtle: oklch(0.645 0.246 16.439 / 20%);
+
+  /* ---- Intent: in attesa ---- */
+  --pending:        oklch(0.769 0.188 70.08);
+  --pending-fg:     oklch(0.828 0.189 84.429);
+  --pending-subtle: oklch(0.769 0.188 70.08 / 20%);
+
+  /* ---- Intent: info ---- */
+  --info:        oklch(0.746 0.16 232.661);
+  --info-subtle: oklch(0.746 0.16 232.661 / 20%);
+
+  /* ---- Intent: in comune ---- */
+  --shared:        oklch(0.702 0.183 293.541);
+  --shared-subtle: oklch(0.702 0.183 293.541 / 20%);
+}
+
+/* ============================================================
+   _base — Stili fondamentali e utilità globali
+   ============================================================ */
+
+/* ---- Safe area padding per bottom nav mobile ---- */
 .pb-safe-nav {
   padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
@@ -126,6 +272,7 @@
   }
 }
 
+/* ---- Skeleton loader ---- */
 @keyframes shimmer {
   0%   { background-position: -400% 0; }
   100% { background-position:  400% 0; }
@@ -134,43 +281,37 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 255, 255, 0.04) 75%
+    oklch(1 0 0 / 4%) 25%,
+    oklch(1 0 0 / 9%) 50%,
+    oklch(1 0 0 / 4%) 75%
   );
   background-size: 400% 100%;
   animation: shimmer 2s ease-in-out infinite;
   border-radius: 0.375rem;
 }
 
+/* ---- Layer base: scrollbar + body + form controls ---- */
 @layer base {
   * {
     @apply border-border outline-ring/50;
+
     /* Firefox */
     scrollbar-width: thin;
-    scrollbar-color: #3f3f46 #18181b;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
   /* Chrome / Safari / Edge */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #18181b;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #3f3f46;
-    border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #52525b;
-  }
+  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
   body {
     @apply bg-background text-foreground;
     color-scheme: dark;
   }
+
+  /* Forza color-scheme dark su input nativi data/ora */
   input[type="date"],
   input[type="time"],
   input[type="datetime-local"],

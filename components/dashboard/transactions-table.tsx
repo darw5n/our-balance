@@ -94,19 +94,19 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   }
 
   if (transactions.length === 0) {
-    return <p className="text-xs text-zinc-400">Nessuna transazione trovata.</p>
+    return <p className="text-xs text-text-2">Nessuna transazione trovata.</p>
   }
 
   return (
     <>
       {selected.size > 0 && (
-        <div className="mb-3 flex items-center gap-3 rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-2">
-          <span className="text-xs text-rose-300">
+        <div className="mb-3 flex items-center gap-3 rounded-md border border-expense/30 bg-expense-subtle px-4 py-2">
+          <span className="text-xs text-expense-fg">
             {selected.size} {selected.size === 1 ? "selezionata" : "selezionate"}
           </span>
           <Button
             size="sm"
-            className="ml-auto h-7 bg-rose-500 text-xs text-white hover:bg-rose-400"
+            className="ml-auto h-7 bg-expense text-xs text-white hover:bg-expense-fg"
             onClick={handleBulkDelete}
             disabled={deleting}
           >
@@ -154,11 +154,11 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   />
                 </TableCell>
                 <TableCell>{dateLabel}</TableCell>
-                <TableCell className="max-w-[160px] truncate text-xs text-zinc-200 md:max-w-[220px]">
+                <TableCell className="max-w-[160px] truncate text-xs text-text-1 md:max-w-[220px]">
                   {tx.description || "-"}
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className={tx.type === "expense" ? "text-rose-400" : "text-emerald-400"}>
+                  <span className={tx.type === "expense" ? "text-expense-fg" : "text-income-fg"}>
                     {formattedAmount}
                   </span>
                 </TableCell>
@@ -166,15 +166,15 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   <div className="flex items-center gap-1.5">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                       tx.type === "income"
-                        ? "bg-emerald-500/20 text-emerald-400"
+                        ? "bg-income-subtle text-income-fg"
                         : tx.type === "expense"
-                        ? "bg-rose-500/20 text-rose-400"
-                        : "bg-zinc-800 text-zinc-400"
+                        ? "bg-expense-subtle text-expense-fg"
+                        : "bg-surface-3 text-text-2"
                     }`}>
                       {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
                     </span>
                     {tx.scope === "family" && (
-                      <span className="flex items-center gap-0.5 rounded-full bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-400">
+                      <span className="flex items-center gap-0.5 rounded-full bg-shared-subtle px-1.5 py-0.5 text-[10px] font-medium text-shared">
                         <Users className="h-2.5 w-2.5" />
                         comune
                       </span>
@@ -184,10 +184,10 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                 <TableCell className="hidden md:table-cell">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                     tx.status === "confirmed"
-                      ? "bg-zinc-700 text-zinc-300"
+                      ? "bg-surface-3 text-text-2"
                       : tx.status === "pending"
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-zinc-800 text-zinc-400"
+                      ? "bg-pending-subtle text-pending-fg"
+                      : "bg-surface-3 text-text-2"
                   }`}>
                     {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
                   </span>
@@ -197,7 +197,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-zinc-400 hover:text-zinc-50"
+                      className="h-7 w-7 text-text-2 hover:text-text-1"
                       onClick={() => handleEdit(tx)}
                       aria-label="Modifica"
                     >
@@ -206,7 +206,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-zinc-400 hover:text-rose-400"
+                      className="h-7 w-7 text-text-2 hover:text-expense-fg"
                       onClick={() => handleDelete(tx)}
                       disabled={deleting}
                       aria-label="Elimina"

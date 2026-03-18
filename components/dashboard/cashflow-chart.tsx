@@ -4,8 +4,6 @@ import { useEffect, useState } from "react"
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -85,19 +83,34 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
             Nessun dato da visualizzare.
           </div>
         ) : hideIncome ? (
-          /* Family view — bar chart of uscite */
+          /* Family view — area chart of uscite */
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+            <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="usciteFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(248,113,133,0.5)" />
+                  <stop offset="100%" stopColor="rgba(248,113,133,0.05)" />
+                </linearGradient>
+              </defs>
               <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
               <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
               <YAxis tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
               <Tooltip
-                cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                cursor={{ stroke: "rgba(255,255,255,0.12)" }}
                 contentStyle={TOOLTIP_STYLE}
+                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
                 formatter={(v: unknown) => [formatCurrency(Number(v)), "Uscite"]}
               />
-              <Bar dataKey="uscite" fill="rgba(248,113,133,0.85)" radius={[6, 6, 0, 0]} />
-            </BarChart>
+              <Area
+                type="monotone"
+                dataKey="uscite"
+                stroke="rgba(248,113,133,1)"
+                strokeWidth={2}
+                fill="url(#usciteFill)"
+                dot={false}
+                activeDot={{ r: 4, fill: "rgba(244,244,245,0.9)" }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         ) : (
           /* Personal view — netto area chart with green/red split */

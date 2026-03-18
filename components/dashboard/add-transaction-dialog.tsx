@@ -12,7 +12,8 @@ import { createTransaction, type TransactionType } from "@/app/actions/transacti
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { supabase } from "@/lib/supabase"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
-import { parseItalianAmount } from "@/lib/utils"
+import { validateAmount } from "@/lib/utils"
+import { useFormState } from "@/lib/hooks/use-form-state"
 
 export type CategoryOption = {
   id: string
@@ -77,8 +78,7 @@ export function AddTransactionDialog({
   const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
   const [confirmationDelay, setConfirmationDelay] = useState(0)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, wrap } = useFormState()
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [mounted, setMounted] = useState(false)
   const [suggestedCategoryId, setSuggestedCategoryId] = useState<string | null>(null)
@@ -212,11 +212,12 @@ export function AddTransactionDialog({
       return
     }
 
-    const parsedAmount = parseItalianAmount(amount)
-    if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
-      setError("Importo non valido.")
+    const amountResult = validateAmount(amount)
+    if (!amountResult.ok) {
+      setError(amountResult.error)
       return
     }
+    const parsedAmount = amountResult.value
 
     // date is already YYYY-MM-DD from DateInput
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -225,20 +226,17 @@ export function AddTransactionDialog({
     }
     const formattedDate = date
 
-    setSubmitting(true)
+    await wrap(async () => {
+      // Verify authentication again before submitting
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-    // Verify authentication again before submitting
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      if (!user) {
+        setError("Sessione scaduta. Ricarica la pagina e riprova.")
+        return
+      }
 
-    if (!user) {
-      setError("Sessione scaduta. Ricarica la pagina e riprova.")
-      setSubmitting(false)
-      return
-    }
-
-    try {
       let result: { success: boolean; error?: string }
 
       if (isRecurring) {
@@ -286,12 +284,7 @@ export function AddTransactionDialog({
       setError(null)
 
       router.refresh()
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Errore sconosciuto."
-      setError(errorMessage)
-    } finally {
-      setSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -301,7 +294,7 @@ export function AddTransactionDialog({
           {!isControlled && (
             <DialogTrigger asChild>
               <Button
-                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-emerald-500 text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-emerald-400 focus-visible:ring-emerald-300 md:bottom-6"
+                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-income text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-income-fg focus-visible:ring-emerald-300 md:bottom-6"
                 size="icon"
               >
                 <Plus className="h-6 w-6" />
@@ -316,8 +309,8 @@ export function AddTransactionDialog({
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="type">
-                Tipo <span className="text-rose-400">*</span>
+              <label className="text-xs font-medium text-text-2" htmlFor="type">
+                Tipo <span className="text-expense-fg">*</span>
               </label>
               <div className="flex gap-2">
                 <button
@@ -325,8 +318,8 @@ export function AddTransactionDialog({
                   onClick={() => { setType("income"); setRequiresConfirmation(true); setCategoryId("") }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "income"
-                      ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                      : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      ? "border-income bg-income-subtle text-income-fg"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                   }`}
                 >
                   <TrendingUp className="h-4 w-4" />
@@ -337,8 +330,8 @@ export function AddTransactionDialog({
                   onClick={() => { setType("expense"); setRequiresConfirmation(false); setCategoryId("") }}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "expense"
-                      ? "border-rose-500 bg-rose-500/20 text-rose-400"
-                      : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      ? "border-expense bg-expense-subtle text-expense-fg"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                   }`}
                 >
                   <TrendingDown className="h-4 w-4" />
@@ -348,7 +341,7 @@ export function AddTransactionDialog({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300">
+              <label className="text-xs font-medium text-text-2">
                 Visibilità
               </label>
               <div className="flex gap-2">
@@ -358,7 +351,7 @@ export function AddTransactionDialog({
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     scope === "personal"
                       ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                      : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                   }`}
                 >
                   <User className="h-4 w-4" />
@@ -369,8 +362,8 @@ export function AddTransactionDialog({
                   onClick={() => setScope("family")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     scope === "family"
-                      ? "border-violet-500 bg-violet-500/20 text-violet-400"
-                      : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      ? "border-shared bg-shared-subtle text-shared"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                   }`}
                 >
                   <Users className="h-4 w-4" />
@@ -380,9 +373,9 @@ export function AddTransactionDialog({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="date">
+              <label className="text-xs font-medium text-text-2" htmlFor="date">
                 {isRecurring ? "Data di inizio" : "Data"}{" "}
-                <span className="text-rose-400">*</span>
+                <span className="text-expense-fg">*</span>
               </label>
               <DateInput
                 id="date"
@@ -393,8 +386,8 @@ export function AddTransactionDialog({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="amount">
-                Importo <span className="text-rose-400">*</span>
+              <label className="text-xs font-medium text-text-2" htmlFor="amount">
+                Importo <span className="text-expense-fg">*</span>
               </label>
               <Input
                 id="amount"
@@ -408,7 +401,7 @@ export function AddTransactionDialog({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="description">
+              <label className="text-xs font-medium text-text-2" htmlFor="description">
                 Descrizione
               </label>
               <Input
@@ -421,8 +414,8 @@ export function AddTransactionDialog({
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300">
-                Categoria <span className="text-rose-400">*</span>
+              <label className="text-xs font-medium text-text-2">
+                Categoria <span className="text-expense-fg">*</span>
               </label>
               <CategoryCombobox
                 categories={categories}
@@ -437,7 +430,7 @@ export function AddTransactionDialog({
                   <button
                     type="button"
                     onClick={() => { setCategoryId(suggestedCategoryId); setSuggestedCategoryId(null) }}
-                    className="flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2.5 py-1.5 text-xs text-amber-300 transition-colors hover:bg-amber-500/20"
+                    className="flex items-center gap-2 rounded-md border border-pending/30 bg-pending-subtle px-2.5 py-1.5 text-xs text-pending-fg transition-colors hover:bg-pending-subtle"
                   >
                     <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: cat.color }} />
                     <span>Suggerito: <strong>{cat.name}</strong></span>
@@ -448,9 +441,9 @@ export function AddTransactionDialog({
             </div>
 
             {/* Recurring toggle */}
-            <div className="border-t border-white/10 pt-3">
+            <div className="border-t border-border-subtle pt-3">
               <div className="flex items-center justify-between">
-                <label htmlFor="is-recurring" className="text-xs font-medium text-zinc-300 cursor-pointer">
+                <label htmlFor="is-recurring" className="text-xs font-medium text-text-2 cursor-pointer">
                   Rendila ricorrente
                 </label>
                 <button
@@ -460,7 +453,7 @@ export function AddTransactionDialog({
                   aria-checked={isRecurring}
                   onClick={() => setIsRecurring((v) => !v)}
                   className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 ${
-                    isRecurring ? "bg-emerald-500" : "bg-zinc-700"
+                    isRecurring ? "bg-income" : "bg-surface-3"
                   }`}
                 >
                   <span
@@ -474,7 +467,7 @@ export function AddTransactionDialog({
               {isRecurring && (
                 <div className="mt-3 space-y-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-zinc-300">Periodicità</label>
+                    <label className="text-xs font-medium text-text-2">Periodicità</label>
                     <div className="flex gap-2">
                       {(["weekly", "monthly", "yearly"] as const).map((f) => (
                         <button
@@ -483,8 +476,8 @@ export function AddTransactionDialog({
                           onClick={() => setFrequency(f)}
                           className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                             frequency === f
-                              ? "border-amber-500 bg-amber-500/20 text-amber-400"
-                              : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                              ? "border-pending bg-pending-subtle text-pending-fg"
+                              : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                           }`}
                         >
                           {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
@@ -502,17 +495,17 @@ export function AddTransactionDialog({
                         setRequiresConfirmation(e.target.checked)
                         if (!e.target.checked) setConfirmationDelay(0)
                       }}
-                      className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
+                      className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-emerald-500"
                     />
-                    <label htmlFor="req-confirm" className="text-xs text-zinc-300 cursor-pointer">
+                    <label htmlFor="req-confirm" className="text-xs text-text-2 cursor-pointer">
                       Chiedi conferma importo ogni volta{" "}
-                      <span className="text-zinc-500">(utile per stipendi variabili)</span>
+                      <span className="text-text-3">(utile per stipendi variabili)</span>
                     </label>
                   </div>
 
                   {requiresConfirmation && (
                     <div className="ml-7 space-y-1.5">
-                      <p className="text-xs text-zinc-400">Quando chiedere conferma?</p>
+                      <p className="text-xs text-text-2">Quando chiedere conferma?</p>
                       <div className="flex gap-2">
                         {([
                           { value: 0, label: "Immediato", hint: "Si conferma nel mese di competenza" },
@@ -526,15 +519,15 @@ export function AddTransactionDialog({
                             title={hint}
                             className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                               confirmationDelay === value
-                                ? "border-sky-500 bg-sky-500/20 text-sky-400"
-                                : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                                ? "border-info bg-info-subtle text-info"
+                                : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                             }`}
                           >
                             {label}
                           </button>
                         ))}
                       </div>
-                      <p className="text-[11px] text-zinc-500">
+                      <p className="text-[11px] text-text-3">
                         {[
                           { value: 0, hint: "Si conferma nel mese di competenza" },
                           { value: 1, hint: "Es. stipendio feb → conferma mar" },
@@ -547,15 +540,15 @@ export function AddTransactionDialog({
               )}
             </div>
 
-            {error && <p className="text-xs text-rose-400">{error}</p>}
+            {error && <p className="text-xs text-expense-fg">{error}</p>}
 
             {/* Footer: sticky su mobile, normale su desktop */}
-            <div className="sticky bottom-0 -mx-5 -mb-5 bg-zinc-950 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
+            <div className="sticky bottom-0 -mx-5 -mb-5 bg-surface-0 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+                  className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-3 hover:text-text-1"
                   onClick={() => setOpen(false)}
                   disabled={submitting}
                 >
@@ -564,7 +557,7 @@ export function AddTransactionDialog({
 
                 <Button
                   type="submit"
-                  className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                  className="bg-income text-zinc-950 hover:bg-income-fg"
                   disabled={submitting}
                 >
                   {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}

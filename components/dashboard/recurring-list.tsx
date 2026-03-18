@@ -76,12 +76,12 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     <>
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {recurring.length} {recurring.length === 1 ? "ricorrenza attiva" : "ricorrenze attive"}
           </p>
           <Button
             onClick={openCreate}
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+            className="bg-income text-zinc-950 hover:bg-income-fg"
             size="sm"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -90,15 +90,15 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
         </div>
 
         {recurring.length === 0 ? (
-          <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
-            <RefreshCw className="mx-auto mb-3 h-8 w-8 text-zinc-600" />
-            <p className="text-sm text-zinc-400">
+          <Card className="border-border-subtle bg-surface-1/50 p-8 text-center backdrop-blur">
+            <RefreshCw className="mx-auto mb-3 h-8 w-8 text-text-3" />
+            <p className="text-sm text-text-2">
               Nessuna ricorrenza. Aggiungine una per automatizzare entrate e uscite periodiche.
             </p>
             <Button
               onClick={openCreate}
               variant="outline"
-              className="mt-4 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+              className="mt-4 border-income/50 text-income-fg hover:bg-income-subtle"
             >
               <Plus className="mr-2 h-4 w-4" />
               Aggiungi ricorrenza
@@ -108,13 +108,13 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
           <ul className="space-y-2">
             {recurring.map((rec) => (
               <li key={rec.id}>
-                <Card className="flex items-center justify-between border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+                <Card className="flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
                         rec.type === "income"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-rose-500/20 text-rose-400"
+                          ? "bg-income-subtle text-income-fg"
+                          : "bg-expense-subtle text-expense-fg"
                       }`}
                     >
                       {rec.type === "income" ? (
@@ -124,25 +124,25 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-100">
+                      <p className="truncate text-sm font-medium text-text-1">
                         {rec.description || "Senza descrizione"}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 mt-0.5">
                         <span
                           className={`text-sm font-semibold ${
-                            rec.type === "income" ? "text-emerald-400" : "text-rose-400"
+                            rec.type === "income" ? "text-income-fg" : "text-expense-fg"
                           }`}
                         >
                           {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
                         </span>
-                        <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+                        <span className="rounded-full bg-pending-subtle px-2 py-0.5 text-xs text-pending-fg">
                           {FREQUENCY_LABEL[rec.frequency]}
                         </span>
                         {rec.category && (
-                          <span className="text-xs text-zinc-400">{rec.category.name}</span>
+                          <span className="text-xs text-text-2">{rec.category.name}</span>
                         )}
                       </div>
-                      <p className="text-xs text-zinc-500 mt-0.5">
+                      <p className="text-xs text-text-3 mt-0.5">
                         Prossima scadenza:{" "}
                         {formatDate(rec.next_due_date)}
                       </p>
@@ -152,7 +152,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-zinc-50"
+                      className="h-8 w-8 text-text-2 hover:text-text-1"
                       onClick={() => openEdit(rec)}
                       aria-label="Modifica"
                     >
@@ -161,7 +161,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-zinc-400 hover:text-rose-400"
+                      className="h-8 w-8 text-text-2 hover:text-expense-fg"
                       onClick={() => handleDelete(rec)}
                       aria-label="Elimina"
                     >

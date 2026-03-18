@@ -47,6 +47,18 @@ export function formatDate(dateStr: string | null | undefined): string {
   return `${day}/${month}/${year}`
 }
 
+/** Validate an Italian-formatted amount string.
+ *  Returns { ok: true, value } on success or { ok: false, error } on failure. */
+export function validateAmount(
+  raw: string
+): { ok: true; value: number } | { ok: false; error: string } {
+  const parsed = parseItalianAmount(raw)
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return { ok: false, error: "Inserisci un importo valido maggiore di zero." }
+  }
+  return { ok: true, value: parsed }
+}
+
 /** Compact currency for chart Y-axis: K suffix above 1000 (e.g. "1,5K €"), plain below */
 export function formatCurrencyAxis(amount: number): string {
   const sign = amount < 0 ? "-" : ""

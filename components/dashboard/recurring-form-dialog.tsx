@@ -20,7 +20,8 @@ import {
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
-import { parseItalianAmount } from "@/lib/utils"
+import { validateAmount } from "@/lib/utils"
+import { useFormState } from "@/lib/hooks/use-form-state"
 
 type RecurringFormDialogProps = {
   open: boolean
@@ -52,8 +53,7 @@ export function RecurringFormDialog({
   const [startDate, setStartDate] = useState("")
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
   const [confirmationDelay, setConfirmationDelay] = useState(0)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, wrap } = useFormState()
 
   const isEdit = !!recurring?.id
 
@@ -97,9 +97,9 @@ export function RecurringFormDialog({
     e.preventDefault()
     setError(null)
 
-    const parsedAmount = parseItalianAmount(amount)
-    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
-      setError("Importo non valido.")
+    const amountResult = validateAmount(amount)
+    if (!amountResult.ok) {
+      setError(amountResult.error)
       return
     }
     if (!categoryId) {
@@ -111,12 +111,11 @@ export function RecurringFormDialog({
       return
     }
 
-    setSubmitting(true)
-    try {
+    await wrap(async () => {
       const input: CreateRecurringInput = {
         type,
         scope,
-        amount: parsedAmount,
+        amount: amountResult.value,
         description: description.trim() || null,
         category_id: categoryId || null,
         frequency,
@@ -136,9 +135,7 @@ export function RecurringFormDialog({
 
       onOpenChange(false)
       onSuccess?.()
-    } finally {
-      setSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -151,8 +148,8 @@ export function RecurringFormDialog({
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* Type */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
-              Tipo <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2">
+              Tipo <span className="text-expense-fg">*</span>
             </label>
             <div className="flex gap-2">
               <button
@@ -160,8 +157,8 @@ export function RecurringFormDialog({
                 onClick={() => handleTypeChange("income")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "income"
-                    ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-income bg-income-subtle text-income-fg"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <TrendingUp className="h-4 w-4" />
@@ -172,8 +169,8 @@ export function RecurringFormDialog({
                 onClick={() => handleTypeChange("expense")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "expense"
-                    ? "border-rose-500 bg-rose-500/20 text-rose-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-expense bg-expense-subtle text-expense-fg"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <TrendingDown className="h-4 w-4" />
@@ -184,7 +181,7 @@ export function RecurringFormDialog({
 
           {/* Scope */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">Visibilità</label>
+            <label className="text-xs font-medium text-text-2">Visibilità</label>
             <div className="flex gap-2">
               <button
                 type="button"
@@ -192,7 +189,7 @@ export function RecurringFormDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "personal"
                     ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <User className="h-4 w-4" />
@@ -203,8 +200,8 @@ export function RecurringFormDialog({
                 onClick={() => setScope("family")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "family"
-                    ? "border-violet-500 bg-violet-500/20 text-violet-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-shared bg-shared-subtle text-shared"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <Users className="h-4 w-4" />
@@ -215,8 +212,8 @@ export function RecurringFormDialog({
 
           {/* Amount */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="rec-amount">
-              Importo <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2" htmlFor="rec-amount">
+              Importo <span className="text-expense-fg">*</span>
             </label>
             <Input
               id="rec-amount"
@@ -225,13 +222,13 @@ export function RecurringFormDialog({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0,00"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
           {/* Description */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="rec-desc">
+            <label className="text-xs font-medium text-text-2" htmlFor="rec-desc">
               Descrizione
             </label>
             <Input
@@ -240,14 +237,14 @@ export function RecurringFormDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Es. Affitto, Stipendio..."
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
           {/* Category */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
-              Categoria <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2">
+              Categoria <span className="text-expense-fg">*</span>
             </label>
             <CategoryCombobox
               categories={categories}
@@ -259,8 +256,8 @@ export function RecurringFormDialog({
 
           {/* Frequency */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
-              Frequenza <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2">
+              Frequenza <span className="text-expense-fg">*</span>
             </label>
             <div className="flex gap-2">
               {(["weekly", "monthly", "yearly"] as const).map((f) => (
@@ -270,8 +267,8 @@ export function RecurringFormDialog({
                   onClick={() => setFrequency(f)}
                   className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                     frequency === f
-                      ? "border-amber-500 bg-amber-500/20 text-amber-400"
-                      : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                      ? "border-pending bg-pending-subtle text-pending-fg"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                   }`}
                 >
                   {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
@@ -282,14 +279,14 @@ export function RecurringFormDialog({
 
           {/* Start Date */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="rec-start">
-              Data inizio <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2" htmlFor="rec-start">
+              Data inizio <span className="text-expense-fg">*</span>
             </label>
             <DateInput
               id="rec-start"
               value={startDate}
               onChange={setStartDate}
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
@@ -301,9 +298,9 @@ export function RecurringFormDialog({
                 type="checkbox"
                 checked={requiresConfirmation}
                 onChange={(e) => handleConfirmationToggle(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-zinc-900 accent-emerald-500"
+                className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-emerald-500"
               />
-              <label htmlFor="rec-confirm" className="text-xs text-zinc-300 cursor-pointer">
+              <label htmlFor="rec-confirm" className="text-xs text-text-2 cursor-pointer">
                 Richiedi conferma importo prima di registrare
               </label>
             </div>
@@ -311,7 +308,7 @@ export function RecurringFormDialog({
             {/* Confirmation delay — visible only when requires_confirmation is on */}
             {requiresConfirmation && (
               <div className="ml-7 space-y-1.5">
-                <p className="text-xs text-zinc-400">Quando chiedere conferma?</p>
+                <p className="text-xs text-text-2">Quando chiedere conferma?</p>
                 <div className="flex gap-2">
                   {DELAY_OPTIONS.map(({ value, label, hint }) => (
                     <button
@@ -321,28 +318,28 @@ export function RecurringFormDialog({
                       title={hint}
                       className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                         confirmationDelay === value
-                          ? "border-sky-500 bg-sky-500/20 text-sky-400"
-                          : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                          ? "border-info bg-info-subtle text-info"
+                          : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                       }`}
                     >
                       {label}
                     </button>
                   ))}
                 </div>
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-text-3">
                   {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
                 </p>
               </div>
             )}
           </div>
 
-          {error && <p className="text-xs text-rose-400">{error}</p>}
+          {error && <p className="text-xs text-expense-fg">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -350,7 +347,7 @@ export function RecurringFormDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="bg-income text-zinc-950 hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}

@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { createCategory, updateCategory, type CreateCategoryInput } from "@/app/actions/categories"
+import { useFormState } from "@/lib/hooks/use-form-state"
 import type { MacroCategory } from "@/lib/supabase/queries/categories"
 
 const PRESET_COLORS = [
@@ -42,8 +43,7 @@ export function CategoryFormDialog({
   const [type, setType] = useState<"expense" | "income">("expense")
   const [macroCategory, setMacroCategory] = useState<MacroCategory | null>(null)
   const [groupName, setGroupName] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, wrap } = useFormState()
 
   const isEdit = !!category?.id
 
@@ -67,8 +67,7 @@ export function CategoryFormDialog({
       return
     }
 
-    setSubmitting(true)
-    try {
+    await wrap(async () => {
       const input: CreateCategoryInput = { name: trimmed, color, type, macro_category: macroCategory, group_name: groupName.trim() || null }
       const result = isEdit
         ? await updateCategory(category.id, input)
@@ -80,9 +79,7 @@ export function CategoryFormDialog({
       }
       onOpenChange(false)
       onSuccess?.()
-    } finally {
-      setSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -93,7 +90,7 @@ export function CategoryFormDialog({
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="cat-name">
+            <label className="text-xs font-medium text-text-2" htmlFor="cat-name">
               Nome
             </label>
             <Input
@@ -101,33 +98,33 @@ export function CategoryFormDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Es. Alimentari"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="cat-group">
-              Gruppo <span className="text-zinc-500">(opzionale)</span>
+            <label className="text-xs font-medium text-text-2" htmlFor="cat-group">
+              Gruppo <span className="text-text-3">(opzionale)</span>
             </label>
             <Input
               id="cat-group"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Es. Abitazione, Cibo, Trasporti…"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">Tipo</label>
-            <div className="flex rounded-md border border-white/15 overflow-hidden">
+            <label className="text-xs font-medium text-text-2">Tipo</label>
+            <div className="flex rounded-md border border-border-subtle overflow-hidden">
               <button
                 type="button"
                 onClick={() => setType("expense")}
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "expense"
-                    ? "bg-rose-500/20 text-rose-400 font-medium"
-                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                    ? "bg-expense-subtle text-expense-fg font-medium"
+                    : "bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 Spesa
@@ -137,8 +134,8 @@ export function CategoryFormDialog({
                 onClick={() => setType("income")}
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "income"
-                    ? "bg-emerald-500/20 text-emerald-400 font-medium"
-                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                    ? "bg-income-subtle text-income-fg font-medium"
+                    : "bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 Entrata
@@ -147,7 +144,7 @@ export function CategoryFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-300">Colore</label>
+            <label className="text-xs font-medium text-text-2">Colore</label>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -166,13 +163,13 @@ export function CategoryFormDialog({
               type="text"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="mt-1 border-white/15 bg-zinc-950 font-mono text-zinc-50"
+              className="mt-1 border-border-subtle bg-surface-0 font-mono text-text-1"
               placeholder="#22c55e"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-300">Macro-categoria <span className="text-zinc-500">(opzionale)</span></label>
+            <label className="text-xs font-medium text-text-2">Macro-categoria <span className="text-text-3">(opzionale)</span></label>
             <div className="flex flex-wrap gap-2">
               {MACRO_OPTIONS.map((opt) => (
                 <button
@@ -188,12 +185,12 @@ export function CategoryFormDialog({
             </div>
           </div>
 
-          {error && <p className="text-xs text-rose-400">{error}</p>}
+          {error && <p className="text-xs text-expense-fg">{error}</p>}
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -201,7 +198,7 @@ export function CategoryFormDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="bg-income text-zinc-950 hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}

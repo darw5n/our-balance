@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { updateTransaction, type TransactionType } from "@/app/actions/transactions"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
-import { parseItalianAmount } from "@/lib/utils"
+import { validateAmount } from "@/lib/utils"
+import { useFormState } from "@/lib/hooks/use-form-state"
 import { DateInput } from "@/components/ui/date-input"
 
 export type Transaction = {
@@ -44,8 +45,7 @@ export function EditTransactionDialog({
   const [amount, setAmount] = useState("")
   const [categoryId, setCategoryId] = useState("")
   const [description, setDescription] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, wrap } = useFormState()
 
   useEffect(() => {
     if (open && transaction) {
@@ -74,16 +74,16 @@ export function EditTransactionDialog({
       return
     }
 
-    const parsedAmount = parseItalianAmount(amount)
-    if (!Number.isFinite(parsedAmount) || parsedAmount === 0) {
-      setError("Importo non valido.")
+    const amountResult = validateAmount(amount)
+    if (!amountResult.ok) {
+      setError(amountResult.error)
       return
     }
+    const parsedAmount = amountResult.value
 
     if (!transaction?.id) return
 
-    setSubmitting(true)
-    try {
+    await wrap(async () => {
       const result = await updateTransaction(transaction.id, {
         type,
         scope,
@@ -100,9 +100,7 @@ export function EditTransactionDialog({
 
       onOpenChange(false)
       onSuccess?.()
-    } finally {
-      setSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -114,8 +112,8 @@ export function EditTransactionDialog({
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
-              Tipo <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2">
+              Tipo <span className="text-expense-fg">*</span>
             </label>
             <div className="flex gap-2">
               <button
@@ -123,8 +121,8 @@ export function EditTransactionDialog({
                 onClick={() => { setType("income"); setCategoryId("") }}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "income"
-                    ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-income bg-income-subtle text-income-fg"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <TrendingUp className="h-4 w-4" />
@@ -135,8 +133,8 @@ export function EditTransactionDialog({
                 onClick={() => { setType("expense"); setCategoryId("") }}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "expense"
-                    ? "border-rose-500 bg-rose-500/20 text-rose-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-expense bg-expense-subtle text-expense-fg"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <TrendingDown className="h-4 w-4" />
@@ -146,7 +144,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
+            <label className="text-xs font-medium text-text-2">
               Visibilità
             </label>
             <div className="flex gap-2">
@@ -156,7 +154,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "personal"
                     ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <User className="h-4 w-4" />
@@ -167,8 +165,8 @@ export function EditTransactionDialog({
                 onClick={() => setScope("family")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "family"
-                    ? "border-violet-500 bg-violet-500/20 text-violet-400"
-                    : "border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                    ? "border-shared bg-shared-subtle text-shared"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
                 }`}
               >
                 <Users className="h-4 w-4" />
@@ -178,8 +176,8 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-date">
-              Data <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2" htmlFor="edit-date">
+              Data <span className="text-expense-fg">*</span>
             </label>
             <DateInput
               id="edit-date"
@@ -190,8 +188,8 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-amount">
-              Importo <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2" htmlFor="edit-amount">
+              Importo <span className="text-expense-fg">*</span>
             </label>
             <Input
               id="edit-amount"
@@ -205,8 +203,8 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">
-              Categoria <span className="text-rose-400">*</span>
+            <label className="text-xs font-medium text-text-2">
+              Categoria <span className="text-expense-fg">*</span>
             </label>
             <CategoryCombobox
               categories={categories}
@@ -217,7 +215,7 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="edit-description">
+            <label className="text-xs font-medium text-text-2" htmlFor="edit-description">
               Descrizione
             </label>
             <Input
@@ -229,13 +227,13 @@ export function EditTransactionDialog({
             />
           </div>
 
-          {error && <p className="text-xs text-rose-400">{error}</p>}
+          {error && <p className="text-xs text-expense-fg">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -243,7 +241,7 @@ export function EditTransactionDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="bg-income text-zinc-950 hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : "Salva"}

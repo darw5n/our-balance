@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react"
 import { CheckCircle, SkipForward } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatCurrency, parseItalianAmount } from "@/lib/utils"
+import { formatCurrency, validateAmount } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { confirmRecurringTransaction, skipRecurringConfirmation } from "@/app/actions/recurring"
@@ -42,14 +42,14 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
 
   function handleConfirm() {
     setError(null)
-    const parsed = parseItalianAmount(amount)
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      setError("Importo non valido.")
+    const result = validateAmount(amount)
+    if (!result.ok) {
+      setError(result.error)
       return
     }
     startTransition(async () => {
-      const result = await confirmRecurringTransaction(item.id, parsed)
-      if (!result.success) setError(result.error)
+      const res = await confirmRecurringTransaction(item.id, result.value)
+      if (!res.success) setError(res.error)
     })
   }
 
@@ -62,18 +62,18 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
   }
 
   return (
-    <Card className="border-amber-500/30 bg-amber-500/5 p-4 backdrop-blur">
+    <Card className="border-pending/30 bg-pending-subtle p-4 backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-zinc-100">
+          <p className="text-sm font-medium text-text-1">
             {item.description || "Ricorrenza senza descrizione"}
           </p>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {FREQUENCY_LABEL[item.frequency]} ·{" "}
             {item.type === "income" ? "Entrata prevista" : "Uscita prevista"}:{" "}
             {formatCurrency(Number(item.amount))}
           </p>
-          <p className="text-xs text-amber-400/80">
+          <p className="text-xs text-pending-fg/80">
             Competenza: {getPendingDate(item.next_due_date, item.frequency)}
           </p>
         </div>
@@ -84,12 +84,12 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-28 border-white/15 bg-zinc-950 text-zinc-50 text-sm"
+            className="w-28 border-border-subtle bg-surface-0 text-text-1 text-sm"
             disabled={isPending}
           />
           <Button
             size="sm"
-            className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shrink-0"
+            className="bg-income text-zinc-950 hover:bg-income-fg shrink-0"
             onClick={handleConfirm}
             disabled={isPending}
           >
@@ -99,7 +99,7 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
           <Button
             size="sm"
             variant="outline"
-            className="border-white/15 bg-transparent text-zinc-400 hover:text-zinc-50 shrink-0"
+            className="border-border-subtle bg-transparent text-text-2 hover:text-text-1 shrink-0"
             onClick={handleSkip}
             disabled={isPending}
           >
@@ -108,7 +108,7 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
           </Button>
         </div>
       </div>
-      {error && <p className="mt-2 text-xs text-rose-400">{error}</p>}
+      {error && <p className="mt-2 text-xs text-expense-fg">{error}</p>}
     </Card>
   )
 }
@@ -119,7 +119,7 @@ export function PendingConfirmations({ items }: PendingConfirmationsProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-medium text-amber-400">
+        <h2 className="text-sm font-medium text-pending-fg">
           {items.length === 1 ? "1 ricorrenza in attesa di conferma" : `${items.length} ricorrenze in attesa di conferma`}
         </h2>
       </div>
