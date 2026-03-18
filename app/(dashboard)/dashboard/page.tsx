@@ -24,7 +24,7 @@ import { getCategoryIcon } from "@/lib/category-icons"
 
 function SkeletonCard() {
   return (
-    <Card className="border-white/10 bg-zinc-900/50 p-5 shadow-sm backdrop-blur">
+    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="skeleton h-3 w-24" />
@@ -49,7 +49,7 @@ function BalanceCardsSkeleton() {
 
 function BudgetsSkeleton() {
   return (
-    <Card className="border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-4 backdrop-blur">
       <div className="mb-3 skeleton h-4 w-32 rounded" />
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
@@ -66,14 +66,14 @@ function BudgetsSkeleton() {
 function ChartsSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.4fr)]">
-      <Card className="border-white/10 bg-zinc-900/50 p-5 shadow-sm backdrop-blur">
+      <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
         <div className="mb-4 space-y-2">
           <div className="skeleton h-4 w-40" />
           <div className="skeleton h-3 w-56" />
         </div>
         <div className="skeleton h-48 w-full !rounded-lg" />
       </Card>
-      <Card className="border-white/10 bg-zinc-900/50 p-5 shadow-sm backdrop-blur">
+      <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
         <div className="mb-4 space-y-2">
           <div className="skeleton h-4 w-40" />
           <div className="skeleton h-3 w-56" />
@@ -123,7 +123,7 @@ async function SummarySection({ userId, viewMode }: { userId: string; viewMode: 
   return (
     <>
       {!hasAnyData && (
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-[var(--subtle-text)]">
           Nessuna transazione, aggiungi la prima per iniziare a tracciare il bilancio.
         </p>
       )}
@@ -137,9 +137,9 @@ async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: 
   if (budgets.length === 0) return null
   const exceededBudgets = budgets.filter((b) => b.is_exceeded)
   return (
-    <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+    <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 backdrop-blur">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-medium text-zinc-100">Budget del mese</h2>
+        <h2 className="text-sm font-medium text-foreground/90">Budget del mese</h2>
         {exceededBudgets.length > 0 && (
           <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-xs font-medium text-rose-400">
             {exceededBudgets.length}{" "}
@@ -160,16 +160,16 @@ async function BudgetsSection({ userId, viewMode }: { userId: string; viewMode: 
                 >
                   <BudgetIcon className="h-3 w-3" style={{ color: budget.category_color }} />
                 </div>
-                <span className="truncate text-xs text-zinc-300">{budget.category_name}</span>
+                <span className="truncate text-xs text-foreground/80">{budget.category_name}</span>
                 {budget.is_exceeded && (
                   <span className="shrink-0 text-xs text-rose-400">Superato!</span>
                 )}
               </div>
-              <span className="shrink-0 text-xs text-zinc-400">
+              <span className="shrink-0 text-xs text-[var(--subtle-text)]">
                 {formatCurrency(budget.spent)} / {formatCurrency(budget.amount_limit)}
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/10 dark:bg-zinc-800">
               <div
                 className={`h-full rounded-full transition-all ${
                   budget.is_exceeded || budget.percentage >= 100
@@ -219,7 +219,7 @@ export default async function DashboardPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-            <p className="text-xs text-zinc-400">Riepilogo di entrate, uscite e categorie principali per il mese corrente.</p>
+            <p className="text-xs text-[var(--subtle-text)]">Riepilogo di entrate, uscite e categorie principali per il mese corrente.</p>
           </div>
           <ViewModeSwitcher currentView={viewMode} basePath="/dashboard" />
         </div>

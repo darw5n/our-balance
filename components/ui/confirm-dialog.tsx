@@ -46,12 +46,12 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <DialogHeader>
               <DialogTitle>{pending.options.title ?? "Conferma"}</DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-zinc-300">{pending.options.message}</p>
+            <p className="text-sm text-foreground/80">{pending.options.message}</p>
             <div className="mt-5 flex justify-end gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                className="border-[var(--card-border)] bg-transparent text-foreground/80 hover:bg-black/5 dark:hover:bg-white/5"
                 onClick={() => handleClose(false)}
               >
                 Annulla

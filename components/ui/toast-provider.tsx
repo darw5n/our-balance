@@ -44,7 +44,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "border-rose-500/30 bg-rose-950/95 text-rose-200"
                 : t.variant === "success"
                 ? "border-emerald-500/30 bg-emerald-950/95 text-emerald-200"
-                : "border-white/15 bg-zinc-900/95 text-zinc-100"
+                : "border-[var(--card-border)] bg-[var(--card-bg)] text-foreground"
             }`}
           >
             <span className="flex-1">{t.message}</span>

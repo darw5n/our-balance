@@ -80,6 +80,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* App semantic tokens — light */
+  --shell-bg: oklch(0.97 0 0);
+  --card-bg: oklch(1 0 0);
+  --card-border: oklch(0 0 0 / 8%);
+  --nav-bg: oklch(1 0 0 / 95%);
+  --subtle-text: oklch(0.45 0 0);
+  --muted-text: oklch(0.6 0 0);
 }
 
 .dark {
@@ -114,6 +121,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* App semantic tokens — dark */
+  --shell-bg: oklch(0.085 0 0);
+  --card-bg: oklch(0.145 0 0 / 50%);
+  --card-border: oklch(1 0 0 / 10%);
+  --nav-bg: oklch(0.085 0 0 / 95%);
+  --subtle-text: oklch(0.55 0 0);
+  --muted-text: oklch(0.42 0 0);
 }
 
 /* Safe area padding for mobile bottom nav */
@@ -134,48 +148,74 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.04) 25%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 255, 255, 0.04) 75%
+    oklch(0 0 0 / 5%) 25%,
+    oklch(0 0 0 / 10%) 50%,
+    oklch(0 0 0 / 5%) 75%
   );
   background-size: 400% 100%;
   animation: shimmer 2s ease-in-out infinite;
   border-radius: 0.375rem;
 }
 
+.dark .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 400% 100%;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    /* Firefox */
+    /* Firefox — light mode */
     scrollbar-width: thin;
+    scrollbar-color: #d4d4d8 #f4f4f5;
+  }
+
+  .dark * {
+    /* Firefox — dark mode */
     scrollbar-color: #3f3f46 #18181b;
   }
 
-  /* Chrome / Safari / Edge */
+  /* Chrome / Safari / Edge — light mode */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #18181b;
+    background: #f4f4f5;
   }
   ::-webkit-scrollbar-thumb {
-    background: #3f3f46;
+    background: #d4d4d8;
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
+    background: #a1a1aa;
+  }
+
+  /* Chrome / Safari / Edge — dark mode */
+  .dark ::-webkit-scrollbar-track {
+    background: #18181b;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #3f3f46;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
     background: #52525b;
   }
 
   body {
     @apply bg-background text-foreground;
-    color-scheme: dark;
+    color-scheme: light dark;
   }
   input[type="date"],
   input[type="time"],
   input[type="datetime-local"],
   input[type="month"],
   input[type="week"] {
-    color-scheme: dark;
+    color-scheme: light dark;
   }
 }

@@ -65,12 +65,12 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
   const zeroOffset = range === 0 ? 1 : max / range
 
   return (
-    <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
+    <Card className="border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
-        <h2 className="text-sm font-medium text-zinc-200">
+        <h2 className="text-sm font-medium text-foreground/90">
           {hideIncome ? "Spese mensili in comune" : "Netto ultimi 12 mesi"}
         </h2>
-        <p className="text-xs text-zinc-400">
+        <p className="text-xs text-[var(--subtle-text)]">
           {hasData
             ? hideIncome
               ? "Andamento spese condivise mensili."
@@ -81,7 +81,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
 
       <div className="h-72 w-full">
         {!hasData ? (
-          <div className="flex h-full items-center justify-center text-xs text-zinc-500">
+          <div className="flex h-full items-center justify-center text-xs text-[var(--muted-text)]">
             Nessun dato da visualizzare.
           </div>
         ) : hideIncome ? (

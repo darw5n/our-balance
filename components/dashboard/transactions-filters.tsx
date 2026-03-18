@@ -32,7 +32,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
         name="q"
         defaultValue={q}
         placeholder="Cerca..."
-        className="h-8 min-w-0 flex-1 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none placeholder:text-zinc-500 md:w-44 md:flex-none"
+        className="h-8 min-w-0 flex-1 rounded-md border border-[var(--card-border)] bg-background px-2 text-xs text-foreground outline-none placeholder:text-[var(--muted-text)] md:w-44 md:flex-none"
       />
 
       {/* Toggle filtri avanzati — solo mobile */}
@@ -42,7 +42,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
         className={`flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 transition-colors md:hidden ${
           filtersOpen || activeCount > 0
             ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-            : "border-white/15 text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+            : "border-[var(--card-border)] text-[var(--subtle-text)] hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
         }`}
         aria-label="Filtri avanzati"
       >
@@ -68,7 +68,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       <select
         name="category"
         defaultValue={category}
-        className={`h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none md:block md:w-auto ${
+        className={`h-8 rounded-md border border-[var(--card-border)] bg-background px-2 text-xs text-foreground outline-none md:block md:w-auto ${
           filtersOpen ? "block w-full" : "hidden"
         }`}
       >
@@ -92,7 +92,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       {hasReset && (
         <a
           href="/transactions"
-          className="flex h-8 items-center rounded-md border border-white/15 px-3 text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+          className="flex h-8 items-center rounded-md border border-[var(--card-border)] px-3 text-[var(--subtle-text)] hover:bg-black/5 hover:text-foreground dark:hover:bg-white/5"
         >
           Reset
         </a>

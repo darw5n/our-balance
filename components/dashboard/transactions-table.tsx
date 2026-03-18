@@ -94,7 +94,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   }
 
   if (transactions.length === 0) {
-    return <p className="text-xs text-zinc-400">Nessuna transazione trovata.</p>
+    return <p className="text-xs text-[var(--subtle-text)]">Nessuna transazione trovata.</p>
   }
 
   return (
@@ -154,7 +154,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   />
                 </TableCell>
                 <TableCell>{dateLabel}</TableCell>
-                <TableCell className="max-w-[160px] truncate text-xs text-zinc-200 md:max-w-[220px]">
+                <TableCell className="max-w-[160px] truncate text-xs text-foreground/90 md:max-w-[220px]">
                   {tx.description || "-"}
                 </TableCell>
                 <TableCell className="text-right">
@@ -169,7 +169,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                         ? "bg-emerald-500/20 text-emerald-400"
                         : tx.type === "expense"
                         ? "bg-rose-500/20 text-rose-400"
-                        : "bg-zinc-800 text-zinc-400"
+                        : "bg-black/10 text-[var(--subtle-text)] dark:bg-zinc-800"
                     }`}>
                       {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
                     </span>
@@ -184,10 +184,10 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                 <TableCell className="hidden md:table-cell">
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                     tx.status === "confirmed"
-                      ? "bg-zinc-700 text-zinc-300"
+                      ? "bg-black/10 text-foreground/80 dark:bg-zinc-700 dark:text-zinc-300"
                       : tx.status === "pending"
                       ? "bg-amber-500/20 text-amber-400"
-                      : "bg-zinc-800 text-zinc-400"
+                      : "bg-black/10 text-[var(--subtle-text)] dark:bg-zinc-800"
                   }`}>
                     {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
                   </span>
@@ -197,7 +197,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-zinc-400 hover:text-zinc-50"
+                      className="h-7 w-7 text-[var(--subtle-text)] hover:text-foreground"
                       onClick={() => handleEdit(tx)}
                       aria-label="Modifica"
                     >
@@ -206,7 +206,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-zinc-400 hover:text-rose-400"
+                      className="h-7 w-7 text-[var(--subtle-text)] hover:text-rose-400"
                       onClick={() => handleDelete(tx)}
                       disabled={deleting}
                       aria-label="Elimina"
