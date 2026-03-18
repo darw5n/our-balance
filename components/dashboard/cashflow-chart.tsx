@@ -1,19 +1,18 @@
 "use client"
 
-import * as React from "react"
 import { useEffect, useState } from "react"
-
 import {
-  Bar,
+  AreaChart,
+  Area,
   BarChart,
-  CartesianGrid,
-  ChartContainer,
-  ChartLegend,
-  ChartTooltip,
-  ResponsiveContainer,
+  Bar,
   XAxis,
   YAxis,
-} from "@/components/ui/chart"
+  CartesianGrid,
+  Tooltip,
+  ReferenceLine,
+  ResponsiveContainer,
+} from "recharts"
 import { Card } from "@/components/ui/card"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
@@ -21,6 +20,16 @@ import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 type CashflowChartProps = {
   data: CashflowMonthlyPoint[]
   hideIncome?: boolean
+}
+
+const AXIS_TICK = { fill: "rgba(244,244,245,0.8)", fontSize: 12 }
+const AXIS_LINE = { stroke: "rgba(255,255,255,0.12)" }
+const TOOLTIP_STYLE = {
+  background: "rgba(9,9,11,0.92)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  borderRadius: 8,
+  color: "rgba(244,244,245,0.95)",
+  fontSize: 12,
 }
 
 function useIsMobile() {
@@ -38,78 +47,97 @@ function useIsMobile() {
 export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) {
   const isMobile = useIsMobile()
   const hasData = data.length > 0
-  const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
+  const formatMonth = (v: string) =>
+    isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
+
+  // Compute netto for each month
+  const nettoData = data.map((p) => ({
+    month: p.month,
+    netto: p.entrate + p.entrate_provvisorie - p.uscite,
+    uscite: p.uscite,
+  }))
+
+  // Calculate where zero falls as a fraction from top (for gradient split)
+  const nettoValues = nettoData.map((d) => d.netto)
+  const max = Math.max(...nettoValues, 0)
+  const min = Math.min(...nettoValues, 0)
+  const range = max - min
+  const zeroOffset = range === 0 ? 1 : max / range
 
   return (
     <Card className="border-white/10 bg-zinc-900/50 p-5 text-zinc-50 shadow-sm backdrop-blur">
       <div className="mb-4 space-y-1">
         <h2 className="text-sm font-medium text-zinc-200">
-          {hideIncome ? "Spese mensili in comune" : "Cashflow ultimi 12 mesi"}
+          {hideIncome ? "Spese mensili in comune" : "Netto ultimi 12 mesi"}
         </h2>
         <p className="text-xs text-zinc-400">
           {hasData
             ? hideIncome
               ? "Andamento spese condivise mensili."
-              : "Andamento entrate/uscite mensili."
+              : "Entrate meno uscite mese per mese."
             : "Nessuna transazione sufficiente per il grafico."}
         </p>
       </div>
 
       <div className="h-72 w-full">
-        {hasData ? (
-          <ChartContainer
-            config={{
-              entrate: { label: "Entrate", color: "rgba(52,211,153,0.9)" },
-              uscite: { label: "Uscite", color: "rgba(248,113,113,0.9)" },
-            }}
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  tickFormatter={formatMonth}
-                />
-                <YAxis
-                  tick={{ fill: "rgba(244,244,245,0.8)", fontSize: 12 }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  tickLine={{ stroke: "rgba(255,255,255,0.12)" }}
-                  width={55}
-                  tickFormatter={(v) => formatCurrencyAxis(Number(v))}
-                />
-                <ChartTooltip
-                  formatter={(value: any, name) => {
-                    if (name === "entrate_provvisorie") return [formatCurrency(Number(value)), "Provvisorie"]
-                    const label = name === "entrate" ? "Entrate" : "Uscite"
-                    return [formatCurrency(Number(value)), label]
-                  }}
-                />
-                {!hideIncome && (
-                  <ChartLegend
-                    wrapperStyle={{ color: "rgba(244,244,245,0.85)", fontSize: 12 }}
-                    formatter={(value) => (value === "entrate" ? "Entrate" : "Uscite")}
-                  />
-                )}
-                {!hideIncome && (
-                  <>
-                    <Bar dataKey="entrate" stackId="e" fill="rgba(52,211,153,0.9)" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="entrate_provvisorie" stackId="e" fill="rgba(52,211,153,0.35)" radius={[6, 6, 0, 0]} />
-                  </>
-                )}
-                <Bar dataKey="uscite" fill="rgba(248,113,113,0.9)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        ) : (
+        {!hasData ? (
           <div className="flex h-full items-center justify-center text-xs text-zinc-500">
             Nessun dato da visualizzare.
           </div>
+        ) : hideIncome ? (
+          /* Family view — bar chart of uscite */
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
+              <YAxis tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
+              <Tooltip
+                cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                contentStyle={TOOLTIP_STYLE}
+                formatter={(v: unknown) => [formatCurrency(Number(v)), "Uscite"]}
+              />
+              <Bar dataKey="uscite" fill="rgba(248,113,133,0.85)" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          /* Personal view — netto area chart with green/red split */
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="nettoFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(52,211,153,0.5)" />
+                  <stop offset={`${zeroOffset * 100}%`} stopColor="rgba(52,211,153,0.1)" />
+                  <stop offset={`${zeroOffset * 100}%`} stopColor="rgba(248,113,133,0.1)" />
+                  <stop offset="100%" stopColor="rgba(248,113,133,0.5)" />
+                </linearGradient>
+                <linearGradient id="nettoStroke" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset={`${zeroOffset * 100}%`} stopColor="rgba(52,211,153,1)" />
+                  <stop offset={`${zeroOffset * 100}%`} stopColor="rgba(248,113,133,1)" />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+              <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
+              <YAxis tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} width={55} tickFormatter={(v) => formatCurrencyAxis(Number(v))} />
+              <Tooltip
+                cursor={{ stroke: "rgba(255,255,255,0.12)" }}
+                contentStyle={TOOLTIP_STYLE}
+                labelStyle={{ color: "rgba(244,244,245,0.9)", fontWeight: 500 }}
+                formatter={(v: unknown) => [formatCurrency(Number(v)), "Netto"]}
+              />
+              <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />
+              <Area
+                type="monotone"
+                dataKey="netto"
+                stroke="url(#nettoStroke)"
+                strokeWidth={2}
+                fill="url(#nettoFill)"
+                dot={false}
+                activeDot={{ r: 4, fill: "rgba(244,244,245,0.9)" }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         )}
       </div>
     </Card>
   )
 }
-
