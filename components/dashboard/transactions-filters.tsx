@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SlidersHorizontal } from "lucide-react"
+import { SlidersHorizontal, ChevronDown } from "lucide-react"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { DateInput } from "@/components/ui/date-input"
 
@@ -65,20 +65,21 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       </div>
 
       {/* Categoria */}
-      <select
-        name="category"
-        defaultValue={category}
-        className={`h-8 rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-6 text-xs text-text-1 outline-none md:block md:w-auto ${
-          filtersOpen ? "block w-full" : "hidden"
-        }`}
-      >
-        <option value="">Tutte le categorie</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
+      <div className={`relative md:block md:w-auto ${filtersOpen ? "block w-full" : "hidden"}`}>
+        <select
+          name="category"
+          defaultValue={category}
+          className="h-8 w-full appearance-none rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-7 text-xs text-text-1 outline-none"
+        >
+          <option value="">Tutte le categorie</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-3" />
+      </div>
 
       {/* Filtra */}
       <button
