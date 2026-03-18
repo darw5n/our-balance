@@ -85,7 +85,7 @@ export function BudgetsList({
     <>
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {budgets.length} {budgets.length === 1 ? "budget" : "budget"} impostati
           </p>
           {canAddMore && (
@@ -101,7 +101,7 @@ export function BudgetsList({
         </div>
 
         {budgets.length === 0 ? (
-          <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
+          <Card className="border-border-subtle bg-surface-1 p-8 text-center backdrop-blur">
             {!hasCategories ? (
               <>
                 <p className="text-sm text-zinc-400">
@@ -134,7 +134,7 @@ export function BudgetsList({
           <ul className="grid gap-3 sm:grid-cols-2">
             {budgets.map((budget) => (
               <li key={budget.id}>
-                <Card className="border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+                <Card className="border-border-subtle bg-surface-1 p-4 backdrop-blur">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {(() => {
@@ -148,7 +148,7 @@ export function BudgetsList({
                           </div>
                         )
                       })()}
-                      <span className="truncate text-sm font-medium text-zinc-100">
+                      <span className="truncate text-sm font-medium text-foreground">
                         {budget.category_name}
                       </span>
                       {budget.is_exceeded && (
@@ -161,7 +161,7 @@ export function BudgetsList({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-zinc-400 hover:text-zinc-50"
+                        className="h-7 w-7 text-text-2 hover:text-foreground"
                         onClick={() => openEdit(budget)}
                         aria-label="Modifica"
                       >
@@ -170,7 +170,7 @@ export function BudgetsList({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-zinc-400 hover:text-rose-400"
+                        className="h-7 w-7 text-text-2 hover:text-rose-400"
                         onClick={() => handleDelete(budget)}
                         aria-label="Elimina"
                       >
@@ -180,17 +180,17 @@ export function BudgetsList({
                   </div>
 
                   <div className="mt-3 space-y-1.5">
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-surface-3">
                       <div
                         className={`h-full rounded-full transition-all ${progressBarColor(budget.percentage, budget.is_exceeded)}`}
                         style={{ width: `${Math.min(budget.percentage, 100)}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-text-2">
                         {formatCurrency(budget.spent)} spesi
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-text-3">
                         limite {formatCurrency(budget.amount_limit)}
                       </span>
                     </div>

@@ -18,10 +18,10 @@ const PRESET_COLORS = [
 ]
 
 const MACRO_OPTIONS: { value: MacroCategory | null; label: string; className: string }[] = [
-  { value: null, label: "Nessuna", className: "border-zinc-600 text-zinc-400 data-[active=true]:bg-zinc-700 data-[active=true]:text-zinc-100 data-[active=true]:border-zinc-500" },
-  { value: "necessita", label: "Necessità", className: "border-amber-700/50 text-amber-400 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-300 data-[active=true]:border-amber-500" },
-  { value: "svago", label: "Svago", className: "border-violet-700/50 text-violet-400 data-[active=true]:bg-violet-500/20 data-[active=true]:text-violet-300 data-[active=true]:border-violet-500" },
-  { value: "investimenti", label: "Investimenti", className: "border-blue-700/50 text-blue-400 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-300 data-[active=true]:border-blue-500" },
+  { value: null, label: "Nessuna", className: "border-border-strong text-text-2 data-[active=true]:bg-surface-active data-[active=true]:text-foreground data-[active=true]:border-border-strong" },
+  { value: "necessita", label: "Necessità", className: "border-amber-700/50 text-amber-500 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-400 data-[active=true]:border-amber-500" },
+  { value: "svago", label: "Svago", className: "border-violet-700/50 text-violet-500 data-[active=true]:bg-violet-500/20 data-[active=true]:text-violet-400 data-[active=true]:border-violet-500" },
+  { value: "investimenti", label: "Investimenti", className: "border-blue-700/50 text-blue-500 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-400 data-[active=true]:border-blue-500" },
 ]
 
 type CategoryFormDialogProps = {
@@ -93,7 +93,7 @@ export function CategoryFormDialog({
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="cat-name">
+            <label className="text-xs font-medium text-text-1" htmlFor="cat-name">
               Nome
             </label>
             <Input
@@ -101,33 +101,31 @@ export function CategoryFormDialog({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Es. Alimentari"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="cat-group">
-              Gruppo <span className="text-zinc-500">(opzionale)</span>
+            <label className="text-xs font-medium text-text-1" htmlFor="cat-group">
+              Gruppo <span className="text-text-3">(opzionale)</span>
             </label>
             <Input
               id="cat-group"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Es. Abitazione, Cibo, Trasporti…"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">Tipo</label>
-            <div className="flex rounded-md border border-white/15 overflow-hidden">
+            <label className="text-xs font-medium text-text-1">Tipo</label>
+            <div className="flex rounded-md border border-border-subtle overflow-hidden">
               <button
                 type="button"
                 onClick={() => setType("expense")}
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "expense"
                     ? "bg-rose-500/20 text-rose-400 font-medium"
-                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                    : "bg-transparent text-text-2 hover:bg-surface-hover"
                 }`}
               >
                 Spesa
@@ -138,7 +136,7 @@ export function CategoryFormDialog({
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "income"
                     ? "bg-emerald-500/20 text-emerald-400 font-medium"
-                    : "bg-transparent text-zinc-400 hover:bg-white/5"
+                    : "bg-transparent text-text-2 hover:bg-surface-hover"
                 }`}
               >
                 Entrata
@@ -147,7 +145,7 @@ export function CategoryFormDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-300">Colore</label>
+            <label className="text-xs font-medium text-text-1">Colore</label>
             <div className="flex flex-wrap gap-2">
               {PRESET_COLORS.map((c) => (
                 <button
@@ -155,7 +153,7 @@ export function CategoryFormDialog({
                   type="button"
                   onClick={() => setColor(c)}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    color === c ? "border-white ring-2 ring-white/30" : "border-white/20"
+                    color === c ? "border-foreground ring-2 ring-foreground/30" : "border-border-strong"
                   }`}
                   style={{ backgroundColor: c }}
                   aria-label={`Colore ${c}`}
@@ -166,13 +164,13 @@ export function CategoryFormDialog({
               type="text"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="mt-1 border-white/15 bg-zinc-950 font-mono text-zinc-50"
+              className="mt-1 font-mono"
               placeholder="#22c55e"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-medium text-zinc-300">Macro-categoria <span className="text-zinc-500">(opzionale)</span></label>
+            <label className="text-xs font-medium text-text-1">Macro-categoria <span className="text-text-3">(opzionale)</span></label>
             <div className="flex flex-wrap gap-2">
               {MACRO_OPTIONS.map((opt) => (
                 <button
@@ -193,7 +191,7 @@ export function CategoryFormDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-foreground hover:bg-surface-hover"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >

@@ -125,7 +125,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
     <>
       <div className="space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {categories.length} {categories.length === 1 ? "categoria" : "categorie"}
           </p>
           <Button
@@ -139,8 +139,8 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
         </div>
 
         {categories.length === 0 ? (
-          <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
-            <p className="text-sm text-zinc-400">Nessuna categoria. Creane una per organizzare le transazioni.</p>
+          <Card className="border-border-subtle bg-surface-1 p-8 text-center backdrop-blur">
+            <p className="text-sm text-text-2">Nessuna categoria. Creane una per organizzare le transazioni.</p>
             <Button
               onClick={openCreate}
               variant="outline"
@@ -158,8 +158,8 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
               return (
                 <div key={groupName}>
                   <div className="mb-2 flex items-center gap-2">
-                    <GroupIcon className="h-3.5 w-3.5 text-zinc-500" />
-                    <span className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+                    <GroupIcon className="h-3.5 w-3.5 text-text-3" />
+                    <span className="text-xs font-medium uppercase tracking-wider text-text-3">
                       {groupName}
                     </span>
                   </div>
@@ -170,7 +170,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                       return (
                         <li key={cat.id}>
                           <Card
-                            className="border-white/10 p-3 backdrop-blur"
+                            className="border-border-subtle p-3 backdrop-blur"
                             style={{ backgroundColor: `${cat.color}0d` }}
                           >
                             <div className="flex items-center justify-between">
@@ -181,7 +181,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                                 >
                                   <Icon className="h-4 w-4" style={{ color: cat.color }} />
                                 </div>
-                                <span className="truncate text-sm font-medium text-zinc-100">
+                                <span className="truncate text-sm font-medium text-foreground">
                                   {cat.name}
                                 </span>
                               </div>
@@ -189,7 +189,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 text-zinc-400 hover:text-zinc-50"
+                                  className="h-8 w-8 text-text-2 hover:text-foreground"
                                   onClick={() => openEdit(cat)}
                                   aria-label="Modifica"
                                 >
@@ -198,7 +198,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 text-zinc-400 hover:text-rose-400"
+                                  className="h-8 w-8 text-text-2 hover:text-rose-400"
                                   onClick={() => handleDelete(cat)}
                                   aria-label="Elimina"
                                 >
@@ -208,13 +208,13 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                             </div>
                             {b && (
                               <div className="mt-2 space-y-1">
-                                <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                                <div className="flex items-center justify-between text-[10px] text-text-3">
                                   <span>Budget mensile</span>
                                   <span className={b.is_exceeded ? "text-rose-400 font-medium" : ""}>
                                     {formatAmount(b.spent, 0)} € / {formatAmount(b.amount_limit, 0)} €
                                   </span>
                                 </div>
-                                <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-800">
+                                <div className="h-1 w-full overflow-hidden rounded-full bg-surface-3">
                                   <div
                                     className={`h-full rounded-full transition-all ${
                                       b.is_exceeded ? "bg-rose-500" : b.percentage >= 80 ? "bg-amber-400" : "bg-emerald-500"
