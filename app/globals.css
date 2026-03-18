@@ -306,6 +306,11 @@
   ::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     color-scheme: dark;
