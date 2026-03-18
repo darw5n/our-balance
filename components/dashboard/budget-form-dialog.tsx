@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { upsertBudget } from "@/app/actions/budgets"
-import { parseItalianAmount } from "@/lib/utils"
+import { validateAmount } from "@/lib/utils"
+import { useFormState } from "@/lib/hooks/use-form-state"
 import type { BudgetWithProgress } from "@/lib/supabase/queries/budgets"
 import type { Category } from "@/lib/supabase/queries/categories"
 
@@ -33,8 +34,7 @@ export function BudgetFormDialog({
 }: BudgetFormDialogProps) {
   const [categoryId, setCategoryId] = useState("")
   const [amountLimit, setAmountLimit] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { submitting, error, setError, wrap } = useFormState()
 
   const isEdit = !!budget?.id
 
@@ -50,9 +50,9 @@ export function BudgetFormDialog({
     e.preventDefault()
     setError(null)
 
-    const amount = parseItalianAmount(amountLimit)
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError("Inserisci un importo valido maggiore di zero.")
+    const amountResult = validateAmount(amountLimit)
+    if (!amountResult.ok) {
+      setError(amountResult.error)
       return
     }
     if (!categoryId) {
@@ -60,18 +60,15 @@ export function BudgetFormDialog({
       return
     }
 
-    setSubmitting(true)
-    try {
-      const result = await upsertBudget({ category_id: categoryId, amount_limit: amount })
+    await wrap(async () => {
+      const result = await upsertBudget({ category_id: categoryId, amount_limit: amountResult.value })
       if (!result.success) {
         setError(result.error)
         return
       }
       onOpenChange(false)
       onSuccess?.()
-    } finally {
-      setSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -82,23 +79,23 @@ export function BudgetFormDialog({
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="budget-category">
+            <label className="text-xs font-medium text-text-2" htmlFor="budget-category">
               Categoria
             </label>
             {isEdit ? (
-              <div className="flex items-center gap-2 rounded-md border border-white/15 bg-zinc-950 px-3 py-2">
+              <div className="flex items-center gap-2 rounded-md border border-border-subtle bg-surface-0 px-3 py-2">
                 <span
                   className="h-3 w-3 shrink-0 rounded-full"
                   style={{ backgroundColor: budget?.category_color }}
                 />
-                <span className="text-sm text-zinc-100">{budget?.category_name}</span>
+                <span className="text-sm text-text-1">{budget?.category_name}</span>
               </div>
             ) : (
               <select
                 id="budget-category"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full rounded-md border border-white/15 bg-zinc-950 px-3 py-2 text-sm text-zinc-50 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-md border border-border-subtle bg-surface-0 px-3 py-2 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -110,7 +107,7 @@ export function BudgetFormDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300" htmlFor="budget-amount">
+            <label className="text-xs font-medium text-text-2" htmlFor="budget-amount">
               Limite mensile (€)
             </label>
             <Input
@@ -120,17 +117,17 @@ export function BudgetFormDialog({
               value={amountLimit}
               onChange={(e) => setAmountLimit(e.target.value)}
               placeholder="Es. 300"
-              className="border-white/15 bg-zinc-950 text-zinc-50"
+              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
-          {error && <p className="text-xs text-rose-400">{error}</p>}
+          {error && <p className="text-xs text-expense-fg">{error}</p>}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
-              className="border-white/15 bg-transparent text-zinc-50 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -138,7 +135,7 @@ export function BudgetFormDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="bg-income text-zinc-950 hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}

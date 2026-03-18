@@ -21,9 +21,9 @@ type BudgetsListProps = {
 }
 
 function progressBarColor(percentage: number, is_exceeded: boolean): string {
-  if (is_exceeded || percentage >= 100) return "bg-rose-500"
-  if (percentage >= 80) return "bg-amber-400"
-  return "bg-emerald-500"
+  if (is_exceeded || percentage >= 100) return "bg-expense"
+  if (percentage >= 80) return "bg-pending-fg"
+  return "bg-income"
 }
 
 export function BudgetsList({
@@ -85,13 +85,13 @@ export function BudgetsList({
     <>
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-text-2">
             {budgets.length} {budgets.length === 1 ? "budget" : "budget"} impostati
           </p>
           {canAddMore && (
             <Button
               onClick={openCreate}
-              className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="bg-income text-zinc-950 hover:bg-income-fg"
               size="sm"
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -101,28 +101,28 @@ export function BudgetsList({
         </div>
 
         {budgets.length === 0 ? (
-          <Card className="border-white/10 bg-zinc-900/50 p-8 text-center backdrop-blur">
+          <Card className="border-border-subtle bg-surface-1/50 p-8 text-center backdrop-blur">
             {!hasCategories ? (
               <>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-text-2">
                   Per impostare un budget devi prima creare almeno una categoria.
                 </p>
                 <Link
                   href="/categories"
-                  className="mt-4 inline-flex items-center rounded-md border border-emerald-500/50 px-4 py-2 text-sm text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  className="mt-4 inline-flex items-center rounded-md border border-income/50 px-4 py-2 text-sm text-income-fg hover:bg-income-subtle transition-colors"
                 >
                   Vai alle categorie
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-text-2">
                   Nessun budget impostato. Aggiungi un limite mensile per le tue categorie.
                 </p>
                 <Button
                   onClick={openCreate}
                   variant="outline"
-                  className="mt-4 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10"
+                  className="mt-4 border-income/50 text-income-fg hover:bg-income-subtle"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Aggiungi budget
@@ -134,7 +134,7 @@ export function BudgetsList({
           <ul className="grid gap-3 sm:grid-cols-2">
             {budgets.map((budget) => (
               <li key={budget.id}>
-                <Card className="border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
+                <Card className="border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {(() => {
@@ -148,11 +148,11 @@ export function BudgetsList({
                           </div>
                         )
                       })()}
-                      <span className="truncate text-sm font-medium text-zinc-100">
+                      <span className="truncate text-sm font-medium text-text-1">
                         {budget.category_name}
                       </span>
                       {budget.is_exceeded && (
-                        <span className="shrink-0 rounded-full bg-rose-500/20 px-2 py-0.5 text-xs font-medium text-rose-400">
+                        <span className="shrink-0 rounded-full bg-expense-subtle px-2 py-0.5 text-xs font-medium text-expense-fg">
                           Superato!
                         </span>
                       )}
@@ -161,7 +161,7 @@ export function BudgetsList({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-zinc-400 hover:text-zinc-50"
+                        className="h-7 w-7 text-text-2 hover:text-text-1"
                         onClick={() => openEdit(budget)}
                         aria-label="Modifica"
                       >
@@ -170,7 +170,7 @@ export function BudgetsList({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-zinc-400 hover:text-rose-400"
+                        className="h-7 w-7 text-text-2 hover:text-expense-fg"
                         onClick={() => handleDelete(budget)}
                         aria-label="Elimina"
                       >
@@ -180,17 +180,17 @@ export function BudgetsList({
                   </div>
 
                   <div className="mt-3 space-y-1.5">
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-surface-3">
                       <div
                         className={`h-full rounded-full transition-all ${progressBarColor(budget.percentage, budget.is_exceeded)}`}
                         style={{ width: `${Math.min(budget.percentage, 100)}%` }}
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-text-2">
                         {formatCurrency(budget.spent)} spesi
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-text-3">
                         limite {formatCurrency(budget.amount_limit)}
                       </span>
                     </div>

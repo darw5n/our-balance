@@ -32,7 +32,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
         name="q"
         defaultValue={q}
         placeholder="Cerca..."
-        className="h-8 min-w-0 flex-1 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none placeholder:text-zinc-500 md:w-44 md:flex-none"
+        className="h-8 min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-0 px-2 text-xs text-text-1 outline-none placeholder:text-text-3 md:w-44 md:flex-none"
       />
 
       {/* Toggle filtri avanzati — solo mobile */}
@@ -41,14 +41,14 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
         onClick={() => setFiltersOpen((v) => !v)}
         className={`flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 transition-colors md:hidden ${
           filtersOpen || activeCount > 0
-            ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-            : "border-white/15 text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+            ? "border-income/50 bg-income-subtle text-income-fg"
+            : "border-border-subtle text-text-2 hover:bg-white/5 hover:text-text-1"
         }`}
         aria-label="Filtri avanzati"
       >
         <SlidersHorizontal className="h-3.5 w-3.5" />
         {activeCount > 0 && (
-          <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-emerald-500 px-1 text-[9px] font-bold text-zinc-950">
+          <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-income px-1 text-[9px] font-bold text-zinc-950">
             {activeCount}
           </span>
         )}
@@ -68,7 +68,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       <select
         name="category"
         defaultValue={category}
-        className={`h-8 rounded-md border border-white/15 bg-zinc-950 px-2 text-xs text-zinc-50 outline-none md:block md:w-auto ${
+        className={`h-8 rounded-md border border-border-subtle bg-surface-0 px-2 text-xs text-text-1 outline-none md:block md:w-auto ${
           filtersOpen ? "block w-full" : "hidden"
         }`}
       >
@@ -83,7 +83,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       {/* Filtra */}
       <button
         type="submit"
-        className="h-8 rounded-md border border-emerald-500 bg-emerald-500 px-3 font-medium text-zinc-950 hover:bg-emerald-400"
+        className="h-8 rounded-md border border-income bg-income px-3 font-medium text-zinc-950 hover:bg-income-fg"
       >
         Filtra
       </button>
@@ -92,7 +92,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
       {hasReset && (
         <a
           href="/transactions"
-          className="flex h-8 items-center rounded-md border border-white/15 px-3 text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+          className="flex h-8 items-center rounded-md border border-border-subtle px-3 text-text-2 hover:bg-white/5 hover:text-text-1"
         >
           Reset
         </a>
