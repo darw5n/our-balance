@@ -156,7 +156,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
+      <main className="mx-auto w-full max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
 
       {/* Footer — desktop only (mobile ha bottom nav) */}
       <footer className="hidden border-t border-border-subtle md:block">
