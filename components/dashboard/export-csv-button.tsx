@@ -41,7 +41,7 @@ export function ExportCsvButton({ transactions, categories }: Props) {
     <Button
       variant="outline"
       size="sm"
-      className="h-8 shrink-0 gap-1.5 border-white/15 bg-transparent text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+      className="h-8 shrink-0 gap-1.5 text-xs text-text-2 hover:text-foreground"
       onClick={handleExportCSV}
     >
       <Download className="h-3.5 w-3.5" />

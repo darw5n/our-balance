@@ -51,7 +51,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[var(--card-border)] bg-transparent text-foreground/80 hover:bg-black/5 dark:hover:bg-white/5"
+                className="border-border-subtle bg-transparent text-foreground hover:bg-surface-hover"
                 onClick={() => handleClose(false)}
               >
                 Annulla

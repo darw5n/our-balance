@@ -94,7 +94,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   }
 
   if (transactions.length === 0) {
-    return <p className="text-xs text-[var(--subtle-text)]">Nessuna transazione trovata.</p>
+    return <p className="text-xs text-text-2">Nessuna transazione trovata.</p>
   }
 
   return (
@@ -169,7 +169,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                         ? "bg-emerald-500/20 text-emerald-400"
                         : tx.type === "expense"
                         ? "bg-rose-500/20 text-rose-400"
-                        : "bg-black/10 text-[var(--subtle-text)] dark:bg-zinc-800"
+                        : "bg-surface-active text-text-2"
                     }`}>
                       {tx.type === "income" ? "Entrata" : tx.type === "expense" ? "Uscita" : tx.type || "-"}
                     </span>
@@ -182,12 +182,12 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
                     tx.status === "confirmed"
-                      ? "bg-surface-active text-foreground/80"
+                      ? "border-border-strong bg-surface-active text-text-1"
                       : tx.status === "pending"
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-surface-3 text-text-2"
+                      ? "border-amber-500/30 bg-amber-500/15 text-amber-500"
+                      : "border-border-subtle bg-surface-3 text-text-2"
                   }`}>
                     {tx.status === "confirmed" ? "Confermato" : tx.status === "pending" ? "In attesa" : tx.status || "-"}
                   </span>
@@ -197,7 +197,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-[var(--subtle-text)] hover:text-foreground"
+                      className="h-7 w-7 text-text-2 hover:text-foreground"
                       onClick={() => handleEdit(tx)}
                       aria-label="Modifica"
                     >
@@ -206,7 +206,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-[var(--subtle-text)] hover:text-rose-400"
+                      className="h-7 w-7 text-text-2 hover:text-rose-400"
                       onClick={() => handleDelete(tx)}
                       disabled={deleting}
                       aria-label="Elimina"

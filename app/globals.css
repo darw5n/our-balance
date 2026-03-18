@@ -239,4 +239,17 @@
   input[type="week"] {
     color-scheme: light dark;
   }
+  input[type="checkbox"],
+  input[type="radio"] {
+    color-scheme: light;
+    accent-color: oklch(0.696 0.17 162.48); /* emerald-500 */
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+  .dark input[type="checkbox"],
+  .dark input[type="radio"] {
+    color-scheme: dark;
+  }
 }
