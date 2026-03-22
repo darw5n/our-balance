@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Wallet, Eye, EyeOff, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
+import { usePageTransition } from "@/components/landing/transition-provider"
 
 const AUTH_ERRORS: Record<string, string> = {
   "User already registered": "Esiste già un account con questa email.",
@@ -19,6 +19,7 @@ function translateError(message: string): string {
 }
 
 export default function SignupPage() {
+  const { navigate } = usePageTransition()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -107,9 +108,12 @@ export default function SignupPage() {
             </button>
             .
           </div>
-          <Link href="/login" className="inline-block text-xs text-zinc-400 hover:text-zinc-200">
+          <button
+            onClick={() => navigate("/login")}
+            className="inline-block text-xs text-zinc-400 hover:text-zinc-200"
+          >
             ← Torna al login
-          </Link>
+          </button>
         </div>
       </div>
     )
@@ -250,9 +254,12 @@ export default function SignupPage() {
 
         <p className="text-center text-xs text-zinc-400">
           Hai già un account?{" "}
-          <Link href="/login" className="text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline">
+          <button
+            onClick={() => navigate("/login")}
+            className="text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
+          >
             Accedi
-          </Link>
+          </button>
         </p>
       </div>
     </div>
