@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Wallet, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
+import { usePageTransition } from "@/components/landing/transition-provider"
 
 const AUTH_ERRORS: Record<string, string> = {
   "Invalid login credentials": "Email o password non corretti.",
@@ -19,6 +19,7 @@ function translateError(message: string): string {
 }
 
 export default function LoginPage() {
+  const { navigate } = usePageTransition()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -159,9 +160,12 @@ export default function LoginPage() {
 
         <p className="text-center text-xs text-zinc-400">
           Non hai un account?{" "}
-          <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 underline-offset-2 hover:underline">
+          <button
+            onClick={() => navigate("/signup")}
+            className="text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
+          >
             Registrati gratis
-          </Link>
+          </button>
         </p>
       </div>
     </div>
