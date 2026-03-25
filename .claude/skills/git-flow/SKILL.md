@@ -9,7 +9,7 @@ Segui sempre questa sequenza nell'ordine esatto.
 
 ## 1. Commit
 
-Aggiungi solo i file modificati (mai `git add -A`):
+Aggiungi solo i file modificati (mai `git add -A` o `git add .`):
 
 ```bash
 git add <file1> <file2>
@@ -17,7 +17,7 @@ git commit -m "tipo(scope): descrizione breve in italiano"
 ```
 
 Tipi: `feat` `fix` `style` `refactor` `chore`
-Scope: `auth` `dashboard` `transactions` `components` `db` `config`
+Scope: `auth` `dashboard` `transactions` `components` `db` `config` `mcp`
 
 ## 2. Push
 
@@ -30,9 +30,12 @@ git push -u origin features/<nome-branch>
 
 ```bash
 gh pr create --title "tipo: titolo" --body "$(cat <<'EOF'
-## Modifiche
+## Summary
 - punto 1
 - punto 2
+
+## Test plan
+- [ ] cosa testare
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 EOF
@@ -43,7 +46,7 @@ EOF
 
 **NON usare `--delete-branch`** — i branch si tengono sempre.
 ```bash
-gh pr merge --merge
+gh pr merge <numero> --merge
 ```
 
 ## 5. Nuovo branch
@@ -53,5 +56,9 @@ Subito dopo il merge, mai lavorare su main:
 git checkout main && git pull origin main && git checkout -b features/<nome>
 ```
 
-Per iterazioni UI successive usare `features/minor-improvements-N`
-incrementando il numero.
+## Regole
+
+- Main branch: `main`
+- Branch naming: `features/<nome-descrittivo>`
+- Non committare mai direttamente su main
+- Non fare force push su main
