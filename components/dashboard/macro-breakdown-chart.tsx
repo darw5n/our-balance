@@ -7,19 +7,21 @@ import type { MacroBreakdown } from "@/lib/supabase/queries/analytics"
 
 type Props = {
   data: MacroBreakdown
+  monthsElapsed: number
 }
 
-// 3 segments in the stacked bar: necessità | svago | risparmiato
+// 4 segments in the stacked bar: necessità | svago | investimenti | risparmiato
 const BAR_SEGMENTS = [
-  { key: "necessita" as const, label: "Necessità",   color: "#f59e0b" },
-  { key: "svago"     as const, label: "Svago",        color: "#8b5cf6" },
-  { key: "risparmi"  as const, label: "Risparmiato",  color: "#10b981" },
+  { key: "necessita"   as const, label: "Necessità",    color: "#f59e0b" },
+  { key: "svago"       as const, label: "Svago",         color: "#8b5cf6" },
+  { key: "investimenti" as const, label: "Investimenti", color: "#10b981" },
+  { key: "risparmi"    as const, label: "Risparmiato",   color: "#38bdf8" },
 ]
 
-export function MacroBreakdownChart({ data }: Props) {
+export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
   const { totale_entrate, necessita, svago, investimenti, risparmi } = data
   const hasData = totale_entrate > 0 || (necessita + svago + investimenti) > 0
-  const barBase = Math.max(totale_entrate, necessita + svago)
+  const barBase = Math.max(totale_entrate, necessita + svago + investimenti)
 
   const pct = (value: number) =>
     totale_entrate > 0 ? ((value / totale_entrate) * 100).toFixed(1) : "—"
@@ -89,7 +91,7 @@ export function MacroBreakdownChart({ data }: Props) {
                       <span className="text-amber-400">Necessità</span>
                     </div>
                   </td>
-                  <td className="py-2 text-right text-zinc-200">{formatCurrency(necessita / 12)}</td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(necessita / monthsElapsed)}</td>
                   <td className="py-2 text-right text-zinc-200">{formatCurrency(necessita)}</td>
                   <td className="py-2 text-right text-zinc-400">{pct(necessita)}%</td>
                 </tr>
@@ -102,21 +104,36 @@ export function MacroBreakdownChart({ data }: Props) {
                       <span className="text-violet-400">Svago</span>
                     </div>
                   </td>
-                  <td className="py-2 text-right text-zinc-200">{formatCurrency(svago / 12)}</td>
+                  <td className="py-2 text-right text-zinc-200">{formatCurrency(svago / monthsElapsed)}</td>
                   <td className="py-2 text-right text-zinc-200">{formatCurrency(svago)}</td>
                   <td className="py-2 text-right text-zinc-400">{pct(svago)}%</td>
                 </tr>
 
-                {/* Risparmiato totale */}
-                {risparmi > 0 && (
+                {/* Investimenti */}
+                {investimenti > 0 && (
                   <tr>
                     <td className="py-2">
                       <div className="flex items-center gap-2">
                         <span className="h-2.5 w-2.5 rounded-sm bg-emerald-400" />
-                        <span className="text-emerald-400">Risparmiato</span>
+                        <span className="text-emerald-400">Investimenti</span>
                       </div>
                     </td>
-                    <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi / 12)}</td>
+                    <td className="py-2 text-right text-zinc-200">{formatCurrency(investimenti / monthsElapsed)}</td>
+                    <td className="py-2 text-right text-zinc-200">{formatCurrency(investimenti)}</td>
+                    <td className="py-2 text-right text-zinc-400">{pct(investimenti)}%</td>
+                  </tr>
+                )}
+
+                {/* Risparmiato liquido */}
+                {risparmi > 0 && (
+                  <tr>
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2.5 w-2.5 rounded-sm bg-sky-400" />
+                        <span className="text-sky-400">Risparmiato</span>
+                      </div>
+                    </td>
+                    <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi / monthsElapsed)}</td>
                     <td className="py-2 text-right text-zinc-200">{formatCurrency(risparmi)}</td>
                     <td className="py-2 text-right text-zinc-400">{pct(risparmi)}%</td>
                   </tr>
@@ -125,7 +142,7 @@ export function MacroBreakdownChart({ data }: Props) {
               <tfoot>
                 <tr className="border-t border-white/15 font-medium">
                   <td className="pt-3 text-zinc-300">Entrate totali</td>
-                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totale_entrate / 12)}</td>
+                  <td className="pt-3 text-right text-zinc-200">{formatCurrency(totale_entrate / monthsElapsed)}</td>
                   <td className="pt-3 text-right text-zinc-200">{formatCurrency(totale_entrate)}</td>
                   <td className="pt-3 text-right text-zinc-400">100%</td>
                 </tr>

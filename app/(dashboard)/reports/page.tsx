@@ -217,7 +217,7 @@ export default async function ReportsPage({
       <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} viewMode={viewMode} />
 
       {/* Ripartizione macro-categorie (50-30-20) */}
-      <MacroBreakdownChart data={macroBreakdown} />
+      <MacroBreakdownChart data={macroBreakdown} monthsElapsed={monthsElapsed} />
 
       {/* Tabella mesi × categorie */}
       <CategoryMonthTable data={categoryMonthly} year={safeYear} />

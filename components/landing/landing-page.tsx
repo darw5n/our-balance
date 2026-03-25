@@ -170,8 +170,7 @@ function MockDashboard() {
       <motion.div
         animate={{ y: [0, -8, 0] }}
         transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-        className="w-full rounded-2xl border border-white/10 bg-zinc-900/90 shadow-2xl shadow-black/50 backdrop-blur"
-        style={{ minWidth: 400 }}
+        className="w-full max-w-[480px] rounded-2xl border border-white/10 bg-zinc-900/90 shadow-2xl shadow-black/50 backdrop-blur"
       >
         {/* Chrome bar */}
         <div className="flex items-center justify-between rounded-t-2xl border-b border-white/5 bg-zinc-800/50 px-5 py-3">
@@ -282,11 +281,11 @@ export function LandingPage() {
           className="pointer-events-none absolute left-1/2 top-1/3 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[140px]"
         />
 
-        <div className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-16">
           {/* Testo */}
           <motion.div
             style={{ y: heroTextY }}
-            className="flex max-w-lg flex-col items-center text-center lg:items-start lg:text-left"
+            className="flex w-full flex-col items-center text-center lg:flex-1 lg:items-start lg:text-left"
           >
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -352,7 +351,7 @@ export function LandingPage() {
           </motion.div>
 
           {/* Mock */}
-          <motion.div style={{ y: mockY }} className="flex w-full justify-center lg:justify-end">
+          <motion.div style={{ y: mockY }} className="flex w-full justify-center lg:flex-1 lg:justify-end">
             <MockDashboard />
           </motion.div>
         </div>
