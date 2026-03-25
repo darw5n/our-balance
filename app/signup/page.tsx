@@ -138,18 +138,23 @@ export default function SignupPage() {
               </button>
               .
             </p>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex flex-col items-center gap-1.5">
               <button
                 onClick={handleResend}
                 disabled={resendCooldown > 0}
                 className="text-emerald-400 hover:text-emerald-300 disabled:text-zinc-600 disabled:cursor-not-allowed"
               >
-                {resendCooldown > 0 ? `Reinvia tra ${resendCooldown}s` : "Reinvia email"}
+                {resendSuccess ? "Reinvia di nuovo" : "Reinvia email"}
               </button>
+              {resendCooldown > 0 && (
+                <p className="text-[11px] text-zinc-500">
+                  Puoi richiedere un nuovo invio tra {resendCooldown}s
+                </p>
+              )}
+              {resendSuccess && resendCooldown === 0 && (
+                <p className="text-[11px] text-emerald-500">Email inviata ✓</p>
+              )}
             </div>
-            {resendSuccess && (
-              <p className="text-emerald-400 text-center">Email inviata di nuovo ✓</p>
-            )}
           </div>
           <button
             onClick={() => navigate("/login")}
