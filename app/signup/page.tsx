@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Wallet, Eye, EyeOff, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,9 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true)
@@ -81,6 +84,30 @@ export default function SignupPage() {
     }
   }
 
+  async function handleResend() {
+    if (resendCooldown > 0) return
+    setResendSuccess(false)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${appUrl}/dashboard` },
+    })
+    if (!error) {
+      setResendSuccess(true)
+      setResendCooldown(60)
+      cooldownRef.current = setInterval(() => {
+        setResendCooldown((s) => {
+          if (s <= 1) { clearInterval(cooldownRef.current!); return 0 }
+          return s - 1
+        })
+      }, 1000)
+    }
+  }
+
+  // cleanup interval on unmount
+  useEffect(() => () => { if (cooldownRef.current) clearInterval(cooldownRef.current) }, [])
+
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
@@ -100,15 +127,29 @@ export default function SignupPage() {
               </p>
             </div>
           </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-900/60 px-6 py-4 text-xs text-zinc-400">
-            Non trovi la email? Controlla la cartella spam o{" "}
-            <button
-              className="text-emerald-400 hover:text-emerald-300"
-              onClick={() => setSuccess(false)}
-            >
-              riprova con un altro indirizzo
-            </button>
-            .
+          <div className="rounded-xl border border-white/10 bg-zinc-900/60 px-6 py-4 text-xs text-zinc-400 space-y-3">
+            <p>
+              Non trovi la email? Controlla la cartella spam o{" "}
+              <button
+                className="text-emerald-400 hover:text-emerald-300"
+                onClick={() => setSuccess(false)}
+              >
+                riprova con un altro indirizzo
+              </button>
+              .
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <button
+                onClick={handleResend}
+                disabled={resendCooldown > 0}
+                className="text-emerald-400 hover:text-emerald-300 disabled:text-zinc-600 disabled:cursor-not-allowed"
+              >
+                {resendCooldown > 0 ? `Reinvia tra ${resendCooldown}s` : "Reinvia email"}
+              </button>
+            </div>
+            {resendSuccess && (
+              <p className="text-emerald-400 text-center">Email inviata di nuovo ✓</p>
+            )}
           </div>
           <button
             onClick={() => navigate("/login")}
