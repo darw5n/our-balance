@@ -54,6 +54,11 @@ function pinDayOfMonth(dateStr: string, targetDay: number): string {
   return date.toISOString().split("T")[0]
 }
 
+function firstDayOfMonth(dateStr: string): string {
+  const date = new Date(dateStr + "T00:00:00Z")
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-01`
+}
+
 function rewindDate(dateStr: string, frequency: RecurringFrequency): string {
   const date = new Date(dateStr + "T00:00:00Z")
   if (frequency === "weekly") {
