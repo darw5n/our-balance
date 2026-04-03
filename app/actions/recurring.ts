@@ -54,6 +54,11 @@ function pinDayOfMonth(dateStr: string, targetDay: number): string {
   return date.toISOString().split("T")[0]
 }
 
+function firstDayOfMonth(dateStr: string): string {
+  const date = new Date(dateStr + "T00:00:00Z")
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-01`
+}
+
 function rewindDate(dateStr: string, frequency: RecurringFrequency): string {
   const date = new Date(dateStr + "T00:00:00Z")
   if (frequency === "weekly") {
@@ -273,13 +278,15 @@ export async function processRecurringTransactions(userId: string): Promise<void
 
         // For income: create a provisional pending transaction as soon as the due
         // date passes — even if the confirmation trigger hasn't arrived yet.
-        // This ensures the current month shows expected income from day one.
+        // Use the 1st of the month so the income appears from the start of the month,
+        // independently of the specific due day.
         if (rec.type === "income") {
+          const provisionalDate = firstDayOfMonth(dueDateForTx)
           const { data: existingPending } = await supabase
             .from("transactions")
             .select("id")
             .eq("user_id", userId)
-            .eq("date", dueDateForTx)
+            .eq("date", provisionalDate)
             .eq("status", "pending")
             .eq("type", "income")
             .limit(1)
@@ -291,7 +298,7 @@ export async function processRecurringTransactions(userId: string): Promise<void
               amount: rec.amount,
               description: rec.description,
               category_id: rec.category_id,
-              date: dueDateForTx,
+              date: provisionalDate,
               status: "pending",
             })
           }
@@ -345,7 +352,9 @@ export async function confirmRecurringTransaction(
 
     // next_due_date was already advanced by one cycle when pending_confirmation was set,
     // so the actual occurrence date is one cycle back.
-    const pendingDate = rewindDate(rec.next_due_date, rec.frequency as RecurringFrequency)
+    const dueDate = rewindDate(rec.next_due_date, rec.frequency as RecurringFrequency)
+    // Provisional income transactions are anchored to the 1st of the due month.
+    const pendingDate = firstDayOfMonth(dueDate)
 
     // Try to find and update the provisional pending transaction
     const { data: pendingTx } = await supabase
@@ -437,12 +446,13 @@ export async function skipRecurringConfirmation(recurringId: string): Promise<Re
 
     // Delete the provisional pending transaction if it exists
     if (rec?.type === "income" && rec.next_due_date) {
-      const dueDateForTx = rewindDate(rec.next_due_date as string, rec.frequency as RecurringFrequency)
+      const dueDate = rewindDate(rec.next_due_date as string, rec.frequency as RecurringFrequency)
+      const provisionalDate = firstDayOfMonth(dueDate)
       await supabase
         .from("transactions")
         .delete()
         .eq("user_id", user.id)
-        .eq("date", dueDateForTx)
+        .eq("date", provisionalDate)
         .eq("status", "pending")
         .eq("type", "income")
     }
