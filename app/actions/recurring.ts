@@ -280,14 +280,30 @@ export async function processRecurringTransactions(userId: string): Promise<void
           let cycleDue = dueDateForTx
           while (firstDayOfMonth(cycleDue) <= today) {
             const provisionalDate = firstDayOfMonth(cycleDue)
-            const { data: existing } = await supabase
+            // Compute the first day of the next calendar month for the range check.
+            const d = new Date(provisionalDate + "T00:00:00Z")
+            d.setUTCMonth(d.getUTCMonth() + 1)
+            const nextMonthStart = d.toISOString().split("T")[0]
+
+            // Check the whole month (not just the 1st) so we don't create a duplicate
+            // if an older provisional already exists at a different day (e.g. the 10th).
+            // Also match by description to avoid false collisions with other recurring incomes.
+            let existingQuery = supabase
               .from("transactions")
               .select("id")
               .eq("user_id", userId)
-              .eq("date", provisionalDate)
+              .gte("date", provisionalDate)
+              .lt("date", nextMonthStart)
               .in("status", ["pending", "confirmed"])
               .eq("type", "income")
               .limit(1)
+            if (rec.description) {
+              existingQuery = existingQuery.eq("description", rec.description)
+            } else {
+              existingQuery = existingQuery.is("description", null)
+            }
+            const { data: existing } = await existingQuery
+
             if (!existing?.length) {
               await supabase.from("transactions").insert({
                 user_id: userId,
