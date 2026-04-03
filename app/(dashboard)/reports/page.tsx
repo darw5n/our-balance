@@ -14,6 +14,7 @@ import {
   getCashflowForYear,
   getCategoryMonthlyBreakdown,
 } from "@/lib/supabase/queries/analytics"
+import { processRecurringTransactions } from "@/app/actions/recurring"
 import { formatCurrency } from "@/lib/utils"
 
 export default async function ReportsPage({
@@ -32,6 +33,8 @@ export default async function ReportsPage({
 
   const user = await getServerUser()
   if (!user) return null
+
+  await processRecurringTransactions(user.id)
 
   const [summary, cashflowCurrent, cashflowPrev, macroBreakdown, categoryMonthly] =
     await Promise.all([
