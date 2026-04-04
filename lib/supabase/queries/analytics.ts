@@ -61,12 +61,13 @@ export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBr
     .gte("date", startISO)
     .lt("date", endISO)
 
+  // Include anche le entrate provvisorie (pending) per coerenza con i KPI in cima alla pagina
   let incomeQuery = supabase
     .from("transactions")
     .select("amount, type, status, date, scope", { head: false })
     .eq("user_id", userId)
     .eq("type", "income")
-    .eq("status", "confirmed")
+    .in("status", ["confirmed", "pending"])
     .gte("date", startISO)
     .lt("date", endISO)
 
@@ -102,9 +103,9 @@ export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBr
     result.totale_entrate += applyScope(rawAmount, row.scope, viewMode)
   }
 
-  // Risparmiato totale = quanto rimane dopo necessità e svago.
-  // Investimenti è un sub-bucket del risparmio (capitale allocato = forma di risparmio).
-  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago)
+  // Risparmiato = quanto rimane dopo necessità, svago e investimenti.
+  // Investimenti è una riga separata, non inclusa nel risparmio liquido.
+  result.risparmi = Math.max(0, result.totale_entrate - result.necessita - result.svago - result.investimenti)
 
   return result
 })
