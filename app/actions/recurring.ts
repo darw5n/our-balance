@@ -330,7 +330,9 @@ export async function processRecurringTransactions(userId: string): Promise<void
         const triggerDate = startDay ? pinDayOfMonth(rawTrigger, startDay) : rawTrigger
         if (triggerDate > today) continue
 
-        const nextDue = advanceDate(dueDateForTx, freq)
+        // Pin next_due_date to the 1st of the next month so future runs of the
+        // look-ahead loop always produce clean 1st-of-month provisional dates.
+        const nextDue = firstDayOfMonth(advanceDate(dueDateForTx, freq))
 
         // Optimistic lock: only set pending_confirmation if not already set.
         const { data: claimed } = await supabase
