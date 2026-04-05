@@ -276,11 +276,10 @@ export async function processRecurringTransactions(userId: string): Promise<void
       } else if (!rec.pending_confirmation) {
         const dueDateForTx = rec.next_due_date as string
 
-        // For income: create provisional pending transactions for ALL months
-        // that have already started (firstDayOfMonth <= today), even if the
-        // due day hasn't arrived yet. This ensures each month shows expected
-        // income from its 1st day, regardless of confirmation status.
-        // Confirmation is triggered separately below, only for the oldest cycle.
+        // Create provisional pending transactions so they appear in the
+        // transactions list before the confirmation trigger fires.
+        // - Income: one provisional per month from the 1st, for all months started.
+        // - Expense: one provisional at next_due_date for the current cycle.
         if (rec.type === "income") {
           let cycleDue = dueDateForTx
           while (firstDayOfMonth(cycleDue) <= today) {
@@ -322,6 +321,42 @@ export async function processRecurringTransactions(userId: string): Promise<void
               })
             }
             cycleDue = advanceDate(cycleDue, freq)
+          }
+        } else {
+          // Expense: create one provisional pending transaction for the current cycle
+          // so it's visible in the transactions list as "In attesa".
+          const provisionalDate = dueDateForTx
+          const d = new Date(provisionalDate + "T00:00:00Z")
+          d.setUTCMonth(d.getUTCMonth() + 1)
+          const nextMonthStart = d.toISOString().split("T")[0]
+
+          let existingQuery = supabase
+            .from("transactions")
+            .select("id")
+            .eq("user_id", userId)
+            .gte("date", provisionalDate)
+            .lt("date", nextMonthStart)
+            .in("status", ["pending", "confirmed"])
+            .eq("type", "expense")
+            .limit(1)
+          if (rec.description) {
+            existingQuery = existingQuery.eq("description", rec.description)
+          } else {
+            existingQuery = existingQuery.is("description", null)
+          }
+          const { data: existing } = await existingQuery
+
+          if (!existing?.length) {
+            await supabase.from("transactions").insert({
+              user_id: userId,
+              type: rec.type,
+              scope: rec.scope,
+              amount: rec.amount,
+              description: rec.description,
+              category_id: rec.category_id,
+              date: provisionalDate,
+              status: "pending",
+            })
           }
         }
 
@@ -467,18 +502,17 @@ export async function skipRecurringConfirmation(recurringId: string): Promise<Re
       return { success: false, error: error.message }
     }
 
-    // Delete the provisional pending transaction for the confirmed cycle only.
-    // (Future month provisionals remain visible in the graphs.)
-    if (rec?.type === "income" && rec.next_due_date) {
+    // Delete the provisional pending transaction for the skipped cycle.
+    if (rec?.next_due_date) {
       const dueDate = rewindDate(rec.next_due_date as string, rec.frequency as RecurringFrequency)
-      const provisionalDate = firstDayOfMonth(dueDate)
+      const provisionalDate = rec.type === "income" ? firstDayOfMonth(dueDate) : dueDate
       await supabase
         .from("transactions")
         .delete()
         .eq("user_id", user.id)
         .eq("date", provisionalDate)
         .eq("status", "pending")
-        .eq("type", "income")
+        .eq("type", rec.type)
     }
 
     revalidatePath("/dashboard")

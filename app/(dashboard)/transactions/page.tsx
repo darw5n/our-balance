@@ -3,6 +3,7 @@ import { getCategories } from "@/lib/supabase/queries/categories"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
 import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
 import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
+import { processRecurringTransactions } from "@/app/actions/recurring"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 
@@ -40,6 +41,8 @@ export default async function TransactionsPage({
   const from = params?.from ?? ""
   const to = params?.to ?? ""
   const category = params?.category ?? ""
+
+  if (user?.id) await processRecurringTransactions(user.id)
 
   const [transactions, categories] = await Promise.all([
     user?.id
