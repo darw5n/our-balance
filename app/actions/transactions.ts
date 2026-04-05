@@ -190,6 +190,14 @@ export async function deleteTransaction(id: string): Promise<TransactionActionRe
   }
 }
 
+export async function confirmTransaction(
+  id: string,
+  amount: number,
+  date: string
+): Promise<TransactionActionResult> {
+  return updateTransaction(id, { status: "confirmed", amount, date })
+}
+
 export async function bulkDeleteTransactions(ids: string[]): Promise<TransactionActionResult> {
   try {
     const user = await getServerUser()
