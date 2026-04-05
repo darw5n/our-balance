@@ -2,12 +2,14 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Users } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, CheckCircle, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
 import { EditTransactionDialog, type Transaction } from "@/components/dashboard/edit-transaction-dialog"
+import { ConfirmTransactionDialog } from "@/components/dashboard/confirm-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { useToast } from "@/components/ui/toast-provider"
 import { useConfirm } from "@/components/ui/confirm-dialog"
@@ -24,6 +26,8 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
   const [editOpen, setEditOpen] = useState(false)
+  const [confirmingTx, setConfirmingTx] = useState<Transaction | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   const allSelected = transactions.length > 0 && selected.size === transactions.length
@@ -51,6 +55,11 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   function handleEdit(tx: Transaction) {
     setEditingTx(tx)
     setEditOpen(true)
+  }
+
+  function handleConfirm(tx: Transaction) {
+    setConfirmingTx(tx)
+    setConfirmOpen(true)
   }
 
   async function handleDelete(tx: Transaction) {
@@ -193,26 +202,35 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   </span>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-text-2 hover:text-text-1"
-                      onClick={() => handleEdit(tx)}
-                      aria-label="Modifica"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-text-2 hover:text-expense-fg"
-                      onClick={() => handleDelete(tx)}
-                      disabled={deleting}
-                      aria-label="Elimina"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                  <div className="flex items-center justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-text-2 hover:text-text-1" aria-label="Azioni">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="min-w-[140px]">
+                        <DropdownMenuItem onClick={() => handleEdit(tx)}>
+                          <Pencil className="mr-2 h-3.5 w-3.5" />
+                          Modifica
+                        </DropdownMenuItem>
+                        {tx.status === "pending" && (
+                          <DropdownMenuItem onClick={() => handleConfirm(tx)} className="text-emerald-400 focus:text-emerald-400">
+                            <CheckCircle className="mr-2 h-3.5 w-3.5" />
+                            Conferma
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(tx)}
+                          disabled={deleting}
+                          className="text-expense-fg focus:text-expense-fg"
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" />
+                          Elimina
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </TableCell>
               </TableRow>
@@ -229,6 +247,16 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
         }}
         transaction={editingTx}
         categories={categories}
+        onSuccess={() => router.refresh()}
+      />
+
+      <ConfirmTransactionDialog
+        open={confirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open)
+          if (!open) setConfirmingTx(null)
+        }}
+        transaction={confirmingTx}
         onSuccess={() => router.refresh()}
       />
     </>
