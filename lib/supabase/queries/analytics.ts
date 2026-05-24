@@ -57,7 +57,10 @@ export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBr
     incomeQuery = incomeQuery.eq("scope", "family")
   }
 
-  const [{ data: expenseData }, { data: incomeData }] = await Promise.all([expenseQuery, incomeQuery])
+  const [{ data: expenseData, error: expenseError }, { data: incomeData, error: incomeError }] = await Promise.all([expenseQuery, incomeQuery])
+
+  if (expenseError) console.error("[getMacroCategoryBreakdown] expenseQuery error:", expenseError)
+  if (incomeError) console.error("[getMacroCategoryBreakdown] incomeQuery error:", incomeError)
 
   const result: MacroBreakdown = { necessita: 0, svago: 0, risparmi: 0, investimenti: 0, totale_entrate: 0 }
 
@@ -108,6 +111,7 @@ export const getCashflowForYear = cache(async function getCashflowForYear(
 
   const { data, error } = await query
 
+  if (error) console.error("[getCashflowForYear] error:", error)
   if (error || !data) return buildEmptyYear(year)
 
   const buckets = new Map<number, { entrate: number; uscite: number; entrate_provvisorie: number }>()
@@ -182,6 +186,7 @@ export const getCategoryMonthlyBreakdown = cache(async function getCategoryMonth
   }
 
   const { data, error } = await query
+  if (error) console.error("[getCategoryMonthlyBreakdown] error:", error)
   if (error || !data) return []
 
   type Row = {
@@ -286,7 +291,10 @@ export const getAnnualDistribution = cache(async function getAnnualDistribution(
     incomeQuery = incomeQuery.eq("scope", "family")
   }
 
-  const [{ data: expenseData }, { data: incomeData }] = await Promise.all([expenseQuery, incomeQuery])
+  const [{ data: expenseData, error: expenseError }, { data: incomeData, error: incomeError }] = await Promise.all([expenseQuery, incomeQuery])
+
+  if (expenseError) console.error("[getAnnualDistribution] expenseQuery error:", expenseError)
+  if (incomeError) console.error("[getAnnualDistribution] incomeQuery error:", incomeError)
 
   const result = { ...empty }
 
@@ -349,6 +357,7 @@ export const getCategoryMonthlyAverages = cache(async function getCategoryMonthl
 
   const { data, error } = await query
 
+  if (error) console.error("[getCategoryMonthlyAverages] error:", error)
   if (error || !data) return []
 
   type Row = {

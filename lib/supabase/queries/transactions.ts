@@ -109,6 +109,7 @@ export const getDashboardSummary = cache(async function getDashboardSummary(
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummary] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -138,6 +139,7 @@ export const getDashboardSummaryPrevMonth = cache(async function getDashboardSum
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummaryPrevMonth] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -166,6 +168,7 @@ export const getDashboardSummaryYear = cache(async function getDashboardSummaryY
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummaryYear] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -194,6 +197,7 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
 
   const { data, error } = await query
 
+  if (error) console.error("[getCashflowMonthly] error:", error)
   if (error || !data) return []
 
   const buckets = new Map<string, { date: Date; entrate: number; uscite: number; entrate_provvisorie: number }>()
@@ -278,6 +282,7 @@ export const getTopCategories = cache(async function getTopCategories(
 
   const { data, error } = await query
 
+  if (error) console.error("[getTopCategories] error:", error)
   if (error || !data) return []
 
   const totals = new Map<
