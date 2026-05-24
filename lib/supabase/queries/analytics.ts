@@ -1,6 +1,7 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode, CashflowMonthlyPoint } from "./transactions"
+import { toNumber, getYearRange, applyScope, resolveJoin } from "@/lib/supabase/query-utils"
 
 export type MacroBreakdown = {
   necessita: number
@@ -19,26 +20,6 @@ type TransactionWithCategory = {
   category: {
     macro_category: string | null
   } | Array<{ macro_category: string | null }> | null
-}
-
-function toNumber(value: number | string | null | undefined): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value === "string") {
-    const n = Number(value.replace(",", "."))
-    return Number.isFinite(n) ? n : 0
-  }
-  return 0
-}
-
-function applyScope(amount: number, scope: string | null | undefined, viewMode: ViewMode): number {
-  if (viewMode === "personal" && scope === "family") return amount * 0.5
-  return amount
-}
-
-function getYearRange(year: number) {
-  const start = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0))
-  const end = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0))
-  return { startISO: start.toISOString(), endISO: end.toISOString() }
 }
 
 export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBreakdown(
@@ -84,14 +65,8 @@ export const getMacroCategoryBreakdown = cache(async function getMacroCategoryBr
     const rawAmount = Math.abs(toNumber(row.amount))
     const amount = applyScope(rawAmount, row.scope, viewMode)
 
-    let macro: string | null = null
-    if (row.category) {
-      if (Array.isArray(row.category)) {
-        macro = row.category[0]?.macro_category ?? null
-      } else {
-        macro = (row.category as { macro_category: string | null }).macro_category
-      }
-    }
+    const cat = resolveJoin(row.category)
+    const macro = cat?.macro_category ?? null
 
     if (macro === "necessita") result.necessita += amount
     else if (macro === "svago") result.svago += amount
@@ -231,12 +206,7 @@ export const getCategoryMonthlyBreakdown = cache(async function getCategoryMonth
   for (const row of data as unknown as Row[]) {
     if (!row.category || !row.date) continue
 
-    let cat: { id?: string; name: string | null; color: string | null; macro_category: string | null } | null = null
-    if (Array.isArray(row.category)) {
-      cat = row.category[0] ?? null
-    } else {
-      cat = row.category
-    }
+    const cat = resolveJoin(row.category)
     if (!cat) continue
 
     const id = cat.id ?? cat.name ?? "unknown"
@@ -402,12 +372,7 @@ export const getCategoryMonthlyAverages = cache(async function getCategoryMonthl
   for (const row of data as unknown as Row[]) {
     if (!row.category) continue
 
-    let cat: { id?: string; name: string | null; color: string | null; macro_category: string | null } | null = null
-    if (Array.isArray(row.category)) {
-      cat = row.category[0] ?? null
-    } else {
-      cat = row.category
-    }
+    const cat = resolveJoin(row.category)
     if (!cat) continue
 
     const id = cat.id ?? cat.name ?? "unknown"

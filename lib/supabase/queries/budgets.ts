@@ -1,6 +1,7 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode } from "@/lib/supabase/queries/transactions"
+import { toNumber, getMonthRange } from "@/lib/supabase/query-utils"
 
 export type BudgetWithProgress = {
   id: string
@@ -13,25 +14,10 @@ export type BudgetWithProgress = {
   is_exceeded: boolean
 }
 
-function getMonthRange(now = new Date()) {
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0))
-  return { startISO: start.toISOString(), endISO: end.toISOString() }
-}
-
 function parseMonthParam(month?: string): Date | undefined {
   if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
   const [year, mon] = month.split("-").map(Number)
   return new Date(Date.UTC(year, mon - 1, 1))
-}
-
-function toNumber(value: number | string | null | undefined): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value === "string") {
-    const n = Number(value.replace(",", "."))
-    return Number.isFinite(n) ? n : 0
-  }
-  return 0
 }
 
 export const getBudgetsWithProgress = cache(async function getBudgetsWithProgress(
