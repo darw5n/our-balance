@@ -20,16 +20,14 @@ import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dia
 import { DarkModeToggle } from "@/components/dashboard/dark-mode-toggle"
 import type { Category } from "@/lib/supabase/queries/categories"
 
-const BOTTOM_NAV = [
+const NAV_ITEMS = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
   { href: "/transactions", label: "Transazioni",  icon: ArrowLeftRight },
-  { id: "ADD" } as const,
   { href: "/reports",      label: "Report",       icon: BarChart2 },
   { href: "/recurring",    label: "Programmati",  icon: Repeat },
 ]
 
 const SECONDARY_NAV = [
-  { href: "/recurring",   label: "Programmati",  icon: Repeat },
   { href: "/budgets",     label: "Budget",        icon: Wallet },
   { href: "/categories",  label: "Categorie",     icon: Tag },
   { href: "/settings",    label: "Impostazioni",  icon: Settings },
@@ -48,7 +46,6 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return
     function handleClick(e: MouseEvent) {
@@ -60,12 +57,10 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
     return () => document.removeEventListener("mousedown", handleClick)
   }, [menuOpen])
 
-  // Close menu on navigation
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
 
-  // Listen for global open-add-transaction event (from NlQuickAddBar etc.)
   useEffect(() => {
     const handler = () => setAddOpen(true)
     window.addEventListener("open-add-transaction", handler)
@@ -85,104 +80,125 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
 
   const userName = userEmail ? userEmail.split("@")[0] : "…"
   const userInitial = userName.charAt(0).toUpperCase()
-  const isSecondaryActive = SECONDARY_NAV.some((l) => isActive(l.href))
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-0 text-text-1">
-      {/* Centered column wrapper */}
-      <div className="mx-auto w-full max-w-[430px] flex-1 flex flex-col">
 
-        {/* Top bar */}
-        <header className="sticky top-0 z-50 bg-surface-overlay backdrop-blur-xl px-5 pt-3.5 pb-2">
-          <div className="flex items-center justify-between">
-            {/* Left: greeting + name */}
-            <div>
-              <p className="font-sans text-[11px] text-text-3">Buongiorno 👋</p>
-              <p className="font-serif text-[22px] font-semibold text-text-1 leading-tight capitalize">
-                {userName}
-              </p>
-            </div>
+      {/* Top bar — sticky, full width, content centered */}
+      <header className="sticky top-0 z-50 bg-surface-overlay backdrop-blur-xl border-b border-border-subtle">
+        <div className="mx-auto flex w-full max-w-[720px] items-center justify-between px-5 pt-3.5 pb-2.5">
 
-            {/* Right: dark mode toggle + avatar */}
-            <div className="flex items-center gap-2.5">
-              <DarkModeToggle />
+          {/* Left: greeting + username */}
+          <div>
+            <p className="font-sans text-[11px] text-text-3">Buongiorno 👋</p>
+            <p className="font-serif text-[20px] font-semibold text-text-1 leading-tight capitalize">
+              {userName}
+            </p>
+          </div>
 
-              {/* Avatar button — opens secondary menu */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen((v) => !v)}
-                  aria-label="Menu account"
-                  className="flex h-9 w-9 items-center justify-center rounded-full font-sans text-sm font-bold text-white transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: "var(--accent-brand)" }}
+          {/* Center: desktop navigation (hidden on mobile) */}
+          <nav className="hidden md:flex items-center gap-0.5">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              const active = isActive(href)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-sm transition-all duration-200 ease-out ${
+                    active
+                      ? "bg-accent-brand-bg text-accent-brand font-semibold"
+                      : "text-text-2 hover:bg-surface-2 hover:text-text-1"
+                  }`}
                 >
-                  {userInitial}
-                </button>
+                  <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.7} />
+                  {label}
+                </Link>
+              )
+            })}
+          </nav>
 
-                {menuOpen && (
-                  <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-[22px] border border-border-subtle bg-surface-1 p-1.5 shadow-xl">
-                    {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
-                      <Link
-                        key={href}
-                        href={href}
-                        className={`flex items-center gap-3 rounded-[14px] px-3 py-2 text-sm font-sans transition-colors ${
-                          isActive(href)
-                            ? "bg-surface-2 text-text-1"
-                            : "text-text-2 hover:bg-surface-2 hover:text-text-1"
-                        }`}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {label}
-                      </Link>
-                    ))}
+          {/* Right: dark mode toggle + avatar */}
+          <div className="flex items-center gap-2.5">
+            <DarkModeToggle />
 
-                    <div className="my-1.5 border-t border-border-subtle" />
+            {/* Avatar — opens secondary dropdown */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="Menu account"
+                className="flex h-9 w-9 items-center justify-center rounded-full font-sans text-sm font-bold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "var(--accent-brand)" }}
+              >
+                {userInitial}
+              </button>
 
-                    {userEmail && (
-                      <p className="truncate px-3 py-2 font-sans text-xs text-text-3">{userEmail}</p>
-                    )}
-
-                    <button
-                      onClick={handleLogout}
-                      className="flex w-full items-center gap-3 rounded-[14px] px-3 py-2 font-sans text-sm text-text-2 transition-colors hover:bg-surface-2 hover:text-expense-fg"
+              {menuOpen && (
+                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-[22px] border border-border-subtle bg-surface-1 p-1.5 shadow-xl">
+                  {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`flex items-center gap-3 rounded-[14px] px-3 py-2 font-sans text-sm transition-colors ${
+                        isActive(href)
+                          ? "bg-surface-2 text-text-1"
+                          : "text-text-2 hover:bg-surface-2 hover:text-text-1"
+                      }`}
                     >
-                      <LogOut className="h-4 w-4" />
-                      Esci
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Link>
+                  ))}
+
+                  <div className="my-1.5 border-t border-border-subtle" />
+
+                  {userEmail && (
+                    <p className="truncate px-3 py-2 font-sans text-xs text-text-3">{userEmail}</p>
+                  )}
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-[14px] px-3 py-2 font-sans text-sm text-text-2 transition-colors hover:bg-surface-2 hover:text-expense-fg"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Esci
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Page content */}
-        <main className="flex-1 px-4 pb-28 pt-2">{children}</main>
-      </div>
+      {/* Page content — centered, responsive max-width */}
+      <main className="mx-auto w-full max-w-[720px] flex-1 px-4 pt-3 pb-32 md:pb-10">
+        {children}
+      </main>
 
-      {/* Bottom nav — fixed, centered, full-width capped at 430px */}
+      {/* FAB — floats above bottom nav on mobile, bottom-right on desktop */}
+      <button
+        onClick={() => setAddOpen(true)}
+        aria-label="Aggiungi transazione"
+        className={[
+          "fixed z-50 flex items-center justify-center rounded-full text-white",
+          "shadow-[0_4px_24px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95",
+          // Mobile: centered above bottom nav
+          "bottom-[72px] left-1/2 h-[58px] w-[58px] -translate-x-1/2",
+          // Desktop: bottom-right corner, slightly larger context
+          "md:bottom-8 md:right-8 md:left-auto md:translate-x-0 md:h-[54px] md:w-[54px]",
+        ].join(" ")}
+        style={{ backgroundColor: "var(--accent-brand)" }}
+      >
+        <Plus className="h-6 w-6 stroke-[2.5]" />
+      </button>
+
+      {/* Bottom nav — mobile only, 4 items (no FAB slot) */}
       <nav
-        className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2 border-t border-border-subtle bg-surface-overlay backdrop-blur-2xl"
-        style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom))" }}
+        className="md:hidden fixed bottom-0 left-1/2 z-40 w-full max-w-[640px] -translate-x-1/2 border-t border-border-subtle bg-surface-overlay backdrop-blur-2xl"
+        style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
       >
         <div className="flex items-center justify-around px-2 pt-2">
-          {BOTTOM_NAV.map((item) => {
-            if ("id" in item && item.id === "ADD") {
-              return (
-                <button
-                  key="ADD"
-                  onClick={() => setAddOpen(true)}
-                  aria-label="Aggiungi transazione"
-                  className="flex h-[54px] w-[54px] items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(200,90,58,0.35)] transition-transform active:scale-95"
-                  style={{ backgroundColor: "var(--accent-brand)" }}
-                >
-                  <Plus className="h-6 w-6 stroke-[2.5]" />
-                </button>
-              )
-            }
-
-            const { href, label, icon: Icon } = item as { href: string; label: string; icon: React.ElementType }
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
-
             return (
               <Link
                 key={href}

@@ -20,6 +20,7 @@ export type CategoryOption = {
   id: string
   name: string
   color: string
+  emoji?: string | null
   type?: string | null
   group_name?: string | null
 }
