@@ -66,7 +66,7 @@ export default async function ReportsPage({
         <div className="flex w-full items-center justify-between sm:w-auto sm:justify-start sm:gap-3">
           <a
             href={makeUrl(safeYear - 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle text-text-3 transition-colors hover:bg-white/5 hover:text-text-1"
             aria-label={`Anno ${safeYear - 1}`}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -77,7 +77,7 @@ export default async function ReportsPage({
           </div>
           {isFutureYear ? (
             <span
-              className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-white/5 text-zinc-700"
+              className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-border-subtle text-text-3"
               aria-disabled="true"
             >
               <ChevronRight className="h-4 w-4" />
@@ -85,7 +85,7 @@ export default async function ReportsPage({
           ) : (
             <a
               href={makeUrl(safeYear + 1)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-border-subtle text-text-3 transition-colors hover:bg-white/5 hover:text-text-1"
               aria-label={`Anno ${safeYear + 1}`}
             >
               <ChevronRight className="h-4 w-4" />
