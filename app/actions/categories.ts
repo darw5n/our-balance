@@ -1,7 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getServerUser } from "@/lib/supabase-server"
+import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { ActionResultWithId } from "@/lib/types/actions"
 
 export type CreateCategoryInput = {
   name: string
@@ -19,9 +20,7 @@ export type UpdateCategoryInput = {
   group_name?: string | null
 }
 
-export type CategoryResult =
-  | { success: true; id: string }
-  | { success: false; error: string }
+export type CategoryResult = ActionResultWithId
 
 export async function createCategory(input: CreateCategoryInput): Promise<CategoryResult> {
   const user = await getServerUser()
@@ -39,7 +38,7 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
   const macro_category = input.macro_category ?? null
   const group_name = input.group_name?.trim() || null
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
@@ -77,7 +76,7 @@ export async function updateCategory(
   const macro_category = input.macro_category ?? null
   const group_name = input.group_name?.trim() || null
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
@@ -104,7 +103,7 @@ export async function deleteCategory(categoryId: string): Promise<CategoryResult
     return { success: false, error: "Utente non autenticato." }
   }
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
     .from("categories")
@@ -187,7 +186,7 @@ export async function createDefaultCategories(): Promise<{ success: boolean; cre
   const user = await getServerUser()
   if (!user?.id) return { success: false, created: 0, error: "Utente non autenticato." }
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   // Recupera nomi esistenti per evitare duplicati
   const { data: existing } = await supabase

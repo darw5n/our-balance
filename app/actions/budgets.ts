@@ -1,16 +1,17 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { getServerUser } from "@/lib/supabase-server"
+import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { ActionResult, ActionResultWithId } from "@/lib/types/actions"
 
 export type BudgetInput = {
   category_id: string
   amount_limit: number
 }
 
-export type BudgetResult = { success: true; id: string } | { success: false; error: string }
+export type BudgetResult = ActionResultWithId
 
-export async function upsertBudget(input: BudgetInput): Promise<BudgetResult> {
+export async function upsertBudget(input: BudgetInput): Promise<ActionResultWithId> {
   const user = await getServerUser()
   if (!user?.id) {
     return { success: false, error: "Utente non autenticato." }
@@ -25,7 +26,7 @@ export async function upsertBudget(input: BudgetInput): Promise<BudgetResult> {
     return { success: false, error: "Il limite deve essere un numero positivo." }
   }
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("budgets")
@@ -46,13 +47,13 @@ export async function upsertBudget(input: BudgetInput): Promise<BudgetResult> {
   return { success: true, id: data.id }
 }
 
-export async function deleteBudget(budgetId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteBudget(budgetId: string): Promise<ActionResult> {
   const user = await getServerUser()
   if (!user?.id) {
     return { success: false, error: "Utente non autenticato." }
   }
 
-  const supabase = await (await import("@/lib/supabase-server")).createSupabaseServerClient()
+  const supabase = await createSupabaseServerClient()
 
   const { error } = await supabase
     .from("budgets")

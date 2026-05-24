@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { ActionResult } from "@/lib/types/actions"
 
 export type RecurringFrequency = "weekly" | "monthly" | "yearly"
 export type RecurringType = "income" | "expense"
@@ -20,9 +21,7 @@ export type CreateRecurringInput = {
 
 export type UpdateRecurringInput = Partial<CreateRecurringInput>
 
-export type RecurringActionResult =
-  | { success: true }
-  | { success: false; error: string }
+export type RecurringActionResult = ActionResult
 
 function advanceDate(dateStr: string, frequency: RecurringFrequency): string {
   const date = new Date(dateStr + "T00:00:00Z")
