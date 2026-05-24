@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode } from "@/lib/supabase/queries/transactions"
-import { toNumber, getMonthRange } from "@/lib/supabase/query-utils"
+import { toNumber, getMonthRange, resolveJoin } from "@/lib/supabase/query-utils"
 
 export type BudgetWithProgress = {
   id: string
@@ -72,7 +72,7 @@ export const getBudgetsWithProgress = cache(async function getBudgetsWithProgres
   }
 
   return budgets.map((b) => {
-    const cat = Array.isArray(b.categories) ? b.categories[0] : b.categories
+    const cat = resolveJoin(b.categories)
     const category_name = (cat as { name?: string | null } | null)?.name ?? "Senza categoria"
     const category_color = (cat as { color?: string | null } | null)?.color ?? "#71717a"
     const amount_limit = toNumber(b.amount_limit)
