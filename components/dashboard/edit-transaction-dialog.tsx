@@ -203,18 +203,6 @@ export function EditTransactionDialog({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">
-              Categoria <span className="text-expense-fg">*</span>
-            </label>
-            <CategoryCombobox
-              categories={categories}
-              txType={type}
-              value={categoryId}
-              onChange={setCategoryId}
-            />
-          </div>
-
-          <div className="space-y-1">
             <label className="text-xs font-medium text-text-2" htmlFor="edit-description">
               Descrizione
             </label>
@@ -224,6 +212,18 @@ export function EditTransactionDialog({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Es. Spesa supermercato"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-text-2">
+              Categoria <span className="text-expense-fg">*</span>
+            </label>
+            <CategoryCombobox
+              categories={categories}
+              txType={type}
+              value={categoryId}
+              onChange={setCategoryId}
             />
           </div>
 
