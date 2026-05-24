@@ -136,7 +136,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                 aria-label="Seleziona tutto"
               />
             </TableHead>
-            <TableHead>Data</TableHead>
+            <TableHead className="hidden md:table-cell">Data</TableHead>
             <TableHead>Descrizione</TableHead>
             <TableHead className="text-right">Importo</TableHead>
             <TableHead className="hidden md:table-cell">Tipo</TableHead>
@@ -162,12 +162,22 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     aria-label="Seleziona riga"
                   />
                 </TableCell>
-                <TableCell>{dateLabel}</TableCell>
-                <TableCell className="max-w-[160px] truncate text-xs text-text-1 md:max-w-[220px]">
-                  {tx.description || "-"}
+                <TableCell className="hidden md:table-cell">{dateLabel}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] bg-surface-2 text-[19px]">
+                      💳
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-sm font-medium text-text-1 truncate max-w-[120px] md:max-w-[180px]">
+                        {tx.description || "-"}
+                      </p>
+                      <p className="font-sans text-[11px] text-text-3 mt-0.5">{dateLabel}</p>
+                    </div>
+                  </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className={tx.type === "expense" ? "text-expense-fg" : "text-income-fg"}>
+                  <span className={tx.type === "income" ? "text-income-fg font-semibold" : "text-text-1 font-semibold"}>
                     {formattedAmount}
                   </span>
                 </TableCell>

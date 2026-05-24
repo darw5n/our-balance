@@ -119,19 +119,19 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
               {!isFamily && <ReferenceLine y={0} stroke="rgba(255,255,255,0.2)" strokeDasharray="4 3" />}
               {!isFamily && (
                 <>
-                  <Bar dataKey="entrate" stackId="e" fill="rgba(52,211,153,0.85)" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="entrate_provvisorie" stackId="e" fill="rgba(52,211,153,0.3)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="entrate" stackId="e" fill="var(--income-fg)" radius={[0, 0, 0, 0]} />
+                  <Bar dataKey="entrate_provvisorie" stackId="e" fill="var(--income-fg)" fillOpacity={0.35} radius={[4, 4, 0, 0]} />
                 </>
               )}
-              <Bar dataKey="uscite" fill="rgba(251,113,133,0.85)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="uscite" fill="var(--expense-fg)" radius={[4, 4, 0, 0]} />
               {!isFamily && (
                 <Line
                   type="monotone"
                   dataKey="netto"
-                  stroke="rgba(56,189,248,0.9)"
+                  stroke="var(--info)"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 4, fill: "rgba(56,189,248,0.9)" }}
+                  activeDot={{ r: 4, fill: "var(--info)" }}
                 />
               )}
             </ComposedChart>

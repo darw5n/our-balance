@@ -1,5 +1,6 @@
-import { TrendingUp, TrendingDown, Wallet, CalendarClock, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { getServerUser } from "@/lib/supabase-server"
+import { Card } from "@/components/ui/card"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { MacroBreakdownChart } from "@/components/dashboard/macro-breakdown-chart"
 import { YearComparisonChart } from "@/components/dashboard/year-comparison-chart"
@@ -47,39 +48,9 @@ export default async function ReportsPage({
 
   // Include provisional income in totals (only relevant for current year)
   const entrateTotale = summary.entrate + summary.entrate_provvisorie
-  const nettoTotale = summary.netto + summary.entrate_provvisorie
-
-  // Previsione: solo per anno corrente parziale
-  let previsione: number | null = null
-  if (isCurrentYear) {
-    const now = new Date()
-    const currentMonthIndex = now.getUTCMonth() // 0-based
-    const hasPrevData = cashflowPrev.some((p) => p.entrate > 0 || p.uscite > 0)
-
-    if (hasPrevData) {
-      // Anno precedente come baseline per la stagionalità
-      const prevRemainingNetto = cashflowPrev
-        .slice(currentMonthIndex + 1)
-        .reduce((sum, p) => sum + p.entrate - p.uscite, 0)
-      previsione = nettoTotale + prevRemainingNetto
-    } else {
-      // Fallback: estrapolazione lineare
-      const monthsElapsed = currentMonthIndex + 1
-      if (monthsElapsed > 0) {
-        previsione = (nettoTotale / monthsElapsed) * 12
-      }
-    }
-  }
-
-  // Savings rate (solo vista personal, quando ci sono entrate)
-  const savingsRate =
-    viewMode === "personal" && entrateTotale > 0
-      ? Math.round((nettoTotale / entrateTotale) * 100)
-      : null
 
   // Media uscite mensile: per anno corrente usa i mesi trascorsi
   const monthsElapsed = isCurrentYear ? new Date().getUTCMonth() + 1 : 12
-  const avgUscite = summary.uscite / monthsElapsed
 
   const makeUrl = (targetYear: number) => {
     const params = new URLSearchParams()
@@ -101,8 +72,8 @@ export default async function ReportsPage({
             <ChevronLeft className="h-4 w-4" />
           </a>
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-semibold tracking-tight">Report {safeYear}</h1>
-            <p className="text-xs text-zinc-400">Riepilogo entrate e uscite per il {safeYear}.</p>
+            <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">{safeYear}</h1>
+            <p className="font-sans text-xs text-text-3 mt-1">Riepilogo entrate e uscite annuali.</p>
           </div>
           {isFutureYear ? (
             <span
@@ -125,93 +96,25 @@ export default async function ReportsPage({
       </div>
 
       {/* Summary cards */}
-      {viewMode === "family" ? (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
-                <p className="text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingDown className="h-4 w-4 text-rose-400" />
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite medio/mese</p>
-                <p className="text-xl font-semibold text-amber-400">{formatCurrency(avgUscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <CalendarClock className="h-4 w-4 text-amber-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Entrate {safeYear}</p>
-                <p className="text-xl font-semibold text-emerald-400">{formatCurrency(entrateTotale)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
-                <p className="text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingDown className="h-4 w-4 text-rose-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Netto {safeYear}</p>
-                <p className="text-xl font-semibold text-sky-400">{formatCurrency(nettoTotale)}</p>
-                {savingsRate !== null && (
-                  <p className="text-[10px] text-zinc-500">
-                    {savingsRate > 0 ? savingsRate : 0}% delle entrate risparmiato
-                  </p>
-                )}
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <Wallet className="h-4 w-4 text-sky-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">
-                  {isCurrentYear && previsione !== null ? "Previsione netto" : "Netto medio/mese"}
-                </p>
-                <p className="text-xl font-semibold text-amber-400">
-                  {isCurrentYear && previsione !== null
-                    ? formatCurrency(previsione)
-                    : formatCurrency(nettoTotale / 12)}
-                </p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <CalendarClock className="h-4 w-4 text-amber-400" />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-2.5">
+        {[
+          { label: "Entrate anno", value: entrateTotale, colorVar: "var(--income-fg)" },
+          { label: "Uscite anno", value: summary.uscite, colorVar: "var(--expense-fg)" },
+          { label: "Netto anno", value: entrateTotale - summary.uscite, colorVar: "var(--info)" },
+          {
+            label: "Media mensile",
+            value: entrateTotale > 0 ? Math.round((entrateTotale - summary.uscite) / 12) : 0,
+            colorVar: "var(--pending-fg)",
+          },
+        ].map(({ label, value, colorVar }) => (
+          <Card key={label} className="p-4">
+            <p className="font-sans text-[10px] text-text-3 leading-snug mb-2">{label}</p>
+            <p className="font-serif text-xl font-semibold" style={{ color: colorVar }}>
+              {formatCurrency(Math.abs(value))}
+            </p>
+          </Card>
+        ))}
+      </div>
 
       {/* Cashflow mensile con linea netto */}
       <CashflowReportChart data={cashflowCurrent} year={safeYear} viewMode={viewMode} />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Plus, TrendingUp, TrendingDown, RefreshCw } from "lucide-react"
+import { Pencil, Trash2, Plus, RefreshCw } from "lucide-react"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -110,45 +110,23 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
               <li key={rec.id}>
                 <Card className="flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                        rec.type === "income"
-                          ? "bg-income-subtle text-income-fg"
-                          : "bg-expense-subtle text-expense-fg"
-                      }`}
-                    >
-                      {rec.type === "income" ? (
-                        <TrendingUp className="h-4 w-4" />
-                      ) : (
-                        <TrendingDown className="h-4 w-4" />
-                      )}
+                    <div className="w-11 h-11 rounded-[14px] bg-surface-2 flex items-center justify-center text-[19px] flex-shrink-0">
+                      💳
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-text-1">
+                      <p className="font-sans text-sm font-medium text-text-1 truncate">
                         {rec.description || "Senza descrizione"}
                       </p>
-                      <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                        <span
-                          className={`text-sm font-semibold ${
-                            rec.type === "income" ? "text-income-fg" : "text-expense-fg"
-                          }`}
-                        >
-                          {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
-                        </span>
-                        <span className="rounded-full bg-pending-subtle px-2 py-0.5 text-xs text-pending-fg">
-                          {FREQUENCY_LABEL[rec.frequency]}
-                        </span>
-                        {rec.category && (
-                          <span className="text-xs text-text-2">{rec.category.name}</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-text-3 mt-0.5">
-                        Prossima scadenza:{" "}
-                        {formatDate(rec.next_due_date)}
+                      <p className="font-sans text-[11px] text-text-3">
+                        {FREQUENCY_LABEL[rec.frequency]}
+                        {rec.next_due_date ? ` · ${formatDate(rec.next_due_date)}` : ""}
                       </p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1 ml-2">
+                    <span className={`font-sans font-semibold text-sm mr-1 ${rec.type === "income" ? "text-income-fg" : "text-accent-brand"}`}>
+                      {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
+                    </span>
                     <Button
                       variant="ghost"
                       size="icon"
