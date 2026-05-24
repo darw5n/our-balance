@@ -107,6 +107,11 @@
   /* ---- Hero gradient ---- */
   --color-hero-start: var(--hero-start);
   --color-hero-end:   var(--hero-end);
+
+  /* ---- Hero card text (fixed — hero bg is always dark) ---- */
+  --color-hero-text:    var(--hero-text);
+  --color-hero-income:  var(--hero-income);
+  --color-hero-expense: var(--hero-expense);
 }
 
 /* ============================================================
@@ -198,6 +203,11 @@
   /* ---- Hero gradient (always dark) ---- */
   --hero-start: #2A1F1A;
   --hero-end:   #3D2E28;
+
+  /* ---- Hero text (fixed, hero is always dark) ---- */
+  --hero-text:    #F0EDE8;
+  --hero-income:  #5DC98E;
+  --hero-expense: #E07B6A;
 }
 
 /* ---- Dark theme — classe applicata da next-themes su <html> ---- */
