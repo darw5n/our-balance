@@ -8,18 +8,6 @@ import { cookies } from "next/headers"
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
 
-  // Debug: log available cookies
-  if (process.env.NODE_ENV === "development") {
-    const allCookies = cookieStore.getAll()
-    const supabaseCookies = allCookies.filter((c) =>
-      c.name.includes("supabase") || c.name.includes("sb-")
-    )
-    console.log("[SupabaseServer] Available Supabase cookies:", supabaseCookies.length)
-    if (supabaseCookies.length > 0) {
-      console.log("[SupabaseServer] Cookie names:", supabaseCookies.map((c) => c.name))
-    }
-  }
-
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,13 +17,13 @@ export async function createSupabaseServerClient() {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-          // In Server Actions, i cookie vengono gestiti automaticamente dal middleware
-          // Non possiamo settare cookie direttamente qui, ma possiamo loggarli per debug
-          if (process.env.NODE_ENV === "development") {
-            console.log("[SupabaseServer] Cookies to set:", cookiesToSet.length)
-            cookiesToSet.forEach(({ name }) => {
-              console.log("[SupabaseServer] Setting cookie:", name)
-            })
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // In server components il set dei cookie non è permesso — ignorabile.
+            // In server actions e route handlers, funziona correttamente.
           }
         },
       },

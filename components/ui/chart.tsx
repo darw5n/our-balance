@@ -25,7 +25,7 @@ const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
       <div
         ref={ref}
         className={cn(
-          "flex h-full w-full items-center justify-center text-xs text-zinc-100",
+          "flex h-full w-full items-center justify-center text-xs text-text-1",
           className
         )}
       >
@@ -41,15 +41,15 @@ type ChartTooltipProps = React.ComponentProps<typeof Tooltip>
 function ChartTooltip(props: ChartTooltipProps) {
   return (
     <Tooltip
-      cursor={{ fill: "rgba(255,255,255,0.04)" }}
+      cursor={{ fill: "var(--surface-hover)" }}
       contentStyle={{
-        background: "rgba(9,9,11,0.9)",
-        border: "1px solid rgba(255,255,255,0.12)",
+        background: "var(--surface-overlay)",
+        border: "1px solid var(--border-subtle)",
         borderRadius: 8,
-        color: "rgba(244,244,245,0.95)",
+        color: "var(--text-1)",
         fontSize: 12,
       }}
-      labelStyle={{ color: "rgba(244,244,245,0.9)" }}
+      labelStyle={{ color: "var(--text-2)" }}
       {...props}
     />
   )

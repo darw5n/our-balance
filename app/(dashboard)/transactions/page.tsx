@@ -3,6 +3,7 @@ import { getCategories } from "@/lib/supabase/queries/categories"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
 import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
 import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
+import { TransactionsSummary } from "@/components/dashboard/transactions-summary"
 import { processRecurringTransactions } from "@/app/actions/recurring"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
@@ -56,6 +57,19 @@ export default async function TransactionsPage({
     user?.id ? getCategories(user.id) : Promise.resolve([]),
   ])
 
+  const hasFilters = !!(q || from || to || category)
+
+  const { totalIncome, totalExpense } = transactions.reduce(
+    (acc, tx) => {
+      const raw = Math.abs(Number(tx.amount) || 0)
+      const amount = tx.scope === "family" ? raw * 0.5 : raw
+      if (tx.type === "income") acc.totalIncome += amount
+      else acc.totalExpense += amount
+      return acc
+    },
+    { totalIncome: 0, totalExpense: 0 }
+  )
+
   return (
     <div className="space-y-6">
       <div>
@@ -77,6 +91,10 @@ export default async function TransactionsPage({
         </div>
         <ExportCsvButton transactions={transactions} categories={categories as CategoryOption[]} />
       </div>
+
+      {hasFilters && (
+        <TransactionsSummary income={totalIncome} expense={totalExpense} count={transactions.length} />
+      )}
 
       <section>
         <TransactionsTable transactions={transactions} categories={categories as CategoryOption[]} />

@@ -1,5 +1,6 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { toNumber, getMonthRange, getYearRange, applyScope, resolveJoin } from "@/lib/supabase/query-utils"
 
 export type ViewMode = "personal" | "family"
 
@@ -35,42 +36,16 @@ type TransactionRow = {
   category_id?: string | null
 }
 
-function getMonthRange(now = new Date()) {
-  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0))
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0))
-  return { startISO: start.toISOString(), endISO: end.toISOString() }
-}
-
 function getLastMonthsRange(months: number, now = new Date()) {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1), 1, 0, 0, 0, 0))
   const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0))
   return { fromISO: from.toISOString(), toISO: to.toISOString() }
 }
 
-function getYearRange(year: number) {
-  const start = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0))
-  const end = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0, 0))
-  return { startISO: start.toISOString(), endISO: end.toISOString() }
-}
-
 function parseMonthParam(month?: string): Date | undefined {
   if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
   const [year, mon] = month.split("-").map(Number)
   return new Date(Date.UTC(year, mon - 1, 1))
-}
-
-function toNumber(value: number | string | null | undefined): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value
-  if (typeof value === "string") {
-    const n = Number(value.replace(",", "."))
-    return Number.isFinite(n) ? n : 0
-  }
-  return 0
-}
-
-function applyScope(amount: number, scope: string | null | undefined, viewMode: ViewMode): number {
-  if (viewMode === "personal" && scope === "family") return amount * 0.5
-  return amount
 }
 
 function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSummary {
@@ -134,6 +109,7 @@ export const getDashboardSummary = cache(async function getDashboardSummary(
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummary] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -163,6 +139,7 @@ export const getDashboardSummaryPrevMonth = cache(async function getDashboardSum
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummaryPrevMonth] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -191,6 +168,7 @@ export const getDashboardSummaryYear = cache(async function getDashboardSummaryY
 
   const { data, error } = await query
 
+  if (error) console.error("[getDashboardSummaryYear] error:", error)
   if (error || !data) return { ...EMPTY_SUMMARY }
 
   return computeSummary(data as TransactionRow[], viewMode)
@@ -219,6 +197,7 @@ export const getCashflowMonthly = cache(async function getCashflowMonthly(
 
   const { data, error } = await query
 
+  if (error) console.error("[getCashflowMonthly] error:", error)
   if (error || !data) return []
 
   const buckets = new Map<string, { date: Date; entrate: number; uscite: number; entrate_provvisorie: number }>()
@@ -303,6 +282,7 @@ export const getTopCategories = cache(async function getTopCategories(
 
   const { data, error } = await query
 
+  if (error) console.error("[getTopCategories] error:", error)
   if (error || !data) return []
 
   const totals = new Map<
@@ -317,15 +297,7 @@ export const getTopCategories = cache(async function getTopCategories(
   for (const row of data as unknown as TopCategoryRow[]) {
     if (!row.category || row.status !== "confirmed") continue
 
-    // Handle category as object or array (Supabase join can return either)
-    let categoryObj: { id?: string; name: string | null; color: string | null } | null = null
-
-    if (Array.isArray(row.category)) {
-      categoryObj = row.category[0] || null
-    } else {
-      categoryObj = row.category
-    }
-
+    const categoryObj = resolveJoin(row.category)
     if (!categoryObj) continue
 
     const id = categoryObj.id ?? categoryObj.name ?? "unknown"

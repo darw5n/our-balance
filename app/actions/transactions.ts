@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { ActionResult, ActionResultWithId } from "@/lib/types/actions"
 
 export type TransactionType = "income" | "expense"
 
@@ -17,13 +18,9 @@ export type CreateTransactionInput = {
 
 export type UpdateTransactionInput = Partial<CreateTransactionInput>
 
-export type CreateTransactionResult =
-  | { success: true; id: string }
-  | { success: false; error: string }
+export type CreateTransactionResult = ActionResultWithId
 
-export type TransactionActionResult =
-  | { success: true }
-  | { success: false; error: string }
+export type TransactionActionResult = ActionResult
 
 export async function createTransaction(
   input: CreateTransactionInput
