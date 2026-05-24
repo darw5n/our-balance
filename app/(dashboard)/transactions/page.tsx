@@ -59,10 +59,16 @@ export default async function TransactionsPage({
 
   const hasFilters = !!(q || from || to || category)
 
-  const filteredTotal = transactions.reduce((sum, tx) => {
-    const amount = Math.abs(Number(tx.amount) || 0)
-    return sum + (tx.type === "income" ? amount : -amount)
-  }, 0)
+  const { totalIncome, totalExpense } = transactions.reduce(
+    (acc, tx) => {
+      const raw = Math.abs(Number(tx.amount) || 0)
+      const amount = tx.scope === "family" ? raw * 0.5 : raw
+      if (tx.type === "income") acc.totalIncome += amount
+      else acc.totalExpense += amount
+      return acc
+    },
+    { totalIncome: 0, totalExpense: 0 }
+  )
 
   return (
     <div className="space-y-6">
@@ -87,7 +93,7 @@ export default async function TransactionsPage({
       </div>
 
       {hasFilters && (
-        <TransactionsSummary total={filteredTotal} count={transactions.length} />
+        <TransactionsSummary income={totalIncome} expense={totalExpense} count={transactions.length} />
       )}
 
       <section>
