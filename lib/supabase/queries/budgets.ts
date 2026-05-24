@@ -40,6 +40,8 @@ export const getBudgetsWithProgress = cache(async function getBudgetsWithProgres
     return []
   }
 
+  const budgetCategoryIds = budgets.map(b => b.category_id)
+
   const dateForRange = parseMonthParam(month)
   const { startISO, endISO } = getMonthRange(dateForRange)
 
@@ -49,6 +51,7 @@ export const getBudgetsWithProgress = cache(async function getBudgetsWithProgres
     .eq("user_id", userId)
     .eq("type", "expense")
     .eq("status", "confirmed")
+    .in("category_id", budgetCategoryIds)
     .gte("date", startISO)
     .lt("date", endISO)
 
