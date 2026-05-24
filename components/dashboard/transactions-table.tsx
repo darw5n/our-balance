@@ -132,7 +132,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleAll}
-                className="cursor-pointer accent-emerald-500"
+                className="cursor-pointer accent-income"
                 aria-label="Seleziona tutto"
               />
             </TableHead>
@@ -158,7 +158,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     type="checkbox"
                     checked={selected.has(tx.id)}
                     onChange={() => toggleOne(tx.id)}
-                    className="cursor-pointer accent-emerald-500"
+                    className="cursor-pointer accent-income"
                     aria-label="Seleziona riga"
                   />
                 </TableCell>
@@ -225,7 +225,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                           Modifica
                         </DropdownMenuItem>
                         {tx.status === "pending" && (
-                          <DropdownMenuItem onClick={() => handleConfirm(tx)} className="text-emerald-400 focus:text-emerald-400">
+                          <DropdownMenuItem onClick={() => handleConfirm(tx)} className="text-income-fg focus:text-income-fg">
                             <CheckCircle className="mr-2 h-3.5 w-3.5" />
                             Conferma
                           </DropdownMenuItem>
