@@ -60,13 +60,16 @@ export default async function ReportsPage({
   }
 
   const nettoAnno = entrateTotale - summary.uscite
-  const prevNetto = entrateTotale > 0 ? Math.round((nettoAnno / monthsElapsed) * 12) : 0
+  const fourthCardLabel = isCurrentYear ? "Proiezione" : "Netto medio/mese"
+  const fourthCardValue = isCurrentYear
+    ? Math.round((nettoAnno / monthsElapsed) * 12)
+    : Math.round(nettoAnno / 12)
 
   const statCards = [
     { label: `Entrate ${safeYear}`, value: entrateTotale, colorVar: "var(--income-fg)", icon: TrendingUp },
     { label: `Uscite ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
     { label: `Netto ${safeYear}`, value: nettoAnno, colorVar: "var(--info)", icon: Wallet },
-    { label: "Proiezione", value: prevNetto, colorVar: "var(--pending-fg)", icon: Calendar },
+    { label: fourthCardLabel, value: fourthCardValue, colorVar: "var(--pending-fg)", icon: Calendar },
   ]
 
   return (
@@ -126,7 +129,7 @@ export default async function ReportsPage({
                 {Math.round((nettoAnno / entrateTotale) * 100)}% risparmiato
               </p>
             )}
-            {label === "Proiezione" && isCurrentYear && (
+            {label === "Proiezione" && (
               <p className="mt-0.5 font-sans text-[10px] text-text-3">
                 A fine {safeYear} se il ritmo continua
               </p>

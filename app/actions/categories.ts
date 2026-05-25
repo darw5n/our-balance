@@ -10,6 +10,7 @@ export type CreateCategoryInput = {
   type: "expense" | "income"
   macro_category?: string | null
   group_name?: string | null
+  emoji?: string | null
 }
 
 export type UpdateCategoryInput = {
@@ -18,6 +19,7 @@ export type UpdateCategoryInput = {
   type: "expense" | "income"
   macro_category?: string | null
   group_name?: string | null
+  emoji?: string | null
 }
 
 export type CategoryResult = ActionResultWithId
@@ -37,12 +39,13 @@ export async function createCategory(input: CreateCategoryInput): Promise<Catego
   const type = input.type === "income" ? "income" : "expense"
   const macro_category = input.macro_category ?? null
   const group_name = input.group_name?.trim() || null
+  const emoji = input.emoji?.trim() || null
 
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .insert({ user_id: user.id, name, color, type, macro_category, group_name })
+    .insert({ user_id: user.id, name, color, type, macro_category, group_name, emoji })
     .select("id")
     .single()
 
@@ -75,12 +78,13 @@ export async function updateCategory(
   const type = input.type === "income" ? "income" : "expense"
   const macro_category = input.macro_category ?? null
   const group_name = input.group_name?.trim() || null
+  const emoji = input.emoji?.trim() || null
 
   const supabase = await createSupabaseServerClient()
 
   const { data, error } = await supabase
     .from("categories")
-    .update({ name, color, type, macro_category, group_name })
+    .update({ name, color, type, macro_category, group_name, emoji })
     .eq("id", categoryId)
     .eq("user_id", user.id)
     .select("id")

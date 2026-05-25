@@ -11,7 +11,7 @@ export function HeroBalanceCard({ summary, monthLabel }: Props) {
   const net = entrateTotale - summary.uscite
   const netSign = net < 0 ? "-" : ""
   const savingsRate = entrateTotale > 0
-    ? Math.round(((summary.entrate - summary.uscite) / entrateTotale) * 100)
+    ? Math.round((net / entrateTotale) * 100)
     : 0
 
   // Split intero + decimali per typography scale
