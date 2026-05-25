@@ -15,8 +15,9 @@ const views: { value: ViewMode; label: string }[] = [
 
 export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraParams }: ViewModeSwitcherProps) {
   return (
-    <div className="flex bg-surface-2 border border-border-subtle rounded-[14px] p-[3px]">
+    <div className="flex w-full rounded-[14px] border border-border-subtle bg-surface-2 p-[3px]">
       {views.map(({ value, label }) => {
+        const active = currentView === value
         const params = new URLSearchParams({ view: value, ...extraParams })
         return (
           <Link
@@ -25,11 +26,11 @@ export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraPa
             prefetch
             replace
             scroll={false}
-            className={
-              currentView === value
-                ? "flex-1 text-center py-2 rounded-full font-sans text-sm font-medium bg-surface-1 text-text-1 shadow-sm transition-all duration-200 ease-out"
-                : "flex-1 text-center py-2 rounded-[10px] font-sans text-sm font-medium bg-transparent text-text-3 hover:text-text-2 transition-all duration-200 ease-out"
-            }
+            className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out ${
+              active
+                ? "rounded-full bg-surface-1 text-text-1 shadow-sm"
+                : "rounded-[10px] bg-transparent text-text-3 hover:text-text-2"
+            }`}
           >
             {label}
           </Link>

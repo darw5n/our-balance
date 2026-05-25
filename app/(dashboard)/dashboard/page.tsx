@@ -2,7 +2,6 @@ import { Suspense } from "react"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { PendingConfirmations } from "@/components/dashboard/pending-confirmations"
 import { HeroBalanceCard } from "@/components/dashboard/hero-balance-card"
-import { NlQuickAddBar } from "@/components/dashboard/nl-quick-add-bar"
 import { UpcomingCard } from "@/components/dashboard/upcoming-card"
 import { CategorySpendingCard } from "@/components/dashboard/category-spending-card"
 import { RecentTransactionsCard } from "@/components/dashboard/recent-transactions-card"
@@ -67,9 +66,6 @@ export default async function DashboardPage({
 
       {/* Hero balance */}
       <HeroBalanceCard summary={summary} />
-
-      {/* Quick add */}
-      <NlQuickAddBar />
 
       {/* In scadenza */}
       {upcoming && upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}

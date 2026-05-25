@@ -78,7 +78,9 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
     return pathname.startsWith(href)
   }
 
-  const userName = userEmail ? userEmail.split("@")[0] : "…"
+  const rawName = userEmail ? userEmail.split("@")[0] : "…"
+  const firstName = rawName.split(".")[0]
+  const userName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
   const userInitial = userName.charAt(0).toUpperCase()
 
   return (
@@ -86,14 +88,12 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
 
       {/* Top bar — sticky, full width, content centered */}
       <header className="sticky top-0 z-50 bg-surface-overlay backdrop-blur-xl border-b border-border-subtle">
-        <div className="mx-auto flex w-full max-w-[720px] items-center justify-between px-5 pt-3.5 pb-2.5">
+        <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-5 pt-3.5 pb-2.5">
 
-          {/* Left: greeting + username */}
+          {/* Left: brand + greeting */}
           <div>
-            <p className="font-sans text-[11px] text-text-3">Buongiorno 👋</p>
-            <p className="font-serif text-[20px] font-semibold text-text-1 leading-tight capitalize">
-              {userName}
-            </p>
+            <p className="font-serif text-[18px] font-semibold text-text-1 leading-none">OurBalance</p>
+            <p className="font-sans text-[11px] text-text-3 mt-0.5">Ciao, {userName} 👋</p>
           </div>
 
           {/* Center: desktop navigation (hidden on mobile) */}
@@ -170,20 +170,20 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
       </header>
 
       {/* Page content — centered, responsive max-width */}
-      <main className="mx-auto w-full max-w-[720px] flex-1 px-4 pt-3 pb-32 md:pb-10">
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-3 pb-36 md:pb-10">
         {children}
       </main>
 
-      {/* FAB — floats above bottom nav on mobile, bottom-right on desktop */}
+      {/* FAB — floats above floating nav on mobile, bottom-right on desktop */}
       <button
         onClick={() => setAddOpen(true)}
         aria-label="Aggiungi transazione"
         className={[
           "fixed z-50 flex items-center justify-center rounded-full text-white",
           "shadow-[0_4px_24px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95",
-          // Mobile: centered above bottom nav
-          "bottom-[72px] left-1/2 h-[58px] w-[58px] -translate-x-1/2",
-          // Desktop: bottom-right corner, slightly larger context
+          // Mobile: centered above floating nav pill
+          "bottom-[100px] left-1/2 h-[56px] w-[56px] -translate-x-1/2",
+          // Desktop: bottom-right corner
           "md:bottom-8 md:right-8 md:left-auto md:translate-x-0 md:h-[54px] md:w-[54px]",
         ].join(" ")}
         style={{ backgroundColor: "var(--accent-brand)" }}
@@ -191,34 +191,27 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         <Plus className="h-6 w-6 stroke-[2.5]" />
       </button>
 
-      {/* Bottom nav — mobile only, 4 items (no FAB slot) */}
-      <nav
-        className="md:hidden fixed bottom-0 left-1/2 z-40 w-full max-w-[640px] -translate-x-1/2 border-t border-border-subtle bg-surface-overlay backdrop-blur-2xl"
-        style={{ paddingBottom: "max(16px, env(safe-area-inset-bottom))" }}
-      >
-        <div className="flex items-center justify-around px-2 pt-2">
+      {/* Bottom nav — mobile only, floating island pill */}
+      <nav className="md:hidden fixed z-40 bottom-6 left-1/2 -translate-x-1/2">
+        <div className="flex items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-[3px] pb-1"
+                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                  active ? "bg-accent-brand-bg" : ""
+                }`}
               >
-                <div
-                  className={`flex h-[38px] w-[38px] items-center justify-center transition-all duration-200 ease-out ${
-                    active ? "rounded-full bg-accent-brand-bg" : "rounded-[12px] bg-transparent"
+                <Icon
+                  className={`h-[20px] w-[20px] transition-colors ${
+                    active ? "text-accent-brand" : "text-text-3"
                   }`}
-                >
-                  <Icon
-                    className={`h-[19px] w-[19px] transition-colors ${
-                      active ? "text-accent-brand" : "text-text-3"
-                    }`}
-                    strokeWidth={active ? 2.2 : 1.7}
-                  />
-                </div>
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
                 <span
-                  className={`font-sans text-[9.5px] transition-colors ${
+                  className={`font-sans text-[9px] leading-none transition-colors ${
                     active ? "font-semibold text-accent-brand" : "font-normal text-text-3"
                   }`}
                 >

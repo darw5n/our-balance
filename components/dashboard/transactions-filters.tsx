@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SlidersHorizontal, ChevronDown } from "lucide-react"
+import { Search, SlidersHorizontal, ChevronDown, X } from "lucide-react"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { DateInput } from "@/components/ui/date-input"
 
@@ -17,86 +17,82 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [fromDate, setFromDate] = useState(from)
   const [toDate, setToDate] = useState(to)
-  const activeCount = [from, to, category].filter(Boolean).length
+  const activeFilterCount = [from, to, category].filter(Boolean).length
   const hasReset = !!(q || from || to || category)
 
   return (
-    <form
-      className="flex flex-wrap items-center gap-2 text-xs"
-      action="/transactions"
-      method="get"
-    >
-      {/* Ricerca */}
-      <input
-        type="search"
-        name="q"
-        defaultValue={q}
-        placeholder="Cerca..."
-        className="h-8 min-w-0 flex-1 rounded-md border border-border-subtle bg-surface-2 px-2 text-xs text-text-1 outline-none placeholder:text-text-3 md:w-44 md:flex-none"
-      />
-
-      {/* Toggle filtri avanzati — solo mobile */}
-      <button
-        type="button"
-        onClick={() => setFiltersOpen((v) => !v)}
-        className={`flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-3 transition-colors md:hidden ${
-          filtersOpen || activeCount > 0
-            ? "border-income/50 bg-income-subtle text-income-fg"
-            : "border-border-subtle text-text-2 hover:bg-white/5 hover:text-text-1"
-        }`}
-        aria-label="Filtri avanzati"
-      >
-        <SlidersHorizontal className="h-3.5 w-3.5" />
-        {activeCount > 0 && (
-          <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-income px-1 text-[9px] font-bold text-zinc-950">
-            {activeCount}
-          </span>
-        )}
-      </button>
-
-      {/* Data da — mobile: solo se aperto; desktop: sempre visibile */}
-      <div className={`md:block ${filtersOpen ? "block w-full" : "hidden"}`}>
-        <DateInput name="from" value={fromDate} onChange={setFromDate} className="h-8 w-full text-xs" />
-      </div>
-
-      {/* Data a */}
-      <div className={`md:block ${filtersOpen ? "block w-full" : "hidden"}`}>
-        <DateInput name="to" value={toDate} onChange={setToDate} className="h-8 w-full text-xs" />
-      </div>
-
-      {/* Categoria */}
-      <div className={`relative md:block md:w-auto ${filtersOpen ? "block w-full" : "hidden"}`}>
-        <select
-          name="category"
-          defaultValue={category}
-          className="h-8 w-full appearance-none rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-7 text-xs text-text-1 outline-none"
+    <form action="/transactions" method="get" className="space-y-2">
+      {/* Search bar + Filtra pill */}
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5">
+          <Search className="h-4 w-4 flex-shrink-0 text-text-3" />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Cerca movimenti..."
+            className="flex-1 bg-transparent font-sans text-sm text-text-1 outline-none placeholder:text-text-3"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((v) => !v)}
+          className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-4 py-2.5 font-sans text-sm font-medium transition-all duration-200 ${
+            filtersOpen || activeFilterCount > 0
+              ? "border-accent-brand bg-accent-brand-bg text-accent-brand"
+              : "border-border-subtle bg-surface-1 text-text-2 hover:text-text-1"
+          }`}
+          aria-label="Filtri avanzati"
         >
-          <option value="">Tutte le categorie</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-3" />
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          Filtra
+          {activeFilterCount > 0 && (
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent-brand text-[9px] font-bold text-white">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </div>
 
-      {/* Filtra */}
-      <button
-        type="submit"
-        className="h-8 rounded-md border border-income bg-income px-3 font-medium text-zinc-950 hover:bg-income-fg"
-      >
-        Filtra
-      </button>
+      {/* Advanced filters — expandable panel */}
+      {filtersOpen && (
+        <div className="flex flex-wrap items-center gap-2 rounded-[18px] border border-border-subtle bg-surface-1 p-3">
+          <DateInput name="from" value={fromDate} onChange={setFromDate} className="h-8 flex-1 min-w-[130px] text-xs" />
+          <DateInput name="to" value={toDate} onChange={setToDate} className="h-8 flex-1 min-w-[130px] text-xs" />
 
-      {/* Reset */}
-      {hasReset && (
-        <a
-          href="/transactions"
-          className="flex h-8 items-center rounded-md border border-border-subtle px-3 text-text-2 hover:bg-white/5 hover:text-text-1"
-        >
-          Reset
-        </a>
+          <div className="relative flex-1 min-w-[160px]">
+            <select
+              name="category"
+              defaultValue={category}
+              className="h-8 w-full appearance-none rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-7 font-sans text-xs text-text-1 outline-none"
+            >
+              <option value="">Tutte le categorie</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-3" />
+          </div>
+
+          <button
+            type="submit"
+            className="h-8 rounded-full bg-accent-brand px-4 font-sans text-xs font-medium text-white transition-colors hover:opacity-90"
+          >
+            Applica
+          </button>
+
+          {hasReset && (
+            <a
+              href="/transactions"
+              className="flex h-8 items-center gap-1 rounded-full border border-border-subtle px-3 font-sans text-xs text-text-2 transition-colors hover:text-text-1"
+            >
+              <X className="h-3 w-3" />
+              Reset
+            </a>
+          )}
+        </div>
       )}
     </form>
   )
