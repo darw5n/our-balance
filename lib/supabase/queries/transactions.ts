@@ -285,7 +285,7 @@ export const getTopCategories = cache(async function getTopCategories(
 
   let query = supabase
     .from("transactions")
-    .select("amount, type, status, date, scope, category:categories ( id, name, emoji, color )", { head: false })
+    .select("amount, type, status, date, scope, category:categories ( * )", { head: false })
     .eq("user_id", userId)
     .eq("type", "expense")
     .gte("date", startISO)
@@ -382,7 +382,7 @@ export async function getRecentTransactions(
 
   let query = supabase
     .from("transactions")
-    .select("id, description, amount, type, date, scope, categories(name, emoji, color)")
+    .select("id, description, amount, type, date, scope, categories(*)")
     .eq("user_id", userId)
 
   if (viewMode === "personal") query = query.eq("scope", "personal")
