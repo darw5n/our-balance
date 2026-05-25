@@ -66,7 +66,7 @@ export default async function ReportsPage({
     { label: `Entrate ${safeYear}`, value: entrateTotale, colorVar: "var(--income-fg)", icon: TrendingUp },
     { label: `Uscite ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
     { label: `Netto ${safeYear}`, value: nettoAnno, colorVar: "var(--info)", icon: Wallet },
-    { label: "Prev. netto", value: prevNetto, colorVar: "var(--pending-fg)", icon: Calendar },
+    { label: "Proiezione", value: prevNetto, colorVar: "var(--pending-fg)", icon: Calendar },
   ]
 
   return (
@@ -124,6 +124,11 @@ export default async function ReportsPage({
             {label.startsWith("Netto") && entrateTotale > 0 && (
               <p className="mt-0.5 font-sans text-[10px] text-text-3">
                 {Math.round((nettoAnno / entrateTotale) * 100)}% risparmiato
+              </p>
+            )}
+            {label === "Proiezione" && isCurrentYear && (
+              <p className="mt-0.5 font-sans text-[10px] text-text-3">
+                A fine {safeYear} se il ritmo continua
               </p>
             )}
           </Card>
