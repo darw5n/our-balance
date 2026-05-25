@@ -1,6 +1,7 @@
-import { TrendingUp, TrendingDown, Wallet, Users2 } from "lucide-react"
+import { Users2 } from "lucide-react"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { PendingConfirmations } from "@/components/dashboard/pending-confirmations"
+import { HeroBalanceCard } from "@/components/dashboard/hero-balance-card"
 import { UpcomingCard } from "@/components/dashboard/upcoming-card"
 import { CategorySpendingCard } from "@/components/dashboard/category-spending-card"
 import { RecentTransactionsCard } from "@/components/dashboard/recent-transactions-card"
@@ -50,18 +51,10 @@ export default async function DashboardPage({
       getCashflowMonthly(user.id, 12, viewMode),
     ])
 
-  const currentMonthLabel = new Date().toLocaleDateString("it-IT", { month: "long", year: "numeric" })
-  const entrateTotale = summary.entrate + summary.entrate_provvisorie
-  const nettoMese = summary.entrate - summary.uscite
-  const savingsRate = entrateTotale > 0 ? nettoMese / entrateTotale : 0
-  const savingsBadge =
-    nettoMese < 0
-      ? { label: "Deficit", color: "var(--expense-fg)" }
-      : savingsRate >= 0.2
-      ? { label: "Ottimo", color: "var(--income-fg)" }
-      : savingsRate >= 0.1
-      ? { label: "Buono", color: "var(--info)" }
-      : { label: "Attenzione", color: "var(--pending-fg)" }
+  const now = new Date()
+  const monthLabel = now.toLocaleDateString("it-IT", { month: "short", year: "numeric" })
+    .replace(/^\w/, (c) => c.toUpperCase())  // "Mag 2026"
+  const currentMonthLabel = now.toLocaleDateString("it-IT", { month: "long", year: "numeric" })
 
   return (
     <div className="space-y-3">
@@ -77,90 +70,39 @@ export default async function DashboardPage({
         <PendingConfirmations items={pendingConfirmations} />
       )}
 
-      {/* In scadenza */}
-      {upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}
+      {/* Hero balance card */}
+      <HeroBalanceCard summary={summary} monthLabel={monthLabel} />
 
-      {/* 4 stat cards 2×2 */}
-      <div className="grid grid-cols-2 gap-2.5">
-        {/* Entrate mese */}
-        <Card className="p-4">
-          <div className="mb-2 flex items-start justify-between">
-            <span className="font-sans text-[10px] leading-snug text-text-3">Entrate mese</span>
-            <div
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
-              style={{ background: "color-mix(in srgb, var(--income-fg) 15%, transparent)" }}
-            >
-              <TrendingUp className="h-3.5 w-3.5" style={{ color: "var(--income-fg)" }} />
-            </div>
-          </div>
-          <p className="font-serif text-xl font-semibold" style={{ color: "var(--income-fg)" }}>
-            {formatCurrency(entrateTotale)}
-          </p>
-          {summary.entrate_provvisorie > 0 && (
-            <p className="mt-0.5 font-sans text-[10px] text-text-3">
-              di cui {formatCurrency(summary.entrate_provvisorie)} provvisori
-            </p>
-          )}
-        </Card>
-
-        {/* Uscite mese */}
-        <Card className="p-4">
-          <div className="mb-2 flex items-start justify-between">
-            <span className="font-sans text-[10px] leading-snug text-text-3">Uscite mese</span>
-            <div
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
-              style={{ background: "color-mix(in srgb, var(--expense-fg) 15%, transparent)" }}
-            >
-              <TrendingDown className="h-3.5 w-3.5" style={{ color: "var(--expense-fg)" }} />
-            </div>
-          </div>
-          <p className="font-serif text-xl font-semibold" style={{ color: "var(--expense-fg)" }}>
-            {formatCurrency(summary.uscite)}
-          </p>
-        </Card>
-
-        {/* Netto mese */}
-        <Card className="p-4">
-          <div className="mb-2 flex items-start justify-between">
-            <span className="font-sans text-[10px] leading-snug text-text-3">Netto mese</span>
-            <div
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
-              style={{ background: "color-mix(in srgb, var(--info) 15%, transparent)" }}
-            >
-              <Wallet className="h-3.5 w-3.5" style={{ color: "var(--info)" }} />
-            </div>
-          </div>
-          <p className="font-serif text-xl font-semibold" style={{ color: "var(--info)" }}>
-            {formatCurrency(Math.abs(nettoMese))}
-          </p>
-          {entrateTotale > 0 && (
-            <p className="mt-0.5 font-sans text-[10px] font-medium" style={{ color: savingsBadge.color }}>
-              {savingsBadge.label}
-            </p>
-          )}
-        </Card>
-
-        {/* Spese in comune — solo in vista personal quando presenti */}
-        {summary.spese_comuni > 0 && (
-          <Card className="p-4">
-            <div className="mb-2 flex items-start justify-between">
-              <span className="font-sans text-[10px] leading-snug text-text-3">Spese in comune</span>
+      {/* Spese in comune — mini-card, solo in vista personal quando presenti */}
+      {summary.spese_comuni > 0 && (
+        <Card className="px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
               <div
-                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
+                className="flex h-8 w-8 items-center justify-center rounded-[10px]"
                 style={{ background: "color-mix(in srgb, var(--shared) 15%, transparent)" }}
               >
-                <Users2 className="h-3.5 w-3.5" style={{ color: "var(--shared)" }} />
+                <Users2 className="h-4 w-4" style={{ color: "var(--shared)" }} />
+              </div>
+              <div>
+                <p className="font-sans text-[10px] text-text-3">Spese in comune</p>
+                <p className="font-serif text-[17px] font-semibold" style={{ color: "var(--shared)" }}>
+                  {formatCurrency(summary.spese_comuni / 2)}
+                </p>
               </div>
             </div>
-            <p className="font-serif text-xl font-semibold" style={{ color: "var(--shared)" }}>
-              {formatCurrency(summary.spese_comuni / 2)}
-            </p>
-            <p className="mt-0.5 font-sans text-[10px] text-text-3">
-              La mia quota · Totale {formatCurrency(summary.spese_comuni)}
-            </p>
-          </Card>
-        )}
-      </div>
+            <div className="text-right">
+              <p className="font-sans text-[10px] text-text-3">La mia quota (50%)</p>
+              <p className="font-sans text-sm text-text-2">
+                Totale {formatCurrency(summary.spese_comuni)}
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* In scadenza */}
+      {upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}
 
       {/* Netto ultimi 12 mesi */}
       <Card className="p-5">
