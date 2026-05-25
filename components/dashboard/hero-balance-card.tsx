@@ -4,9 +4,10 @@ import type { DashboardSummary } from "@/lib/supabase/queries/transactions"
 type Props = {
   summary: DashboardSummary
   monthLabel: string  // e.g. "Mag 2026"
+  viewMode?: "personal" | "family"
 }
 
-export function HeroBalanceCard({ summary, monthLabel }: Props) {
+export function HeroBalanceCard({ summary, monthLabel, viewMode = "personal" }: Props) {
   const entrateTotale = summary.entrate + summary.entrate_provvisorie
   const net = entrateTotale - summary.uscite
   const netSign = net < 0 ? "-" : ""
@@ -42,26 +43,31 @@ export function HeroBalanceCard({ summary, monthLabel }: Props) {
         {decPart && <span style={{ fontSize: 24 }}>{decPart}</span>}
       </p>
 
-      {/* 3-column footer */}
-      <div className="grid grid-cols-3 gap-2 border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+      {/* Footer: 2 colonne in vista famiglia, 3 altrimenti */}
+      <div
+        className={`grid gap-2 border-t pt-4 ${viewMode === "family" ? "grid-cols-2" : "grid-cols-3"}`}
+        style={{ borderColor: "rgba(255,255,255,0.08)" }}
+      >
         <div>
           <p className="font-sans text-[10px] text-white/40 mb-0.5">Entrate</p>
           <p className="font-sans text-sm font-semibold text-hero-income">
             +{formatCurrency(entrateTotale)}
           </p>
         </div>
-        <div className="border-x px-2" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+        <div className={viewMode !== "family" ? "border-x px-2" : "pl-2"} style={{ borderColor: "rgba(255,255,255,0.08)" }}>
           <p className="font-sans text-[10px] text-white/40 mb-0.5">Uscite</p>
           <p className="font-sans text-sm font-semibold text-hero-expense">
             -{formatCurrency(summary.uscite)}
           </p>
         </div>
-        <div className="pl-2">
-          <p className="font-sans text-[10px] text-white/40 mb-0.5">Risparmio</p>
-          <p className="font-sans text-sm font-semibold text-hero-text/70">
-            {entrateTotale > 0 ? `${savingsRate}%` : "—"}
-          </p>
-        </div>
+        {viewMode !== "family" && (
+          <div className="pl-2">
+            <p className="font-sans text-[10px] text-white/40 mb-0.5">Risparmio</p>
+            <p className="font-sans text-sm font-semibold text-hero-text/70">
+              {entrateTotale > 0 ? `${savingsRate}%` : "—"}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

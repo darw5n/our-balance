@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import type { TopCategory } from "@/lib/supabase/queries/transactions"
+import { getCategoryIcon } from "@/lib/category-icons"
 
 type Props = {
   categories: TopCategory[]
@@ -25,11 +26,15 @@ export function CategorySpendingCard({ categories, month }: Props) {
       <div className="flex flex-col gap-3">
         {categories.map((cat) => {
           const pct = max > 0 ? Math.round((cat.amount / max) * 100) : 0
+          const CatIcon = getCategoryIcon(cat.name)
           return (
             <div key={cat.name}>
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-base leading-none">{cat.emoji ?? "📦"}</span>
+                  {cat.emoji
+                    ? <span className="text-base leading-none">{cat.emoji}</span>
+                    : <CatIcon className="h-4 w-4 text-text-3 flex-shrink-0" />
+                  }
                   <span className="font-sans text-sm text-text-1">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2">

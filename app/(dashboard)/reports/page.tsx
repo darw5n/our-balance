@@ -65,11 +65,18 @@ export default async function ReportsPage({
     ? Math.round((nettoAnno / monthsElapsed) * 12)
     : Math.round(nettoAnno / 12)
 
+  const mediaUsciteMensile = monthsElapsed > 0 ? summary.uscite / monthsElapsed : 0
+
   const statCards = [
     { label: `Entrate ${safeYear}`, value: entrateTotale, colorVar: "var(--income-fg)", icon: TrendingUp },
     { label: `Uscite ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
     { label: `Netto ${safeYear}`, value: nettoAnno, colorVar: "var(--info)", icon: Wallet },
     { label: fourthCardLabel, value: fourthCardValue, colorVar: "var(--pending-fg)", icon: Calendar },
+  ]
+
+  const familyCards = [
+    { label: `Uscite in comune ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
+    { label: "Media mensile", value: mediaUsciteMensile, colorVar: "var(--pending-fg)", icon: Calendar },
   ]
 
   return (
@@ -85,7 +92,9 @@ export default async function ReportsPage({
         </a>
         <div className="text-center">
           <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">{safeYear}</h1>
-          <p className="font-sans text-xs text-text-3">Entrate, uscite e risparmio annuali.</p>
+          <p className="font-sans text-xs text-text-3">
+            {viewMode === "family" ? "Spese condivise annuali." : "Entrate, uscite e risparmio annuali."}
+          </p>
         </div>
         {isFutureYear ? (
           <span
@@ -108,9 +117,9 @@ export default async function ReportsPage({
       {/* View mode toggle */}
       <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
 
-      {/* 4 stat cards 2×2 */}
+      {/* Stat cards: 4 in vista personale, 2 in vista famiglia */}
       <div className="grid grid-cols-2 gap-2.5">
-        {statCards.map(({ label, value, colorVar, icon: Icon }) => (
+        {(viewMode === "family" ? familyCards : statCards).map(({ label, value, colorVar, icon: Icon }) => (
           <Card key={label} className="p-4">
             <div className="mb-2 flex items-start justify-between">
               <span className="font-sans text-[10px] leading-snug text-text-3">{label}</span>
@@ -132,6 +141,11 @@ export default async function ReportsPage({
             {label === "Proiezione" && (
               <p className="mt-0.5 font-sans text-[10px] text-text-3">
                 A fine {safeYear} se il ritmo continua
+              </p>
+            )}
+            {label === "Media mensile" && (
+              <p className="mt-0.5 font-sans text-[10px] text-text-3">
+                Su {monthsElapsed} {monthsElapsed === 1 ? "mese" : "mesi"} registrati
               </p>
             )}
           </Card>

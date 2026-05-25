@@ -123,6 +123,7 @@
    ============================================================ */
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
 
   /* ---- Shadcn defaults (light) ---- */
@@ -212,6 +213,7 @@
 
 /* ---- Dark theme — classe applicata da next-themes su <html> ---- */
 .dark {
+  color-scheme: dark;
   /* ---- Shadcn defaults (dark) ---- */
   --background:           #141210;
   --foreground:           #F0EDE8;
@@ -343,15 +345,5 @@
   body {
     overflow-x: clip;
     @apply bg-background text-foreground;
-    color-scheme: light dark;
-  }
-
-  /* Forza color-scheme su input nativi data/ora */
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  input[type="month"],
-  input[type="week"] {
-    color-scheme: light dark;
   }
 }

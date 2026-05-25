@@ -15,7 +15,7 @@ export default function ReportsLoading() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 space-y-3">
+          <div key={i} className="rounded-xl border border-border-subtle bg-surface-1 p-4 space-y-3">
             <div className="skeleton h-3 w-24" />
             <div className="skeleton h-7 w-28" />
           </div>

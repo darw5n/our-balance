@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus, RefreshCw } from "lucide-react"
+import { getCategoryIcon } from "@/lib/category-icons"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -31,6 +32,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
   const [recurring, setRecurring] = useState(initialRecurring)
   const [formOpen, setFormOpen] = useState(false)
   const [editingRecurring, setEditingRecurring] = useState<RecurringTransaction | null>(null)
+  const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
 
   useEffect(() => {
     setRecurring(initialRecurring)
@@ -110,9 +112,16 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
               <li key={rec.id}>
                 <Card className="flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-11 h-11 rounded-[14px] bg-surface-2 flex items-center justify-center text-[19px] flex-shrink-0">
-                      💳
-                    </div>
+                    {(() => {
+                      const cat = rec.category_id ? catMap.get(rec.category_id) : undefined
+                      const hasEmoji = !!cat?.emoji
+                      const CatIcon = getCategoryIcon(cat?.name ?? "")
+                      return (
+                        <div className="w-11 h-11 rounded-[14px] bg-surface-2 flex items-center justify-center text-[19px] flex-shrink-0">
+                          {hasEmoji ? cat!.emoji : <CatIcon className="h-5 w-5 text-text-3" />}
+                        </div>
+                      )
+                    })()}
                     <div className="min-w-0">
                       <p className="font-sans text-sm font-medium text-text-1 truncate">
                         {rec.description || "Senza descrizione"}

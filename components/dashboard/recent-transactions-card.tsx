@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import type { RecentTransaction } from "@/lib/supabase/queries/transactions"
+import { getCategoryIcon } from "@/lib/category-icons"
 
 export function RecentTransactionsCard({ transactions }: { transactions: RecentTransaction[] }) {
   if (transactions.length === 0) return null
@@ -22,15 +23,17 @@ export function RecentTransactionsCard({ transactions }: { transactions: RecentT
           const time = tx.date
             ? new Date(tx.date).toLocaleDateString("it-IT", { day: "numeric", month: "short" })
             : ""
+          const hasEmoji = !!tx.category_emoji
+          const CatIcon = getCategoryIcon(tx.category_name ?? "")
 
           return (
             <div
               key={tx.id}
               className={`flex items-center gap-3 py-2.5 ${i < transactions.length - 1 ? "border-b border-border-subtle" : ""}`}
             >
-              {/* Emoji avatar */}
+              {/* Category avatar */}
               <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] bg-surface-2 text-[19px]">
-                {tx.category_emoji ?? "💳"}
+                {hasEmoji ? tx.category_emoji : <CatIcon className="h-5 w-5 text-text-3" />}
               </div>
               {/* Description + meta */}
               <div className="flex-1 min-w-0">

@@ -1,4 +1,4 @@
-import { Users2 } from "lucide-react"
+import { TrendingDown, Calendar } from "lucide-react"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { PendingConfirmations } from "@/components/dashboard/pending-confirmations"
 import { HeroBalanceCard } from "@/components/dashboard/hero-balance-card"
@@ -9,6 +9,7 @@ import { CashflowChart } from "@/components/dashboard/cashflow-chart"
 import { Card } from "@/components/ui/card"
 import {
   getDashboardSummary,
+  getDashboardSummaryYear,
   getTopCategories,
   getRecentTransactions,
   getCashflowMonthly,
@@ -41,9 +42,12 @@ export default async function DashboardPage({
 
   await processRecurringTransactions(user.id)
 
-  const [summary, topCategories, recentTransactions, pendingConfirmations, upcoming, cashflowData] =
+  const currentYear = new Date().getUTCFullYear()
+
+  const [summary, summaryYear, topCategories, recentTransactions, pendingConfirmations, upcoming, cashflowData] =
     await Promise.all([
       getDashboardSummary(user.id, viewMode),
+      getDashboardSummaryYear(user.id, viewMode, currentYear),
       getTopCategories(user.id, 5, viewMode),
       getRecentTransactions(user.id, 5, viewMode),
       getPendingConfirmations(user.id),
@@ -53,7 +57,7 @@ export default async function DashboardPage({
 
   const now = new Date()
   const monthLabel = now.toLocaleDateString("it-IT", { month: "short", year: "numeric" })
-    .replace(/^\w/, (c) => c.toUpperCase())  // "Mag 2026"
+    .replace(/^\w/, (c) => c.toUpperCase())
   const currentMonthLabel = now.toLocaleDateString("it-IT", { month: "long", year: "numeric" })
 
   return (
@@ -70,47 +74,52 @@ export default async function DashboardPage({
         <PendingConfirmations items={pendingConfirmations} />
       )}
 
-      {/* Hero balance card */}
-      <HeroBalanceCard summary={summary} monthLabel={monthLabel} />
-
-      {/* Spese in comune — mini-card, solo in vista personal quando presenti */}
-      {summary.spese_comuni > 0 && (
-        <Card className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+      {/* Hero: personale → card gradiente con netto | famiglia → 2 stat card uscite */}
+      {viewMode === "family" ? (
+        <div className="grid grid-cols-2 gap-2.5">
+          <Card className="p-4">
+            <div className="mb-2 flex items-start justify-between">
+              <span className="font-sans text-[10px] leading-snug text-text-3">Uscite questo mese</span>
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-[10px]"
-                style={{ background: "color-mix(in srgb, var(--shared) 15%, transparent)" }}
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
+                style={{ background: "color-mix(in srgb, var(--expense-fg) 15%, transparent)" }}
               >
-                <Users2 className="h-4 w-4" style={{ color: "var(--shared)" }} />
-              </div>
-              <div>
-                <p className="font-sans text-[10px] text-text-3">Spese in comune</p>
-                <p className="font-serif text-[17px] font-semibold" style={{ color: "var(--shared)" }}>
-                  {formatCurrency(summary.spese_comuni / 2)}
-                </p>
+                <TrendingDown className="h-3.5 w-3.5" style={{ color: "var(--expense-fg)" }} />
               </div>
             </div>
-            <div className="text-right">
-              <p className="font-sans text-[10px] text-text-3">La mia quota (50%)</p>
-              <p className="font-sans text-sm text-text-2">
-                Totale {formatCurrency(summary.spese_comuni)}
-              </p>
+            <p className="font-serif text-xl font-semibold text-expense-fg">
+              {formatCurrency(summary.uscite)}
+            </p>
+          </Card>
+          <Card className="p-4">
+            <div className="mb-2 flex items-start justify-between">
+              <span className="font-sans text-[10px] leading-snug text-text-3">Uscite da gennaio</span>
+              <div
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
+                style={{ background: "color-mix(in srgb, var(--expense-fg) 15%, transparent)" }}
+              >
+                <Calendar className="h-3.5 w-3.5" style={{ color: "var(--expense-fg)" }} />
+              </div>
             </div>
-          </div>
-        </Card>
+            <p className="font-serif text-xl font-semibold text-expense-fg">
+              {formatCurrency(summaryYear.uscite)}
+            </p>
+          </Card>
+        </div>
+      ) : (
+        <HeroBalanceCard summary={summary} monthLabel={monthLabel} />
       )}
 
       {/* In scadenza */}
       {upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}
 
-      {/* Netto ultimi 12 mesi */}
+      {/* Cashflow chart */}
       <Card className="p-5">
         <h2 className="font-serif text-[18px] font-semibold text-text-1">
-          {viewMode === "family" ? "Spese mensili in comune" : "Netto ultimi 12 mesi"}
+          {viewMode === "family" ? "Spese in comune per mese" : "Netto ultimi 12 mesi"}
         </h2>
         <p className="mt-0.5 font-sans text-xs text-text-3">
-          {viewMode === "family" ? "Andamento spese condivise mensili." : "Entrate meno uscite mese per mese."}
+          {viewMode === "family" ? "Andamento delle spese condivise." : "Entrate meno uscite mese per mese."}
         </p>
         <div className="mt-4">
           <CashflowChart data={cashflowData} hideIncome={viewMode === "family"} />

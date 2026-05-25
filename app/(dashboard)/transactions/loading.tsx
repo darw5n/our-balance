@@ -15,7 +15,7 @@ export default function TransactionsLoading() {
 
       <div className="space-y-2">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 rounded-lg border border-white/5 bg-zinc-900/50 px-4 py-3">
+          <div key={i} className="flex items-center gap-4 rounded-lg border border-border-subtle bg-surface-1 px-4 py-3">
             <div className="skeleton h-4 w-4" />
             <div className="skeleton h-3 w-20" />
             <div className="skeleton h-3 flex-1" />

@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal, Pencil, Trash2, CheckCircle, Users } from "lucide-react"
+import { getCategoryIcon } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -153,7 +154,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
             type="checkbox"
             checked={allSelected}
             onChange={toggleAll}
-            className="cursor-pointer accent-income"
+            className="h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-1 accent-income"
             aria-label="Seleziona tutto"
           />
           <span className="font-sans text-xs text-expense-fg">
@@ -184,8 +185,9 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
               {group.transactions.map((tx, index) => {
                 const amount = Math.abs(tx.amount ?? 0)
                 const cat = tx.category_id ? catMap.get(tx.category_id) : undefined
-                const emoji = cat?.emoji ?? "💳"
                 const categoryName = cat?.name ?? "—"
+                const hasEmoji = !!cat?.emoji
+                const CatIcon = getCategoryIcon(categoryName)
                 const time = formatTime(tx.created_at)
                 const isLast = index === group.transactions.length - 1
 
@@ -201,13 +203,16 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                       type="checkbox"
                       checked={selected.has(tx.id)}
                       onChange={() => toggleOne(tx.id)}
-                      className="hidden cursor-pointer accent-income md:block flex-shrink-0"
+                      className="hidden h-4 w-4 cursor-pointer rounded border-border-strong bg-surface-1 accent-income md:block flex-shrink-0"
                       aria-label="Seleziona riga"
                     />
 
-                    {/* Emoji avatar */}
+                    {/* Category avatar */}
                     <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px] bg-surface-2 text-[19px]">
-                      {emoji}
+                      {hasEmoji
+                        ? cat!.emoji
+                        : <CatIcon className="h-5 w-5 text-text-3" />
+                      }
                     </div>
 
                     {/* Description + meta */}
@@ -218,6 +223,9 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                       <p className="mt-0.5 font-sans text-[11px] text-text-3">
                         {categoryName}
                         {time ? ` · ${time}` : ""}
+                        {tx.status === "pending" && (
+                          <span className="ml-1.5 font-medium text-pending-fg">· In attesa</span>
+                        )}
                         {tx.scope === "family" && (
                           <span className="ml-1.5 inline-flex items-center gap-0.5 text-shared">
                             <Users className="h-2.5 w-2.5" />

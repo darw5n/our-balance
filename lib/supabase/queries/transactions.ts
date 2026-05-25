@@ -386,6 +386,7 @@ export async function getRecentTransactions(
     .eq("user_id", userId)
 
   if (viewMode === "personal") query = query.eq("scope", "personal")
+  if (viewMode === "family") query = query.eq("scope", "family")
 
   const { data, error } = await query
     .order("date", { ascending: false })
