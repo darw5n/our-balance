@@ -1,5 +1,6 @@
-import { TrendingUp, TrendingDown, Wallet, CalendarClock, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Wallet, Calendar } from "lucide-react"
 import { getServerUser } from "@/lib/supabase-server"
+import { Card } from "@/components/ui/card"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { MacroBreakdownChart } from "@/components/dashboard/macro-breakdown-chart"
 import { YearComparisonChart } from "@/components/dashboard/year-comparison-chart"
@@ -47,39 +48,9 @@ export default async function ReportsPage({
 
   // Include provisional income in totals (only relevant for current year)
   const entrateTotale = summary.entrate + summary.entrate_provvisorie
-  const nettoTotale = summary.netto + summary.entrate_provvisorie
-
-  // Previsione: solo per anno corrente parziale
-  let previsione: number | null = null
-  if (isCurrentYear) {
-    const now = new Date()
-    const currentMonthIndex = now.getUTCMonth() // 0-based
-    const hasPrevData = cashflowPrev.some((p) => p.entrate > 0 || p.uscite > 0)
-
-    if (hasPrevData) {
-      // Anno precedente come baseline per la stagionalità
-      const prevRemainingNetto = cashflowPrev
-        .slice(currentMonthIndex + 1)
-        .reduce((sum, p) => sum + p.entrate - p.uscite, 0)
-      previsione = nettoTotale + prevRemainingNetto
-    } else {
-      // Fallback: estrapolazione lineare
-      const monthsElapsed = currentMonthIndex + 1
-      if (monthsElapsed > 0) {
-        previsione = (nettoTotale / monthsElapsed) * 12
-      }
-    }
-  }
-
-  // Savings rate (solo vista personal, quando ci sono entrate)
-  const savingsRate =
-    viewMode === "personal" && entrateTotale > 0
-      ? Math.round((nettoTotale / entrateTotale) * 100)
-      : null
 
   // Media uscite mensile: per anno corrente usa i mesi trascorsi
   const monthsElapsed = isCurrentYear ? new Date().getUTCMonth() + 1 : 12
-  const avgUscite = summary.uscite / monthsElapsed
 
   const makeUrl = (targetYear: number) => {
     const params = new URLSearchParams()
@@ -88,142 +59,134 @@ export default async function ReportsPage({
     return `/reports?${params.toString()}`
   }
 
+  const nettoAnno = entrateTotale - summary.uscite
+  const fourthCardLabel = isCurrentYear ? "Proiezione" : "Netto medio/mese"
+  const fourthCardValue = isCurrentYear
+    ? Math.round((nettoAnno / monthsElapsed) * 12)
+    : Math.round(nettoAnno / 12)
+
+  const mediaUsciteMensile = monthsElapsed > 0 ? summary.uscite / monthsElapsed : 0
+
+  const statCards = [
+    { label: `Entrate ${safeYear}`, value: entrateTotale, colorVar: "var(--income-fg)", icon: TrendingUp },
+    { label: `Uscite ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
+    { label: `Netto ${safeYear}`, value: nettoAnno, colorVar: "var(--info)", icon: Wallet },
+    { label: fourthCardLabel, value: fourthCardValue, colorVar: "var(--pending-fg)", icon: Calendar },
+  ]
+
+  const familyCards = [
+    { label: `Uscite in comune ${safeYear}`, value: summary.uscite, colorVar: "var(--expense-fg)", icon: TrendingDown },
+    { label: "Media mensile", value: mediaUsciteMensile, colorVar: "var(--pending-fg)", icon: Calendar },
+  ]
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="flex w-full items-center justify-between sm:w-auto sm:justify-start sm:gap-3">
-          <a
-            href={makeUrl(safeYear - 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
-            aria-label={`Anno ${safeYear - 1}`}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </a>
-          <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-semibold tracking-tight">Report {safeYear}</h1>
-            <p className="text-xs text-zinc-400">Riepilogo entrate e uscite per il {safeYear}.</p>
-          </div>
-          {isFutureYear ? (
-            <span
-              className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-lg border border-white/5 text-zinc-700"
-              aria-disabled="true"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </span>
-          ) : (
-            <a
-              href={makeUrl(safeYear + 1)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-200"
-              aria-label={`Anno ${safeYear + 1}`}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </a>
-          )}
+    <div className="space-y-4">
+      {/* Year navigation + title */}
+      <div className="flex items-center justify-between">
+        <a
+          href={makeUrl(safeYear - 1)}
+          className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1"
+          aria-label={`Anno ${safeYear - 1}`}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </a>
+        <div className="text-center">
+          <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">{safeYear}</h1>
+          <p className="font-sans text-xs text-text-3">
+            {viewMode === "family" ? "Spese condivise annuali." : "Entrate, uscite e risparmio annuali."}
+          </p>
         </div>
-        <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
+        {isFutureYear ? (
+          <span
+            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-[10px] border border-border-subtle text-text-3"
+            aria-disabled="true"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        ) : (
+          <a
+            href={makeUrl(safeYear + 1)}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1"
+            aria-label={`Anno ${safeYear + 1}`}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </a>
+        )}
       </div>
 
-      {/* Summary cards */}
-      {viewMode === "family" ? (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
-                <p className="text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingDown className="h-4 w-4 text-rose-400" />
-              </div>
-            </div>
-          </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite medio/mese</p>
-                <p className="text-xl font-semibold text-amber-400">{formatCurrency(avgUscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <CalendarClock className="h-4 w-4 text-amber-400" />
+      {/* View mode toggle */}
+      <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
+
+      {/* Stat cards: 4 in vista personale, 2 in vista famiglia */}
+      <div className="grid grid-cols-2 gap-2.5">
+        {(viewMode === "family" ? familyCards : statCards).map(({ label, value, colorVar, icon: Icon }) => (
+          <Card key={label} className="p-4">
+            <div className="mb-2 flex items-start justify-between">
+              <span className="font-sans text-[10px] leading-snug text-text-3">{label}</span>
+              <div
+                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
+                style={{ background: `color-mix(in srgb, ${colorVar} 15%, transparent)` }}
+              >
+                <Icon className="h-3.5 w-3.5" style={{ color: colorVar }} />
               </div>
             </div>
-          </div>
+            <p className="font-serif text-xl font-semibold" style={{ color: colorVar }}>
+              {formatCurrency(Math.abs(value))}
+            </p>
+            {label.startsWith("Netto") && entrateTotale > 0 && (
+              <p className="mt-0.5 font-sans text-[10px] text-text-3">
+                {Math.round((nettoAnno / entrateTotale) * 100)}% risparmiato
+              </p>
+            )}
+            {label === "Proiezione" && (
+              <p className="mt-0.5 font-sans text-[10px] text-text-3">
+                A fine {safeYear} se il ritmo continua
+              </p>
+            )}
+            {label === "Media mensile" && (
+              <p className="mt-0.5 font-sans text-[10px] text-text-3">
+                Su {monthsElapsed} {monthsElapsed === 1 ? "mese" : "mesi"} registrati
+              </p>
+            )}
+          </Card>
+        ))}
+      </div>
+
+      {/* Cashflow mensile */}
+      <Card className="p-5">
+        <h2 className="font-serif text-[18px] font-semibold text-text-1">Cashflow mensile {safeYear}</h2>
+        <p className="mt-0.5 font-sans text-xs text-text-3">Entrate, uscite e netto mese per mese.</p>
+        <div className="mt-4">
+          <CashflowReportChart data={cashflowCurrent} year={safeYear} viewMode={viewMode} />
         </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Entrate {safeYear}</p>
-                <p className="text-xl font-semibold text-emerald-400">{formatCurrency(entrateTotale)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
-              </div>
-            </div>
-          </div>
+      </Card>
 
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Uscite {safeYear}</p>
-                <p className="text-xl font-semibold text-rose-400">{formatCurrency(summary.uscite)}</p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <TrendingDown className="h-4 w-4 text-rose-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">Netto {safeYear}</p>
-                <p className="text-xl font-semibold text-sky-400">{formatCurrency(nettoTotale)}</p>
-                {savingsRate !== null && (
-                  <p className="text-[10px] text-zinc-500">
-                    {savingsRate > 0 ? savingsRate : 0}% delle entrate risparmiato
-                  </p>
-                )}
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <Wallet className="h-4 w-4 text-sky-400" />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-4 backdrop-blur">
-            <div className="flex items-start justify-between gap-2">
-              <div className="space-y-1">
-                <p className="text-xs text-zinc-400">
-                  {isCurrentYear && previsione !== null ? "Previsione netto" : "Netto medio/mese"}
-                </p>
-                <p className="text-xl font-semibold text-amber-400">
-                  {isCurrentYear && previsione !== null
-                    ? formatCurrency(previsione)
-                    : formatCurrency(nettoTotale / 12)}
-                </p>
-              </div>
-              <div className="rounded-md border border-white/10 bg-zinc-950/30 p-1.5">
-                <CalendarClock className="h-4 w-4 text-amber-400" />
-              </div>
-            </div>
-          </div>
+      {/* Confronto anno precedente */}
+      <Card className="p-5">
+        <h2 className="font-serif text-[18px] font-semibold text-text-1">Confronto anno precedente</h2>
+        <p className="mt-0.5 font-sans text-xs text-text-3">{safeYear} vs {safeYear - 1}.</p>
+        <div className="mt-4">
+          <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} viewMode={viewMode} />
         </div>
-      )}
+      </Card>
 
-      {/* Cashflow mensile con linea netto */}
-      <CashflowReportChart data={cashflowCurrent} year={safeYear} viewMode={viewMode} />
-
-      {/* Confronto anno precedente — vicino al cashflow per continuità narrativa */}
-      <YearComparisonChart currentYear={cashflowCurrent} prevYear={cashflowPrev} year={safeYear} viewMode={viewMode} />
-
-      {/* Ripartizione macro-categorie (50-30-20) */}
-      <MacroBreakdownChart data={macroBreakdown} monthsElapsed={monthsElapsed} />
+      {/* Ripartizione macro-categorie */}
+      <Card className="p-5">
+        <h2 className="font-serif text-[18px] font-semibold text-text-1">Dove vanno i soldi</h2>
+        <p className="mt-0.5 font-sans text-xs text-text-3">Ripartizione per macro-categoria (50-30-20).</p>
+        <div className="mt-4">
+          <MacroBreakdownChart data={macroBreakdown} monthsElapsed={monthsElapsed} />
+        </div>
+      </Card>
 
       {/* Tabella mesi × categorie */}
-      <CategoryMonthTable data={categoryMonthly} year={safeYear} />
+      <Card className="p-5">
+        <h2 className="font-serif text-[18px] font-semibold text-text-1">Dettaglio per categoria</h2>
+        <p className="mt-0.5 font-sans text-xs text-text-3">Spese mensili per categoria.</p>
+        <div className="mt-4">
+          <CategoryMonthTable data={categoryMonthly} year={safeYear} />
+        </div>
+      </Card>
     </div>
   )
 }

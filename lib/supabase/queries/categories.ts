@@ -7,6 +7,7 @@ export type Category = {
   id: string
   name: string
   color: string
+  emoji?: string | null
   type: string
   user_id?: string
   macro_category?: MacroCategory | null
@@ -20,7 +21,7 @@ export const getCategories = cache(async function getCategories(userId: string):
 
   const { data, error } = await supabase
     .from("categories")
-    .select("id, name, color, type, user_id, macro_category, group_name")
+    .select("*")
     .eq("user_id", userId)
     .order("name", { ascending: true })
 

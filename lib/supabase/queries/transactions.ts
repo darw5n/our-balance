@@ -23,8 +23,21 @@ export type CashflowMonthlyPoint = {
 export type TopCategory = {
   name: string
   color: string
+  emoji: string | null
   amount: number
   percentage: number
+}
+
+export type RecentTransaction = {
+  id: string
+  description: string | null
+  amount: number | null
+  type: string | null
+  date: string | null
+  scope: string | null
+  category_name: string | null
+  category_emoji: string | null
+  category_color: string | null
 }
 
 type TransactionRow = {
@@ -249,10 +262,12 @@ type TopCategoryRow = {
     id?: string
     name: string | null
     color: string | null
+    emoji: string | null
   } | null | Array<{
     id?: string
     name: string | null
     color: string | null
+    emoji: string | null
   }>
 }
 
@@ -270,7 +285,7 @@ export const getTopCategories = cache(async function getTopCategories(
 
   let query = supabase
     .from("transactions")
-    .select("amount, type, status, date, scope, category:categories ( id, name, color )", { head: false })
+    .select("amount, type, status, date, scope, category:categories ( * )", { head: false })
     .eq("user_id", userId)
     .eq("type", "expense")
     .gte("date", startISO)
@@ -290,6 +305,7 @@ export const getTopCategories = cache(async function getTopCategories(
     {
       name: string
       color: string
+      emoji: string | null
       amount: number
     }
   >()
@@ -303,6 +319,7 @@ export const getTopCategories = cache(async function getTopCategories(
     const id = categoryObj.id ?? categoryObj.name ?? "unknown"
     const name = categoryObj.name ?? "Senza categoria"
     const color = categoryObj.color ?? "#71717a"
+    const emoji = categoryObj.emoji ?? null
     const rawAmount = Math.abs(toNumber(row.amount))
     const amount = applyScope(rawAmount, row.scope, viewMode)
 
@@ -310,7 +327,7 @@ export const getTopCategories = cache(async function getTopCategories(
     if (existing) {
       existing.amount += amount
     } else {
-      totals.set(id, { name, color, amount })
+      totals.set(id, { name, color, emoji, amount })
     }
   }
 
@@ -323,6 +340,7 @@ export const getTopCategories = cache(async function getTopCategories(
     return top.map((item) => ({
       name: item.name,
       color: item.color,
+      emoji: item.emoji,
       amount: item.amount,
       percentage: 0,
     }))
@@ -331,7 +349,64 @@ export const getTopCategories = cache(async function getTopCategories(
   return top.map((item) => ({
     name: item.name,
     color: item.color,
+    emoji: item.emoji,
     amount: item.amount,
     percentage: (item.amount / totalAmount) * 100,
   }))
 })
+
+type RecentTransactionRow = {
+  id: string
+  description: string | null
+  amount: number | null
+  type: string | null
+  date: string | null
+  scope: string | null
+  categories: {
+    name: string | null
+    emoji: string | null
+    color: string | null
+  } | null | Array<{
+    name: string | null
+    emoji: string | null
+    color: string | null
+  }>
+}
+
+export async function getRecentTransactions(
+  userId: string,
+  limit: number = 5,
+  viewMode: ViewMode = "personal"
+): Promise<RecentTransaction[]> {
+  const supabase = await createSupabaseServerClient()
+
+  let query = supabase
+    .from("transactions")
+    .select("id, description, amount, type, date, scope, categories(*)")
+    .eq("user_id", userId)
+
+  if (viewMode === "personal") query = query.eq("scope", "personal")
+  if (viewMode === "family") query = query.eq("scope", "family")
+
+  const { data, error } = await query
+    .order("date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+
+  return (data as unknown as RecentTransactionRow[]).map(row => {
+    const cat = resolveJoin<{ name: string | null; emoji: string | null; color: string | null }>(row.categories)
+    return {
+      id: row.id,
+      description: row.description,
+      amount: row.amount,
+      type: row.type,
+      date: row.date,
+      scope: row.scope,
+      category_name: cat?.name ?? null,
+      category_emoji: cat?.emoji ?? null,
+      category_color: cat?.color ?? null,
+    }
+  })
+}

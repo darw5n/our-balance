@@ -18,17 +18,32 @@ const PRESET_COLORS = [
   "#3b82f6", "#8b5cf6", "#ec4899", "#71717a", "#a3a3a3",
 ]
 
-const MACRO_OPTIONS: { value: MacroCategory | null; label: string; className: string }[] = [
-  { value: null, label: "Nessuna", className: "border-zinc-600 text-zinc-400 data-[active=true]:bg-zinc-700 data-[active=true]:text-zinc-100 data-[active=true]:border-zinc-500" },
-  { value: "necessita", label: "Necessità", className: "border-amber-700/50 text-amber-400 data-[active=true]:bg-amber-500/20 data-[active=true]:text-amber-300 data-[active=true]:border-amber-500" },
-  { value: "svago", label: "Svago", className: "border-violet-700/50 text-violet-400 data-[active=true]:bg-violet-500/20 data-[active=true]:text-violet-300 data-[active=true]:border-violet-500" },
-  { value: "investimenti", label: "Investimenti", className: "border-blue-700/50 text-blue-400 data-[active=true]:bg-blue-500/20 data-[active=true]:text-blue-300 data-[active=true]:border-blue-500" },
+const MACRO_OPTIONS: { value: MacroCategory | null; label: string }[] = [
+  { value: null, label: "Nessuna" },
+  { value: "necessita", label: "Necessità" },
+  { value: "svago", label: "Svago" },
+  { value: "investimenti", label: "Investimenti" },
 ]
+
+const MACRO_ACTIVE: Record<string, string> = {
+  none:        "bg-surface-2 text-text-1 border-border-strong",
+  necessita:   "bg-amber-500/15 text-amber-600 border-amber-400/40",
+  svago:       "bg-violet-500/15 text-violet-600 border-violet-400/40",
+  investimenti:"bg-blue-500/15 text-blue-600 border-blue-400/40",
+}
 
 type CategoryFormDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  category?: { id: string; name: string; color: string; type?: string; macro_category?: MacroCategory | null; group_name?: string | null } | null
+  category?: {
+    id: string
+    name: string
+    color: string
+    emoji?: string | null
+    type?: string
+    macro_category?: MacroCategory | null
+    group_name?: string | null
+  } | null
   onSuccess?: () => void
 }
 
@@ -39,6 +54,7 @@ export function CategoryFormDialog({
   onSuccess,
 }: CategoryFormDialogProps) {
   const [name, setName] = useState("")
+  const [emoji, setEmoji] = useState("")
   const [color, setColor] = useState("#22c55e")
   const [type, setType] = useState<"expense" | "income">("expense")
   const [macroCategory, setMacroCategory] = useState<MacroCategory | null>(null)
@@ -50,6 +66,7 @@ export function CategoryFormDialog({
   useEffect(() => {
     if (open) {
       setName(category?.name ?? "")
+      setEmoji(category?.emoji ?? "")
       setColor(category?.color ?? "#22c55e")
       setType(category?.type === "income" ? "income" : "expense")
       setMacroCategory(category?.macro_category ?? null)
@@ -68,7 +85,14 @@ export function CategoryFormDialog({
     }
 
     await wrap(async () => {
-      const input: CreateCategoryInput = { name: trimmed, color, type, macro_category: macroCategory, group_name: groupName.trim() || null }
+      const input: CreateCategoryInput = {
+        name: trimmed,
+        color,
+        type,
+        macro_category: macroCategory,
+        group_name: groupName.trim() || null,
+        emoji: emoji.trim() || null,
+      }
       const result = isEdit
         ? await updateCategory(category.id, input)
         : await createCategory(input)
@@ -89,19 +113,41 @@ export function CategoryFormDialog({
           <DialogTitle>{isEdit ? "Modifica categoria" : "Nuova categoria"}</DialogTitle>
         </DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
+
+          {/* Nome */}
           <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="cat-name">
-              Nome
-            </label>
+            <label className="text-xs font-medium text-text-2" htmlFor="cat-name">Nome</label>
             <Input
               id="cat-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Es. Alimentari"
-              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
+          {/* Emoji */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-text-2" htmlFor="cat-emoji">
+              Emoji <span className="text-text-3">(opzionale)</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-surface-2 text-xl">
+                {emoji || "?"}
+              </div>
+              <Input
+                id="cat-emoji"
+                value={emoji}
+                onChange={(e) => setEmoji(e.target.value.trim())}
+                placeholder="🛒"
+                maxLength={4}
+              />
+            </div>
+            <p className="font-sans text-[10px] text-text-3">
+              Incolla o digita un&apos;emoji — visibile nelle transazioni e nella dashboard
+            </p>
+          </div>
+
+          {/* Gruppo */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-2" htmlFor="cat-group">
               Gruppo <span className="text-text-3">(opzionale)</span>
@@ -111,20 +157,20 @@ export function CategoryFormDialog({
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Es. Abitazione, Cibo, Trasporti…"
-              className="border-border-subtle bg-surface-0 text-text-1"
             />
           </div>
 
+          {/* Tipo */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-2">Tipo</label>
-            <div className="flex rounded-md border border-border-subtle overflow-hidden">
+            <div className="flex overflow-hidden rounded-md border border-border-subtle">
               <button
                 type="button"
                 onClick={() => setType("expense")}
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "expense"
                     ? "bg-expense-subtle text-expense-fg font-medium"
-                    : "bg-transparent text-text-2 hover:bg-white/5"
+                    : "bg-transparent text-text-2 hover:bg-surface-hover"
                 }`}
               >
                 Spesa
@@ -135,7 +181,7 @@ export function CategoryFormDialog({
                 className={`flex-1 py-2 text-sm transition-colors ${
                   type === "income"
                     ? "bg-income-subtle text-income-fg font-medium"
-                    : "bg-transparent text-text-2 hover:bg-white/5"
+                    : "bg-transparent text-text-2 hover:bg-surface-hover"
                 }`}
               >
                 Entrata
@@ -143,6 +189,7 @@ export function CategoryFormDialog({
             </div>
           </div>
 
+          {/* Colore */}
           <div className="space-y-2">
             <label className="text-xs font-medium text-text-2">Colore</label>
             <div className="flex flex-wrap gap-2">
@@ -152,7 +199,7 @@ export function CategoryFormDialog({
                   type="button"
                   onClick={() => setColor(c)}
                   className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    color === c ? "border-white ring-2 ring-white/30" : "border-white/20"
+                    color === c ? "border-border-strong ring-2 ring-border-strong/30" : "border-transparent"
                   }`}
                   style={{ backgroundColor: c }}
                   aria-label={`Colore ${c}`}
@@ -163,25 +210,35 @@ export function CategoryFormDialog({
               type="text"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="mt-1 border-border-subtle bg-surface-0 font-mono text-text-1"
+              className="font-mono"
               placeholder="#22c55e"
             />
           </div>
 
+          {/* Macro-categoria */}
           <div className="space-y-2">
-            <label className="text-xs font-medium text-text-2">Macro-categoria <span className="text-text-3">(opzionale)</span></label>
+            <label className="text-xs font-medium text-text-2">
+              Macro-categoria <span className="text-text-3">(opzionale)</span>
+            </label>
             <div className="flex flex-wrap gap-2">
-              {MACRO_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value ?? "none"}
-                  type="button"
-                  data-active={macroCategory === opt.value}
-                  onClick={() => setMacroCategory(opt.value)}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${opt.className}`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+              {MACRO_OPTIONS.map((opt) => {
+                const isActive = macroCategory === opt.value
+                const key = opt.value ?? "none"
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setMacroCategory(opt.value)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                      isActive
+                        ? (MACRO_ACTIVE[key] ?? MACRO_ACTIVE.none)
+                        : "border-border-subtle text-text-3 hover:bg-surface-hover"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -190,17 +247,12 @@ export function CategoryFormDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
               Annulla
             </Button>
-            <Button
-              type="submit"
-              className="bg-income text-zinc-950 hover:bg-income-fg"
-              disabled={submitting}
-            >
+            <Button type="submit" disabled={submitting}>
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}
             </Button>
           </div>

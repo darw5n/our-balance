@@ -19,8 +19,9 @@
 @theme inline {
 
   /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-serif: var(--font-lora), Georgia, serif;
+  --font-mono: var(--font-geist-mono), monospace;
 
   /* Shadcn: colori base */
   --color-background:            var(--background);
@@ -76,28 +77,41 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-strong: var(--border-strong);
 
-  /* ---- Intent: entrate (emerald) ---- */
-  --color-income:        oklch(0.696 0.17 162.48);
-  --color-income-fg:     oklch(0.765 0.177 163.223);
-  --color-income-subtle: oklch(0.696 0.17 162.48 / 20%);
+  /* ---- Intent: entrate ---- */
+  --color-income:        var(--income);
+  --color-income-fg:     var(--income-fg);
+  --color-income-subtle: var(--income-subtle);
 
-  /* ---- Intent: uscite (rose) ---- */
-  --color-expense:        oklch(0.645 0.246 16.439);
-  --color-expense-fg:     oklch(0.712 0.194 13.428);
-  --color-expense-subtle: oklch(0.645 0.246 16.439 / 20%);
+  /* ---- Intent: uscite ---- */
+  --color-expense:        var(--expense);
+  --color-expense-fg:     var(--expense-fg);
+  --color-expense-subtle: var(--expense-subtle);
 
-  /* ---- Intent: in attesa (amber) ---- */
-  --color-pending:        oklch(0.769 0.188 70.08);
-  --color-pending-fg:     oklch(0.828 0.189 84.429);
-  --color-pending-subtle: oklch(0.769 0.188 70.08 / 20%);
+  /* ---- Intent: in attesa ---- */
+  --color-pending:        var(--pending);
+  --color-pending-fg:     var(--pending-fg);
+  --color-pending-subtle: var(--pending-subtle);
 
-  /* ---- Intent: info (sky) ---- */
-  --color-info:        oklch(0.746 0.16 232.661);
-  --color-info-subtle: oklch(0.746 0.16 232.661 / 20%);
+  /* ---- Intent: info ---- */
+  --color-info:        var(--info);
+  --color-info-subtle: var(--info-subtle);
 
-  /* ---- Intent: in comune (violet) ---- */
-  --color-shared:        oklch(0.702 0.183 293.541);
-  --color-shared-subtle: oklch(0.702 0.183 293.541 / 20%);
+  /* ---- Intent: in comune ---- */
+  --color-shared:        var(--shared);
+  --color-shared-subtle: var(--shared-subtle);
+
+  /* ---- Accent brand ---- */
+  --color-accent-brand:    var(--accent-brand);
+  --color-accent-brand-bg: var(--accent-brand-bg);
+
+  /* ---- Hero gradient ---- */
+  --color-hero-start: var(--hero-start);
+  --color-hero-end:   var(--hero-end);
+
+  /* ---- Hero card text (fixed — hero bg is always dark) ---- */
+  --color-hero-text:    var(--hero-text);
+  --color-hero-income:  var(--hero-income);
+  --color-hero-expense: var(--hero-expense);
 }
 
 /* ============================================================
@@ -109,152 +123,175 @@
    ============================================================ */
 
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
 
-  /* ---- Shadcn defaults ---- */
-  --background:           oklch(0.145 0 0);
-  --foreground:           oklch(0.985 0 0);
-  --card:                 oklch(0.21 0 0);
-  --card-foreground:      oklch(0.985 0 0);
-  --popover:              oklch(0.21 0 0);
-  --popover-foreground:   oklch(0.985 0 0);
-  --primary:              oklch(0.922 0 0);
-  --primary-foreground:   oklch(0.205 0 0);
-  --secondary:            oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted:                oklch(0.269 0 0);
-  --muted-foreground:     oklch(0.708 0 0);
-  --accent:               oklch(0.269 0 0);
-  --accent-foreground:    oklch(0.985 0 0);
-  --destructive:          oklch(0.704 0.191 22.216);
-  --border:               oklch(1 0 0 / 10%);
-  --input:                oklch(1 0 0 / 15%);
-  --ring:                 oklch(0.556 0 0);
-  --chart-1:              oklch(0.488 0.243 264.376);
-  --chart-2:              oklch(0.696 0.17 162.48);
-  --chart-3:              oklch(0.769 0.188 70.08);
-  --chart-4:              oklch(0.627 0.265 303.9);
-  --chart-5:              oklch(0.645 0.246 16.439);
+  /* ---- Shadcn defaults (light) ---- */
+  --background:           #F3EEE6;
+  --foreground:           #1A1410;
+  --card:                 #FFFFFF;
+  --card-foreground:      #1A1410;
+  --popover:              #FFFFFF;
+  --popover-foreground:   #1A1410;
+  --primary:              #C85A3A;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #EDE8DF;
+  --secondary-foreground: #1A1410;
+  --muted:                #EDE8DF;
+  --muted-foreground:     #9B8D83;
+  --accent:               #EDE8DF;
+  --accent-foreground:    #1A1410;
+  --destructive:          #C7374A;
+  --border:               rgba(0,0,0,0.055);
+  --input:                rgba(0,0,0,0.08);
+  --ring:                 #C85A3A;
+  --chart-1:              #3A6EA5;
+  --chart-2:              #3D8F6B;
+  --chart-3:              #B07830;
+  --chart-4:              #7C3AED;
+  --chart-5:              #C7374A;
 
-  /* ---- Superfici ---- */
-  --surface-0:       oklch(0.145 0 0);         /* bg principale — zinc-950  */
-  --surface-1:       oklch(0.21 0 0);          /* card, modal  — zinc-900  */
-  --surface-2:       oklch(0.248 0 0);         /* input, select            */
-  --surface-3:       oklch(0.274 0 0);         /* hover target — zinc-800  */
-  --surface-hover:   oklch(0.274 0 0 / 60%);  /* hover sottile            */
-  --surface-active:  oklch(0.274 0 0);         /* stato attivo/selezionato */
-  --surface-overlay: oklch(0.145 0 0 / 95%);  /* header blur, nav mobile  */
+  /* ---- Superfici (light) ---- */
+  --surface-0:       #F3EEE6;
+  --surface-1:       #FFFFFF;
+  --surface-2:       #EDE8DF;
+  --surface-3:       #E5DFD5;
+  --surface-hover:   rgba(0,0,0,0.04);
+  --surface-active:  rgba(0,0,0,0.07);
+  --surface-overlay: rgba(243,238,230,0.92);
 
-  /* ---- Testo ---- */
-  --text-1: oklch(0.985 0 0);  /* primario   — zinc-50  */
-  --text-2: oklch(0.646 0 0);  /* secondario — zinc-300 */
-  --text-3: oklch(0.507 0 0);  /* muted      — zinc-500 */
+  /* ---- Testo (light) ---- */
+  --text-1: #1A1410;
+  --text-2: #7A6D63;
+  --text-3: #9B8D83;
 
-  /* ---- Bordi ---- */
-  --border-subtle: oklch(1 0 0 / 10%);  /* separatori leggeri — white/10 */
-  --border-strong: oklch(1 0 0 / 20%);  /* bordi evidenti     — white/20 */
+  /* ---- Bordi (light) ---- */
+  --border-subtle: rgba(0,0,0,0.055);
+  --border-strong: rgba(0,0,0,0.14);
 
-  /* ---- Scrollbar ---- */
-  --scrollbar-track:       oklch(0.145 0 0);  /* zinc-950 */
-  --scrollbar-thumb:       oklch(0.37 0 0);   /* zinc-700 */
-  --scrollbar-thumb-hover: oklch(0.442 0 0);  /* zinc-600 */
+  /* ---- Scrollbar (light) ---- */
+  --scrollbar-track:       #EDE8DF;
+  --scrollbar-thumb:       #C8BDB6;
+  --scrollbar-thumb-hover: #B0A49C;
 
-  /* ---- Intent: entrate (emerald) ---- */
-  --income:        oklch(0.696 0.17 162.48);           /* emerald-500 */
-  --income-fg:     oklch(0.765 0.177 163.223);         /* emerald-400 */
-  --income-subtle: oklch(0.696 0.17 162.48 / 20%);    /* emerald-500/20 */
+  /* ---- Intent: entrate (green) ---- */
+  --income:        #3D8F6B;
+  --income-fg:     #3D8F6B;
+  --income-subtle: #EAF5EF;
 
-  /* ---- Intent: uscite (rose) ---- */
-  --expense:        oklch(0.645 0.246 16.439);         /* rose-500 */
-  --expense-fg:     oklch(0.712 0.194 13.428);         /* rose-400 */
-  --expense-subtle: oklch(0.645 0.246 16.439 / 20%);  /* rose-500/20 */
+  /* ---- Intent: uscite (red) ---- */
+  --expense:        #C7374A;
+  --expense-fg:     #C7374A;
+  --expense-subtle: #FDEDF0;
 
   /* ---- Intent: in attesa (amber) ---- */
-  --pending:        oklch(0.769 0.188 70.08);          /* amber-500 */
-  --pending-fg:     oklch(0.828 0.189 84.429);         /* amber-400 */
-  --pending-subtle: oklch(0.769 0.188 70.08 / 20%);   /* amber-500/20 */
+  --pending:        #B07830;
+  --pending-fg:     #B07830;
+  --pending-subtle: #FBF4E8;
 
-  /* ---- Intent: info (sky) ---- */
-  --info:        oklch(0.746 0.16 232.661);            /* sky-400 */
-  --info-subtle: oklch(0.746 0.16 232.661 / 20%);     /* sky-400/20 */
+  /* ---- Intent: info (blue) ---- */
+  --info:        #3A6EA5;
+  --info-subtle: #EBF2FB;
 
-  /* ---- Intent: in comune / famiglia (violet) ---- */
-  --shared:        oklch(0.702 0.183 293.541);         /* violet-400 */
-  --shared-subtle: oklch(0.702 0.183 293.541 / 20%);  /* violet-400/20 */
+  /* ---- Intent: in comune (violet) ---- */
+  --shared:        #7C3AED;
+  --shared-subtle: #F0EBFF;
+
+  /* ---- Accent brand (terracotta) ---- */
+  --accent-brand:    #C85A3A;
+  --accent-brand-bg: #FEF0EB;
+
+  /* ---- Hero gradient (always dark) ---- */
+  --hero-start: #2A1F1A;
+  --hero-end:   #3D2E28;
+
+  /* ---- Hero text (fixed, hero is always dark) ---- */
+  --hero-text:    #F0EDE8;
+  --hero-income:  #5DC98E;
+  --hero-expense: #E07B6A;
 }
 
 /* ---- Dark theme — classe applicata da next-themes su <html> ---- */
 .dark {
-  /* ---- Shadcn defaults ---- */
-  --background:           oklch(0.145 0 0);
-  --foreground:           oklch(0.985 0 0);
-  --card:                 oklch(0.21 0 0);
-  --card-foreground:      oklch(0.985 0 0);
-  --popover:              oklch(0.21 0 0);
-  --popover-foreground:   oklch(0.985 0 0);
-  --primary:              oklch(0.922 0 0);
-  --primary-foreground:   oklch(0.205 0 0);
-  --secondary:            oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted:                oklch(0.269 0 0);
-  --muted-foreground:     oklch(0.708 0 0);
-  --accent:               oklch(0.269 0 0);
-  --accent-foreground:    oklch(0.985 0 0);
-  --destructive:          oklch(0.704 0.191 22.216);
-  --border:               oklch(1 0 0 / 10%);
-  --input:                oklch(1 0 0 / 15%);
-  --ring:                 oklch(0.556 0 0);
-  --chart-1:              oklch(0.488 0.243 264.376);
-  --chart-2:              oklch(0.696 0.17 162.48);
-  --chart-3:              oklch(0.769 0.188 70.08);
-  --chart-4:              oklch(0.627 0.265 303.9);
-  --chart-5:              oklch(0.645 0.246 16.439);
+  color-scheme: dark;
+  /* ---- Shadcn defaults (dark) ---- */
+  --background:           #141210;
+  --foreground:           #F0EDE8;
+  --card:                 #1E1A17;
+  --card-foreground:      #F0EDE8;
+  --popover:              #1E1A17;
+  --popover-foreground:   #F0EDE8;
+  --primary:              #D9674A;
+  --primary-foreground:   #FFFFFF;
+  --secondary:            #272320;
+  --secondary-foreground: #F0EDE8;
+  --muted:                #272320;
+  --muted-foreground:     #6B5F57;
+  --accent:               #272320;
+  --accent-foreground:    #F0EDE8;
+  --destructive:          #E05C6A;
+  --border:               rgba(255,255,255,0.07);
+  --input:                rgba(255,255,255,0.10);
+  --ring:                 #D9674A;
+  --chart-1:              #5B8FCC;
+  --chart-2:              #4BAA7E;
+  --chart-3:              #C99040;
+  --chart-4:              #A78BFA;
+  --chart-5:              #E05C6A;
 
-  /* ---- Superfici ---- */
-  --surface-0:       oklch(0.145 0 0);
-  --surface-1:       oklch(0.21 0 0);
-  --surface-2:       oklch(0.248 0 0);
-  --surface-3:       oklch(0.274 0 0);
-  --surface-hover:   oklch(0.274 0 0 / 60%);
-  --surface-active:  oklch(0.274 0 0);
-  --surface-overlay: oklch(0.145 0 0 / 95%);
+  /* ---- Superfici (dark) ---- */
+  --surface-0:       #141210;
+  --surface-1:       #1E1A17;
+  --surface-2:       #272320;
+  --surface-3:       #302B27;
+  --surface-hover:   rgba(255,255,255,0.05);
+  --surface-active:  rgba(255,255,255,0.09);
+  --surface-overlay: rgba(20,18,16,0.92);
 
-  /* ---- Testo ---- */
-  --text-1: oklch(0.985 0 0);
-  --text-2: oklch(0.646 0 0);
-  --text-3: oklch(0.507 0 0);
+  /* ---- Testo (dark) ---- */
+  --text-1: #F0EDE8;
+  --text-2: #9A8D85;
+  --text-3: #6B5F57;
 
-  /* ---- Bordi ---- */
-  --border-subtle: oklch(1 0 0 / 10%);
-  --border-strong: oklch(1 0 0 / 20%);
+  /* ---- Bordi (dark) ---- */
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-strong: rgba(255,255,255,0.14);
 
-  /* ---- Scrollbar ---- */
-  --scrollbar-track:       oklch(0.145 0 0);
-  --scrollbar-thumb:       oklch(0.37 0 0);
-  --scrollbar-thumb-hover: oklch(0.442 0 0);
+  /* ---- Scrollbar (dark) ---- */
+  --scrollbar-track:       #141210;
+  --scrollbar-thumb:       #3A3330;
+  --scrollbar-thumb-hover: #4A4340;
 
-  /* ---- Intent: entrate ---- */
-  --income:        oklch(0.696 0.17 162.48);
-  --income-fg:     oklch(0.765 0.177 163.223);
-  --income-subtle: oklch(0.696 0.17 162.48 / 20%);
+  /* ---- Intent: entrate (green) ---- */
+  --income:        #4BAA7E;
+  --income-fg:     #4BAA7E;
+  --income-subtle: rgba(75,170,126,0.13);
 
-  /* ---- Intent: uscite ---- */
-  --expense:        oklch(0.645 0.246 16.439);
-  --expense-fg:     oklch(0.712 0.194 13.428);
-  --expense-subtle: oklch(0.645 0.246 16.439 / 20%);
+  /* ---- Intent: uscite (red) ---- */
+  --expense:        #E05C6A;
+  --expense-fg:     #E05C6A;
+  --expense-subtle: rgba(224,92,106,0.13);
 
-  /* ---- Intent: in attesa ---- */
-  --pending:        oklch(0.769 0.188 70.08);
-  --pending-fg:     oklch(0.828 0.189 84.429);
-  --pending-subtle: oklch(0.769 0.188 70.08 / 20%);
+  /* ---- Intent: in attesa (amber) ---- */
+  --pending:        #C99040;
+  --pending-fg:     #C99040;
+  --pending-subtle: rgba(201,144,64,0.13);
 
-  /* ---- Intent: info ---- */
-  --info:        oklch(0.746 0.16 232.661);
-  --info-subtle: oklch(0.746 0.16 232.661 / 20%);
+  /* ---- Intent: info (blue) ---- */
+  --info:        #5B8FCC;
+  --info-subtle: rgba(91,143,204,0.13);
 
-  /* ---- Intent: in comune ---- */
-  --shared:        oklch(0.702 0.183 293.541);
-  --shared-subtle: oklch(0.702 0.183 293.541 / 20%);
+  /* ---- Intent: in comune (violet) ---- */
+  --shared:        #9B7FD4;
+  --shared-subtle: rgba(155,127,212,0.13);
+
+  /* ---- Accent brand (terracotta dark) ---- */
+  --accent-brand:    #D9674A;
+  --accent-brand-bg: rgba(217,103,74,0.15);
+
+  /* ---- Hero gradient (darker) ---- */
+  --hero-start: #0D0A08;
+  --hero-end:   #1A1410;
 }
 
 /* ============================================================
@@ -280,9 +317,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    oklch(1 0 0 / 4%) 25%,
-    oklch(1 0 0 / 9%) 50%,
-    oklch(1 0 0 / 4%) 75%
+    var(--surface-2) 25%,
+    var(--surface-3) 50%,
+    var(--surface-2) 75%
   );
   background-size: 400% 100%;
   animation: shimmer 2s ease-in-out infinite;
@@ -308,15 +345,5 @@
   body {
     overflow-x: clip;
     @apply bg-background text-foreground;
-    color-scheme: dark;
-  }
-
-  /* Forza color-scheme dark su input nativi data/ora */
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  input[type="month"],
-  input[type="week"] {
-    color-scheme: dark;
   }
 }

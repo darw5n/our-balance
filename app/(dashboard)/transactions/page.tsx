@@ -73,10 +73,8 @@ export default async function TransactionsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Transazioni</h1>
-        <p className="text-xs text-zinc-400">
-          Vista lista delle tue transazioni. Filtra per data, descrizione o categoria.
-        </p>
+        <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">Transazioni</h1>
+        <p className="font-sans text-xs text-text-3 mt-1">Storico di tutti i tuoi movimenti.</p>
       </div>
 
       <div className="flex items-start gap-3">

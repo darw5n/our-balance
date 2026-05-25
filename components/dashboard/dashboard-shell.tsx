@@ -12,25 +12,25 @@ import {
   Tag,
   Repeat,
   LogOut,
-  User,
   Settings,
 } from "lucide-react"
 
 import { supabase } from "@/lib/supabase"
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog"
+import { DarkModeToggle } from "@/components/dashboard/dark-mode-toggle"
 import type { Category } from "@/lib/supabase/queries/categories"
 
-const PRIMARY_NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/transactions", label: "Transazioni", icon: ArrowLeftRight },
-  { href: "/reports", label: "Report", icon: BarChart2 },
+const NAV_ITEMS = [
+  { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
+  { href: "/transactions", label: "Transazioni",  icon: ArrowLeftRight },
+  { href: "/reports",      label: "Report",       icon: BarChart2 },
+  { href: "/recurring",    label: "Programmati",  icon: Repeat },
 ]
 
 const SECONDARY_NAV = [
-  { href: "/recurring", label: "Programmati", icon: Repeat },
-  { href: "/budgets", label: "Budget", icon: Wallet },
-  { href: "/categories", label: "Categorie", icon: Tag },
-  { href: "/settings", label: "Impostazioni", icon: Settings },
+  { href: "/budgets",     label: "Budget",        icon: Wallet },
+  { href: "/categories",  label: "Categorie",     icon: Tag },
+  { href: "/settings",    label: "Impostazioni",  icon: Settings },
 ]
 
 type Props = {
@@ -46,7 +46,6 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return
     function handleClick(e: MouseEvent) {
@@ -58,10 +57,15 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
     return () => document.removeEventListener("mousedown", handleClick)
   }, [menuOpen])
 
-  // Close menu on navigation
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    const handler = () => setAddOpen(true)
+    window.addEventListener("open-add-transaction", handler)
+    return () => window.removeEventListener("open-add-transaction", handler)
+  }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -74,61 +78,70 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
     return pathname.startsWith(href)
   }
 
-  const isSecondaryActive = SECONDARY_NAV.some((l) => isActive(l.href))
+  const rawName = userEmail ? userEmail.split("@")[0] : "…"
+  const firstName = rawName.split(".")[0]
+  const userName = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+  const userInitial = userName.charAt(0).toUpperCase()
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-0 text-text-1">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border-subtle bg-surface-overlay backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          {/* Left: logo + primary nav (desktop) */}
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="mr-4 text-sm font-semibold tracking-tight">
-              OurBalance
-            </Link>
-            <nav className="hidden items-center gap-1 md:flex">
-              {PRIMARY_NAV.map(({ href, label }) => (
+
+      {/* Top bar — sticky, full width, content centered */}
+      <header className="sticky top-0 z-50 bg-surface-overlay backdrop-blur-xl border-b border-border-subtle">
+        <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-5 pt-3.5 pb-2.5">
+
+          {/* Left: brand + greeting */}
+          <div>
+            <p className="font-serif text-[18px] font-semibold text-text-1 leading-none">OurBalance</p>
+            <p className="font-sans text-[11px] text-text-3 mt-0.5">Ciao, {userName} 👋</p>
+          </div>
+
+          {/* Center: desktop navigation (hidden on mobile) */}
+          <nav className="hidden md:flex items-center gap-0.5">
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+              const active = isActive(href)
+              return (
                 <Link
                   key={href}
                   href={href}
-                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    isActive(href)
-                      ? "bg-surface-3 text-text-1"
-                      : "text-text-2 hover:bg-surface-hover hover:text-text-1"
+                  className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-sm transition-all duration-200 ease-out ${
+                    active
+                      ? "bg-accent-brand-bg text-accent-brand font-semibold"
+                      : "text-text-2 hover:bg-surface-2 hover:text-text-1"
                   }`}
                 >
+                  <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.7} />
                   {label}
                 </Link>
-              ))}
-            </nav>
-          </div>
+              )
+            })}
+          </nav>
 
-          {/* Right: secondary menu */}
-          <div className="flex items-center gap-2">
-            {/* Secondary menu */}
+          {/* Right: dark mode toggle + avatar */}
+          <div className="flex items-center gap-2.5">
+            <DarkModeToggle />
+
+            {/* Avatar — opens secondary dropdown */}
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Menu account"
-                className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors ${
-                  menuOpen || isSecondaryActive
-                    ? "border-border-strong bg-surface-3 text-text-1"
-                    : "border-border-subtle text-text-2 hover:bg-surface-hover hover:text-text-1"
-                }`}
+                className="flex h-9 w-9 items-center justify-center rounded-full font-sans text-sm font-bold text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: "var(--accent-brand)" }}
               >
-                <User className="h-4 w-4" />
+                {userInitial}
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-xl border border-border-subtle bg-surface-1 p-1.5 shadow-xl">
+                <div className="absolute right-0 top-full z-[100] mt-2 w-52 rounded-[22px] border border-border-subtle bg-surface-1 p-1.5 shadow-xl">
                   {SECONDARY_NAV.map(({ href, label, icon: Icon }) => (
                     <Link
                       key={href}
                       href={href}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                      className={`flex items-center gap-3 rounded-[14px] px-3 py-2 font-sans text-sm transition-colors ${
                         isActive(href)
-                          ? "bg-surface-3 text-text-1"
-                          : "text-text-2 hover:bg-surface-3 hover:text-text-1"
+                          ? "bg-surface-2 text-text-1"
+                          : "text-text-2 hover:bg-surface-2 hover:text-text-1"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -139,12 +152,12 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                   <div className="my-1.5 border-t border-border-subtle" />
 
                   {userEmail && (
-                    <p className="truncate px-3 py-2 text-xs text-text-3">{userEmail}</p>
+                    <p className="truncate px-3 py-2 font-sans text-xs text-text-3">{userEmail}</p>
                   )}
 
                   <button
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-text-2 transition-colors hover:bg-surface-3 hover:text-expense-fg"
+                    className="flex w-full items-center gap-3 rounded-[14px] px-3 py-2 font-sans text-sm text-text-2 transition-colors hover:bg-surface-2 hover:text-expense-fg"
                   >
                     <LogOut className="h-4 w-4" />
                     Esci
@@ -156,82 +169,83 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto w-full flex-1 max-w-5xl px-4 py-8 pb-safe-nav">{children}</main>
+      {/* Page content — centered, responsive max-width */}
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-3 pb-28 md:pb-10">
+        {children}
+      </main>
 
-      {/* Footer — desktop only (mobile ha bottom nav) */}
-      <footer className="hidden border-t border-border-subtle md:block">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 text-xs text-text-3">
-          <span>OurBalance</span>
-          <span>© {new Date().getFullYear()}</span>
-        </div>
-      </footer>
+      {/* FAB — desktop only (mobile FAB is inside the nav pill) */}
+      <button
+        onClick={() => setAddOpen(true)}
+        aria-label="Aggiungi transazione"
+        className="fixed z-50 hidden md:flex items-center justify-center rounded-full text-white shadow-[0_4px_24px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95 bottom-8 right-8 h-[54px] w-[54px]"
+        style={{ backgroundColor: "var(--accent-brand)" }}
+      >
+        <Plus className="h-6 w-6 stroke-[2.5]" />
+      </button>
 
-      {/* Bottom nav — mobile only */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border-subtle bg-surface-overlay backdrop-blur md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex">
-          {/* Dashboard */}
-          {[
-            { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-            { href: "/transactions", label: "Transazioni", icon: ArrowLeftRight },
-          ].map(({ href, label, icon: Icon }) => {
+      {/* Bottom nav — mobile only, floating island pill with FAB in center */}
+      <nav className="md:hidden fixed z-40 bottom-6 left-1/2 -translate-x-1/2">
+        <div className="flex items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
+          {/* First 2 nav items */}
+          {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-income-fg" : "text-text-3 hover:text-text-2"
+                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                  active ? "bg-accent-brand-bg" : ""
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                {label}
+                <Icon
+                  className={`h-[20px] w-[20px] transition-colors ${
+                    active ? "text-accent-brand" : "text-text-3"
+                  }`}
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
+                  {label}
+                </span>
               </Link>
             )
           })}
 
-          {/* + central elevated */}
-          <div className="flex h-16 flex-1 items-center justify-center">
-            <button
-              onClick={() => setAddOpen(true)}
-              className="-mt-5 flex h-14 w-14 items-center justify-center rounded-full bg-income shadow-lg shadow-emerald-500/30 transition-transform active:scale-95"
-              aria-label="Aggiungi transazione"
-            >
-              <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
-            </button>
-          </div>
+          {/* FAB — center element */}
+          <button
+            onClick={() => setAddOpen(true)}
+            aria-label="Aggiungi transazione"
+            className="mx-1 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95"
+            style={{ backgroundColor: "var(--accent-brand)" }}
+          >
+            <Plus className="h-[22px] w-[22px] stroke-[2.5]" />
+          </button>
 
-          {/* Report + Programmati */}
-          {[
-            { href: "/reports", label: "Report", icon: BarChart2 },
-            { href: "/recurring", label: "Programmati", icon: Repeat },
-          ].map(({ href, label, icon: Icon }) => {
+          {/* Last 2 nav items */}
+          {NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
-                  active ? "text-income-fg" : "text-text-3 hover:text-text-2"
+                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                  active ? "bg-accent-brand-bg" : ""
                 }`}
               >
-                <Icon className="h-5 w-5" />
-                {label}
+                <Icon
+                  className={`h-[20px] w-[20px] transition-colors ${
+                    active ? "text-accent-brand" : "text-text-3"
+                  }`}
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
+                  {label}
+                </span>
               </Link>
             )
           })}
         </div>
       </nav>
-
-      {/* Desktop FAB — solo su dashboard e transazioni */}
-      {(pathname === "/dashboard" || pathname.startsWith("/transactions")) && (
-        <button
-          onClick={() => setAddOpen(true)}
-          className="fixed bottom-6 right-6 z-50 hidden h-14 w-14 items-center justify-center rounded-full bg-income shadow-lg shadow-emerald-500/30 transition-all hover:scale-105 hover:bg-income-fg active:scale-95 md:flex"
-          aria-label="Aggiungi transazione"
-        >
-          <Plus className="h-6 w-6 stroke-[2.5] text-zinc-950" />
-        </button>
-      )}
 
       {/* Global add transaction dialog */}
       <AddTransactionDialog

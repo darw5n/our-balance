@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
       )}
       {...props}
     >
-      <div className="w-full flex-1 overflow-y-auto rounded-none border-0 bg-surface-0 p-5 text-text-1 shadow-xl md:max-h-[85vh] md:flex-none md:max-w-lg md:rounded-xl md:border md:border-border-subtle md:bg-surface-overlay md:backdrop-blur">
+      <div className="w-full flex-1 overflow-y-auto rounded-none border-0 bg-surface-1 p-5 text-text-1 shadow-xl md:max-h-[85vh] md:flex-none md:max-w-lg md:rounded-xl md:border md:border-border-subtle md:backdrop-blur">
         {children}
       </div>
     </DialogPrimitive.Content>

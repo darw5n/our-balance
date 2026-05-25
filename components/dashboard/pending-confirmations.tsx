@@ -27,12 +27,7 @@ function getPendingDate(nextDueDate: string, frequency: string): string {
   if (frequency === "yearly") {
     return String(date.getUTCFullYear())
   }
-  // weekly: show the specific date
   return date.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })
-}
-
-type PendingConfirmationsProps = {
-  items: RecurringTransaction[]
 }
 
 function PendingItem({ item }: { item: RecurringTransaction }) {
@@ -61,68 +56,70 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
     })
   }
 
+  const typeLabel = item.type === "income" ? "Entrata" : "Uscita"
+  const periodLabel = getPendingDate(item.next_due_date, item.frequency)
+
   return (
-    <Card className="border-pending/30 bg-pending-subtle p-4 backdrop-blur">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-text-1">
+    <Card className="border-pending/30 bg-pending-subtle">
+      <div className="p-3">
+        {/* Name + period */}
+        <div className="mb-1 flex items-start justify-between gap-2">
+          <p className="font-sans text-sm font-semibold text-text-1 leading-tight">
             {item.description || "Ricorrenza senza descrizione"}
           </p>
-          <p className="text-xs text-text-2">
-            {FREQUENCY_LABEL[item.frequency]} ·{" "}
-            {item.type === "income" ? "Entrata prevista" : "Uscita prevista"}:{" "}
-            {formatCurrency(Number(item.amount))}
-          </p>
-          <p className="text-xs text-pending-fg/80">
-            Competenza: {getPendingDate(item.next_due_date, item.frequency)}
-          </p>
+          <span className="font-sans text-[11px] text-pending-fg/70 flex-shrink-0 mt-0.5">
+            {periodLabel}
+          </span>
         </div>
-
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Subtitle */}
+        <p className="font-sans text-xs text-text-2 mb-3">
+          {FREQUENCY_LABEL[item.frequency] ?? item.frequency} · {typeLabel} prevista {formatCurrency(Number(item.amount))}
+        </p>
+        {/* Actions */}
+        <div className="flex items-center gap-2">
           <Input
             type="text"
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-28 border-border-subtle bg-surface-0 text-text-1 text-sm"
+            className="w-24 flex-shrink-0 border-border-subtle bg-surface-0 text-sm text-text-1"
             disabled={isPending}
+            aria-label="Importo"
           />
           <Button
             size="sm"
-            className="bg-income text-zinc-950 hover:bg-income-fg shrink-0"
+            className="flex-1 bg-income text-white hover:bg-income-fg"
             onClick={handleConfirm}
             disabled={isPending}
           >
-            <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
+            <CheckCircle className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
             Conferma
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="border-border-subtle bg-transparent text-text-2 hover:text-text-1 shrink-0"
+            className="flex-1 border-border-subtle bg-transparent text-text-2 hover:text-text-1"
             onClick={handleSkip}
             disabled={isPending}
           >
-            <SkipForward className="mr-1.5 h-3.5 w-3.5" />
+            <SkipForward className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
             Salta
           </Button>
         </div>
       </div>
-      {error && <p className="mt-2 text-xs text-expense-fg">{error}</p>}
+      {error && <p className="px-3 pb-3 font-sans text-xs text-expense-fg">{error}</p>}
     </Card>
   )
 }
 
-export function PendingConfirmations({ items }: PendingConfirmationsProps) {
+export function PendingConfirmations({ items }: { items: RecurringTransaction[] }) {
   if (items.length === 0) return null
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <h2 className="text-sm font-medium text-pending-fg">
-          {items.length === 1 ? "1 ricorrenza in attesa di conferma" : `${items.length} ricorrenze in attesa di conferma`}
-        </h2>
-      </div>
+      <p className="font-sans text-sm font-medium text-pending-fg">
+        {items.length === 1 ? "1 ricorrenza in attesa di conferma" : `${items.length} ricorrenze in attesa di conferma`}
+      </p>
       {items.map((item) => (
         <PendingItem key={item.id} item={item} />
       ))}
