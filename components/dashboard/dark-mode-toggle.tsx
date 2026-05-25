@@ -8,11 +8,8 @@ export function DarkModeToggle() {
 
   useEffect(() => {
     const html = document.documentElement
-
-    // Sync initial state from DOM (the anti-flash script may have already applied the class)
     setIsDark(html.classList.contains("dark"))
 
-    // Stay in sync if something external changes the class (e.g. OS preference, devtools)
     const observer = new MutationObserver(() => {
       setIsDark(html.classList.contains("dark"))
     })
@@ -22,7 +19,6 @@ export function DarkModeToggle() {
 
   function toggle() {
     const html = document.documentElement
-    // Always read current state from DOM — never rely on possibly-stale React state
     const currentlyDark = html.classList.contains("dark")
     const next = !currentlyDark
 
@@ -32,11 +28,10 @@ export function DarkModeToggle() {
       html.classList.remove("dark")
     }
 
-    try {
-      localStorage.setItem("theme", next ? "dark" : "light")
-    } catch {
-      // localStorage can be unavailable in some contexts
-    }
+    // Cookie per server-side rendering (persiste su refresh, letto da layout.tsx)
+    const age = 365 * 24 * 60 * 60
+    document.cookie = `theme=${next ? "dark" : "light"}; path=/; max-age=${age}; SameSite=Lax`
+
     setIsDark(next)
   }
 

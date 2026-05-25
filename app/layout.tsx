@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Lora, DM_Sans, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
@@ -41,13 +41,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get("theme")?.value;
+  const isDark = theme === "dark";
+
   return (
-    <html lang="it" suppressHydrationWarning>
+    <html lang="it" className={isDark ? "dark" : ""} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#09090b" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -57,9 +61,6 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${dmSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Script id="theme-init" strategy="beforeInteractive">
-          {`try{var t=localStorage.getItem('theme');if(t==='dark'||(t===null&&matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}`}
-        </Script>
         <TransitionProvider>
           <ToastProvider>
             <ConfirmProvider>

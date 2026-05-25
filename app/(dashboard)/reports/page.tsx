@@ -71,9 +71,6 @@ export default async function ReportsPage({
 
   return (
     <div className="space-y-4">
-      {/* View mode toggle */}
-      <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
-
       {/* Year navigation + title */}
       <div className="flex items-center justify-between">
         <a
@@ -104,6 +101,9 @@ export default async function ReportsPage({
           </a>
         )}
       </div>
+
+      {/* View mode toggle */}
+      <ViewModeSwitcher currentView={viewMode} basePath="/reports" extraParams={{ year: String(safeYear) }} />
 
       {/* 4 stat cards 2×2 */}
       <div className="grid grid-cols-2 gap-2.5">

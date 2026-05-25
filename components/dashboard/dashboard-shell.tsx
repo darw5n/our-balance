@@ -170,31 +170,25 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
       </header>
 
       {/* Page content — centered, responsive max-width */}
-      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-3 pb-36 md:pb-10">
+      <main className="mx-auto w-full max-w-[1200px] flex-1 px-4 pt-3 pb-28 md:pb-10">
         {children}
       </main>
 
-      {/* FAB — floats above floating nav on mobile, bottom-right on desktop */}
+      {/* FAB — desktop only (mobile FAB is inside the nav pill) */}
       <button
         onClick={() => setAddOpen(true)}
         aria-label="Aggiungi transazione"
-        className={[
-          "fixed z-50 flex items-center justify-center rounded-full text-white",
-          "shadow-[0_4px_24px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95",
-          // Mobile: centered above floating nav pill
-          "bottom-[100px] left-1/2 h-[56px] w-[56px] -translate-x-1/2",
-          // Desktop: bottom-right corner
-          "md:bottom-8 md:right-8 md:left-auto md:translate-x-0 md:h-[54px] md:w-[54px]",
-        ].join(" ")}
+        className="fixed z-50 hidden md:flex items-center justify-center rounded-full text-white shadow-[0_4px_24px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95 bottom-8 right-8 h-[54px] w-[54px]"
         style={{ backgroundColor: "var(--accent-brand)" }}
       >
         <Plus className="h-6 w-6 stroke-[2.5]" />
       </button>
 
-      {/* Bottom nav — mobile only, floating island pill */}
+      {/* Bottom nav — mobile only, floating island pill with FAB in center */}
       <nav className="md:hidden fixed z-40 bottom-6 left-1/2 -translate-x-1/2">
         <div className="flex items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {/* First 2 nav items */}
+          {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
             return (
               <Link
@@ -210,11 +204,41 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
                   }`}
                   strokeWidth={active ? 2.2 : 1.7}
                 />
-                <span
-                  className={`font-sans text-[9px] leading-none transition-colors ${
-                    active ? "font-semibold text-accent-brand" : "font-normal text-text-3"
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
+                  {label}
+                </span>
+              </Link>
+            )
+          })}
+
+          {/* FAB — center element */}
+          <button
+            onClick={() => setAddOpen(true)}
+            aria-label="Aggiungi transazione"
+            className="mx-1 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95"
+            style={{ backgroundColor: "var(--accent-brand)" }}
+          >
+            <Plus className="h-[22px] w-[22px] stroke-[2.5]" />
+          </button>
+
+          {/* Last 2 nav items */}
+          {NAV_ITEMS.slice(2).map(({ href, label, icon: Icon }) => {
+            const active = isActive(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                  active ? "bg-accent-brand-bg" : ""
+                }`}
+              >
+                <Icon
+                  className={`h-[20px] w-[20px] transition-colors ${
+                    active ? "text-accent-brand" : "text-text-3"
                   }`}
-                >
+                  strokeWidth={active ? 2.2 : 1.7}
+                />
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
                   {label}
                 </span>
               </Link>
