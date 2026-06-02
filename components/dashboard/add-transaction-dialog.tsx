@@ -274,7 +274,7 @@ export function AddTransactionDialog({
             <DialogTitle>Aggiungi transazione</DialogTitle>
           </DialogHeader>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="flex flex-1 flex-col gap-4" onSubmit={handleSubmit}>
             <div className="space-y-1">
               <label className="text-xs font-medium text-text-2" htmlFor="type">
                 Tipo <span className="text-expense-fg">*</span>
@@ -509,8 +509,8 @@ export function AddTransactionDialog({
 
             {error && <p className="text-xs text-expense-fg">{error}</p>}
 
-            {/* Footer: sticky su mobile, normale su desktop */}
-            <div className="sticky bottom-0 -mx-5 -mb-5 bg-surface-0 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
+            {/* Footer: sempre in fondo al dialog */}
+            <div className="mt-auto -mx-5 -mb-5 bg-surface-1 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
               <div className="flex justify-end gap-2">
                 <Button
                   type="button"

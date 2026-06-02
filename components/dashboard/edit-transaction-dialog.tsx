@@ -110,7 +110,7 @@ export function EditTransactionDialog({
           <DialogTitle>Modifica transazione</DialogTitle>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="flex flex-1 flex-col gap-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-2">
               Tipo <span className="text-expense-fg">*</span>
@@ -229,7 +229,7 @@ export function EditTransactionDialog({
 
           {error && <p className="text-xs text-expense-fg">{error}</p>}
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="mt-auto flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"

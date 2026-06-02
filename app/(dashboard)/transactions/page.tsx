@@ -78,7 +78,7 @@ export default async function TransactionsPage({
       </div>
 
       <div className="flex items-start gap-3">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <TransactionsFilters
             q={q}
             from={from}
