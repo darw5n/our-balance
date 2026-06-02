@@ -35,8 +35,13 @@ function getDateLabel(dateStr: string | null | undefined): string {
   if (date.toDateString() === today.toDateString()) return "OGGI"
   if (date.toDateString() === yesterday.toDateString()) return "IERI"
 
+  const isCurrentYear = date.getFullYear() === today.getFullYear()
   return date
-    .toLocaleDateString("it-IT", { day: "numeric", month: "short" })
+    .toLocaleDateString("it-IT", {
+      day: "numeric",
+      month: "short",
+      ...(isCurrentYear ? {} : { year: "numeric" }),
+    })
     .replace(".", "")
     .toUpperCase()
 }
@@ -46,12 +51,13 @@ function groupByDate(transactions: Transaction[]): { label: string; transactions
   const seen = new Map<string, number>()
 
   for (const tx of transactions) {
+    const key = tx.date ?? "no-date"
     const label = getDateLabel(tx.date)
-    if (!seen.has(label)) {
-      seen.set(label, groups.length)
+    if (!seen.has(key)) {
+      seen.set(key, groups.length)
       groups.push({ label, transactions: [] })
     }
-    groups[seen.get(label)!].transactions.push(tx)
+    groups[seen.get(key)!].transactions.push(tx)
   }
   return groups
 }

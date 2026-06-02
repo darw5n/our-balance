@@ -56,11 +56,11 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
 
       {/* Advanced filters — expandable panel */}
       {filtersOpen && (
-        <div className="flex flex-wrap items-center gap-2 rounded-[18px] border border-border-subtle bg-surface-1 p-3">
-          <DateInput name="from" value={fromDate} onChange={setFromDate} className="h-8 flex-1 min-w-[130px] text-xs" />
-          <DateInput name="to" value={toDate} onChange={setToDate} className="h-8 flex-1 min-w-[130px] text-xs" />
+        <div className="grid grid-cols-2 gap-2 rounded-[18px] border border-border-subtle bg-surface-1 p-3">
+          <DateInput name="from" value={fromDate} onChange={setFromDate} className="h-8 w-full text-xs" />
+          <DateInput name="to" value={toDate} onChange={setToDate} className="h-8 w-full text-xs" />
 
-          <div className="relative flex-1 min-w-[160px]">
+          <div className="relative col-span-2">
             <select
               name="category"
               defaultValue={category}
@@ -78,7 +78,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
 
           <button
             type="submit"
-            className="h-8 rounded-full bg-accent-brand px-4 font-sans text-xs font-medium text-white transition-colors hover:opacity-90"
+            className="col-span-2 h-8 rounded-full bg-accent-brand px-4 font-sans text-xs font-medium text-white transition-colors hover:opacity-90"
           >
             Applica
           </button>
@@ -86,7 +86,7 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
           {hasReset && (
             <a
               href="/transactions"
-              className="flex h-8 items-center gap-1 rounded-full border border-border-subtle px-3 font-sans text-xs text-text-2 transition-colors hover:text-text-1"
+              className="col-span-2 flex h-8 items-center justify-center gap-1 rounded-full border border-border-subtle px-3 font-sans text-xs text-text-2 transition-colors hover:text-text-1"
             >
               <X className="h-3 w-3" />
               Reset
