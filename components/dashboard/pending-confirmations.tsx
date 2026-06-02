@@ -31,7 +31,7 @@ function getPendingDate(nextDueDate: string, frequency: string): string {
 }
 
 function PendingItem({ item }: { item: RecurringTransaction }) {
-  const [amount, setAmount] = useState(String(item.amount))
+  const [amount, setAmount] = useState(() => String(item.amount).replace(".", ","))
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 

@@ -30,7 +30,7 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
 
   useEffect(() => {
     if (open && transaction) {
-      setAmount(transaction.amount != null ? String(Math.abs(transaction.amount)) : "")
+      setAmount(transaction.amount != null ? String(Math.abs(transaction.amount)).replace(".", ",") : "")
       const txDate = transaction.date ?? todayISO()
       setDate(txDate.slice(0, 10))
       setAmountError("")
