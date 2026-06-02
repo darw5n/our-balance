@@ -145,7 +145,8 @@ export function RecurringFormDialog({
           <DialogTitle>{isEdit ? "Modifica ricorrenza" : "Nuova ricorrenza"}</DialogTitle>
         </DialogHeader>
 
-        <form className="flex flex-1 flex-col gap-4" onSubmit={handleSubmit}>
+        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+        <div className="min-h-0 flex-1 overflow-y-auto space-y-4 pb-2">
           {/* Type */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-text-2">
@@ -334,8 +335,9 @@ export function RecurringFormDialog({
           </div>
 
           {error && <p className="text-xs text-expense-fg">{error}</p>}
+        </div>
 
-          <div className="mt-auto flex justify-end gap-2 pt-2">
+          <div className="flex flex-shrink-0 justify-end gap-2 border-t border-border-subtle -mx-5 px-5 py-4">
             <Button
               type="button"
               variant="outline"

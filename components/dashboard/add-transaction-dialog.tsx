@@ -274,7 +274,8 @@ export function AddTransactionDialog({
             <DialogTitle>Aggiungi transazione</DialogTitle>
           </DialogHeader>
 
-          <form className="flex flex-1 flex-col gap-4" onSubmit={handleSubmit}>
+          <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+          <div className="min-h-0 flex-1 overflow-y-auto space-y-4 pb-2">
             <div className="space-y-1">
               <label className="text-xs font-medium text-text-2" htmlFor="type">
                 Tipo <span className="text-expense-fg">*</span>
@@ -507,29 +508,29 @@ export function AddTransactionDialog({
               )}
             </div>
 
-            {error && <p className="text-xs text-expense-fg">{error}</p>}
+          </div>
 
-            {/* Footer: sempre in fondo al dialog */}
-            <div className="mt-auto -mx-5 -mb-5 bg-surface-1 px-5 pb-6 pt-3 sm:static sm:mx-0 sm:mb-0 sm:bg-transparent sm:pb-0 sm:pt-2">
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-3 hover:text-text-1"
-                  onClick={() => setOpen(false)}
-                  disabled={submitting}
-                >
-                  Annulla
-                </Button>
+            {error && <p className="flex-shrink-0 pt-1 text-xs text-expense-fg">{error}</p>}
 
-                <Button
-                  type="submit"
-                  className="bg-income text-zinc-950 hover:bg-income-fg"
-                  disabled={submitting}
-                >
-                  {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
-                </Button>
-              </div>
+            {/* Footer: sempre visibile, non scorre */}
+            <div className="flex flex-shrink-0 justify-end gap-2 border-t border-border-subtle -mx-5 px-5 py-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-3 hover:text-text-1"
+                onClick={() => setOpen(false)}
+                disabled={submitting}
+              >
+                Annulla
+              </Button>
+
+              <Button
+                type="submit"
+                className="bg-income text-zinc-950 hover:bg-income-fg"
+                disabled={submitting}
+              >
+                {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
+              </Button>
             </div>
           </form>
           </DialogContent>
