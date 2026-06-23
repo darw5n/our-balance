@@ -242,13 +242,20 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                     </div>
 
                     {/* Amount */}
-                    <span
-                      className={`flex-shrink-0 font-sans text-sm font-semibold ${
-                        tx.type === "income" ? "text-income-fg" : "text-text-1"
-                      }`}
-                    >
-                      {tx.type === "income" ? "+" : "−"}{formatCurrency(amount)}
-                    </span>
+                    <div className="flex flex-col items-end flex-shrink-0">
+                      <span
+                        className={`font-sans text-sm font-semibold ${
+                          tx.type === "income" ? "text-income-fg" : "text-text-1"
+                        }`}
+                      >
+                        {tx.type === "income" ? "+" : "−"}{formatCurrency(tx.scope === "family" ? amount * 0.5 : amount)}
+                      </span>
+                      {tx.scope === "family" && (
+                        <span className="text-[10px] text-text-3 font-normal mt-0.5">
+                          totale {formatCurrency(amount)}
+                        </span>
+                      )}
+                    </div>
 
                     {/* Actions dropdown */}
                     <DropdownMenu>

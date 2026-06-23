@@ -2,16 +2,25 @@ import { getBudgetsWithProgress } from "@/lib/supabase/queries/budgets"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { BudgetsList } from "@/components/dashboard/budgets-list"
 import { getServerUser } from "@/lib/supabase-server"
+import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
+import type { ViewMode } from "@/lib/supabase/queries/transactions"
 
-export default async function BudgetsPage() {
+export default async function BudgetsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ view?: string }>
+}) {
   const user = await getServerUser()
+  const params = await searchParams
+  const view = params?.view
+  const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
   if (!user) {
     return null
   }
 
   const [budgets, categories] = await Promise.all([
-    getBudgetsWithProgress(user.id),
+    getBudgetsWithProgress(user.id, viewMode),
     getCategories(user.id),
   ])
 
@@ -21,11 +30,13 @@ export default async function BudgetsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Budget</h1>
-        <p className="text-xs text-zinc-400">
+        <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">Budget</h1>
+        <p className="font-sans text-xs text-text-3 mt-1">
           Imposta limiti di spesa mensili per categoria e monitora i progressi.
         </p>
       </div>
+
+      <ViewModeSwitcher currentView={viewMode} basePath="/budgets" />
 
       <BudgetsList
         budgets={budgets}

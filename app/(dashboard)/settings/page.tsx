@@ -19,11 +19,11 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Impostazioni</h1>
-        <p className="text-xs text-zinc-400">Gestisci le integrazioni del tuo account.</p>
+        <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">Impostazioni</h1>
+        <p className="font-sans text-xs text-text-3 mt-1">Gestisci le integrazioni del tuo account.</p>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-zinc-900/50 p-5 backdrop-blur">
+      <div className="rounded-xl border border-border-subtle bg-surface-1/50 p-5 backdrop-blur">
         {configError ? (
           <p className="text-sm text-rose-400">
             Configurazione incompleta: <code className="text-xs">{configError}</code>

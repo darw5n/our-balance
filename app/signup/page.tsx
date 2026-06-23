@@ -110,28 +110,28 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-surface-0 px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-4">
-              <Mail className="h-8 w-8 text-emerald-400" />
+            <div className="rounded-full border border-income/30 bg-income-subtle p-4">
+              <Mail className="h-8 w-8 text-income-fg" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-zinc-50">Controlla la email</h1>
-              <p className="mt-2 text-sm text-zinc-400">
+              <h1 className="text-2xl font-bold tracking-tight text-text-1">Controlla la email</h1>
+              <p className="mt-2 text-sm text-text-2">
                 Abbiamo inviato un link di conferma a{" "}
-                <span className="font-medium text-zinc-200">{email}</span>.
+                <span className="font-medium text-text-1">{email}</span>.
               </p>
-              <p className="mt-1 text-sm text-zinc-400">
+              <p className="mt-1 text-sm text-text-2">
                 Clicca il link per attivare il tuo account.
               </p>
             </div>
           </div>
-          <div className="rounded-xl border border-white/10 bg-zinc-900/60 px-6 py-4 text-xs text-zinc-400 space-y-3">
+          <div className="rounded-xl border border-border-subtle bg-surface-1/60 px-6 py-4 text-xs text-text-2 space-y-3">
             <p>
               Non trovi la email? Controlla la cartella spam o{" "}
               <button
-                className="text-emerald-400 hover:text-emerald-300"
+                className="text-accent-brand font-medium hover:underline"
                 onClick={() => setSuccess(false)}
               >
                 riprova con un altro indirizzo
@@ -142,23 +142,23 @@ export default function SignupPage() {
               <button
                 onClick={handleResend}
                 disabled={resendCooldown > 0}
-                className="text-emerald-400 hover:text-emerald-300 disabled:text-zinc-600 disabled:cursor-not-allowed"
+                className="text-accent-brand font-medium hover:underline disabled:text-text-3 disabled:no-underline disabled:cursor-not-allowed"
               >
                 {resendSuccess ? "Reinvia di nuovo" : "Reinvia email"}
               </button>
               {resendCooldown > 0 && (
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-text-3">
                   Puoi richiedere un nuovo invio tra {resendCooldown}s
                 </p>
               )}
               {resendSuccess && resendCooldown === 0 && (
-                <p className="text-[11px] text-emerald-500">Email inviata ✓</p>
+                <p className="text-[11px] text-income-fg">Email inviata ✓</p>
               )}
             </div>
           </div>
           <button
             onClick={() => navigate("/login")}
-            className="inline-block text-xs text-zinc-400 hover:text-zinc-200"
+            className="inline-block text-xs text-text-3 hover:text-text-1"
           >
             ← Torna al login
           </button>
@@ -168,27 +168,27 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-surface-0 px-4">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-3">
-            <Wallet className="h-6 w-6 text-emerald-400" />
+          <div className="rounded-full border border-income/30 bg-income-subtle p-3">
+            <Wallet className="h-6 w-6 text-income-fg" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-50">Crea account</h1>
-            <p className="mt-1 text-sm text-zinc-400">Inizia a gestire le tue finanze gratis</p>
+            <h1 className="text-2xl font-bold tracking-tight text-text-1">Crea account</h1>
+            <p className="mt-1 text-sm text-text-2">Inizia a gestire le tue finanze gratis</p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="rounded-xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur">
+        <div className="rounded-xl border border-border-subtle bg-surface-1/60 p-6 backdrop-blur">
           {/* Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || submitting}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-md border border-border-subtle bg-surface-2 px-4 py-2.5 text-sm font-medium text-text-1 transition-colors hover:bg-surface-3 disabled:opacity-50"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -200,14 +200,14 @@ export default function SignupPage() {
           </button>
 
           <div className="my-4 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-zinc-500">oppure</span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-border-subtle" />
+            <span className="text-xs text-text-3">oppure</span>
+            <div className="h-px flex-1 bg-border-subtle" />
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="email">
+              <label className="text-xs font-medium text-text-2" htmlFor="email">
                 Email
               </label>
               <Input
@@ -223,7 +223,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="password">
+              <label className="text-xs font-medium text-text-2" htmlFor="password">
                 Password
               </label>
               <div className="relative">
@@ -241,7 +241,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-1"
                   aria-label={showPassword ? "Nascondi password" : "Mostra password"}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -250,7 +250,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="confirm-password">
+              <label className="text-xs font-medium text-text-2" htmlFor="confirm-password">
                 Conferma password
               </label>
               <div className="relative">
@@ -264,16 +264,16 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   className={`pr-10 ${
                     confirmPassword && confirmPassword !== password
-                      ? "border-rose-500/50 focus-visible:ring-rose-500/30"
+                      ? "border-expense/50 focus-visible:ring-expense/30"
                       : confirmPassword && confirmPassword === password
-                        ? "border-emerald-500/50 focus-visible:ring-emerald-500/30"
+                        ? "border-income/50 focus-visible:ring-income/30"
                         : ""
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-1"
                   aria-label={showConfirm ? "Nascondi password" : "Mostra password"}
                 >
                   {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -292,7 +292,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="w-full bg-accent-brand text-white hover:opacity-90"
               disabled={submitting}
             >
               {submitting ? "Creazione account..." : "Crea account"}
@@ -300,11 +300,11 @@ export default function SignupPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-zinc-400">
+        <p className="text-center text-xs text-text-2">
           Hai già un account?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
+            className="text-accent-brand font-medium underline-offset-2 hover:underline"
           >
             Accedi
           </button>

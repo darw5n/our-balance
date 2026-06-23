@@ -385,8 +385,9 @@ export async function getRecentTransactions(
     .select("id, description, amount, type, date, scope, categories(*)")
     .eq("user_id", userId)
 
-  if (viewMode === "personal") query = query.eq("scope", "personal")
-  if (viewMode === "family") query = query.eq("scope", "family")
+  if (viewMode === "family") {
+    query = query.eq("scope", "family")
+  }
 
   const { data, error } = await query
     .order("date", { ascending: false })
@@ -397,10 +398,12 @@ export async function getRecentTransactions(
 
   return (data as unknown as RecentTransactionRow[]).map(row => {
     const cat = resolveJoin<{ name: string | null; emoji: string | null; color: string | null }>(row.categories)
+    const rawAmount = row.amount != null ? Math.abs(row.amount) : null
+    const amount = (rawAmount != null && viewMode === "personal" && row.scope === "family") ? rawAmount * 0.5 : rawAmount
     return {
       id: row.id,
       description: row.description,
-      amount: row.amount,
+      amount: amount,
       type: row.type,
       date: row.date,
       scope: row.scope,

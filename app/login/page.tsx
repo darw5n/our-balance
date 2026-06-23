@@ -62,27 +62,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-surface-0 px-4">
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 p-3">
-            <Wallet className="h-6 w-6 text-emerald-400" />
+          <div className="rounded-full border border-income/30 bg-income-subtle p-3">
+            <Wallet className="h-6 w-6 text-income-fg" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-50">Bentornato</h1>
-            <p className="mt-1 text-sm text-zinc-400">Accedi al tuo account OurBalance</p>
+            <h1 className="text-2xl font-bold tracking-tight text-text-1">Bentornato</h1>
+            <p className="mt-1 text-sm text-text-2">Accedi al tuo account OurBalance</p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="rounded-xl border border-white/10 bg-zinc-900/60 p-6 backdrop-blur">
+        <div className="rounded-xl border border-border-subtle bg-surface-1/60 p-6 backdrop-blur">
           {/* Google */}
           <button
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading || submitting}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-md border border-border-subtle bg-surface-2 px-4 py-2.5 text-sm font-medium text-text-1 transition-colors hover:bg-surface-3 disabled:opacity-50"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -94,14 +94,14 @@ export default function LoginPage() {
           </button>
 
           <div className="my-4 flex items-center gap-3">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-zinc-500">oppure</span>
-            <div className="h-px flex-1 bg-white/10" />
+            <div className="h-px flex-1 bg-border-subtle" />
+            <span className="text-xs text-text-3">oppure</span>
+            <div className="h-px flex-1 bg-border-subtle" />
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="email">
+              <label className="text-xs font-medium text-text-2" htmlFor="email">
                 Email
               </label>
               <Input
@@ -117,7 +117,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-300" htmlFor="password">
+              <label className="text-xs font-medium text-text-2" htmlFor="password">
                 Password
               </label>
               <div className="relative">
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-1"
                   aria-label={showPassword ? "Nascondi password" : "Mostra password"}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -150,7 +150,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+              className="w-full bg-accent-brand text-white hover:opacity-90"
               disabled={submitting}
             >
               {submitting ? "Accesso in corso..." : "Accedi"}
@@ -158,11 +158,11 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-zinc-400">
+        <p className="text-center text-xs text-text-2">
           Non hai un account?{" "}
           <button
             onClick={() => navigate("/signup")}
-            className="text-emerald-400 underline-offset-2 hover:text-emerald-300 hover:underline"
+            className="text-accent-brand font-medium underline-offset-2 hover:underline"
           >
             Registrati gratis
           </button>

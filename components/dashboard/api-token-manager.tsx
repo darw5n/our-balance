@@ -55,12 +55,12 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
     <div className="space-y-6">
       {/* Intestazione sezione */}
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-zinc-800">
-          <Bot className="h-4 w-4 text-violet-400" />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-2">
+          <Bot className="h-4 w-4 text-shared" />
         </div>
         <div>
-          <h2 className="text-sm font-medium text-zinc-100">Claude MCP</h2>
-          <p className="mt-0.5 text-xs text-zinc-400">
+          <h2 className="text-sm font-medium text-text-1">Claude MCP</h2>
+          <p className="mt-0.5 text-xs text-text-2">
             Collega il tuo account OurBalance a Claude.ai per aggiungere transazioni
             direttamente dalla chat, caricando la foto di uno scontrino.
           </p>
@@ -70,9 +70,9 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
       {/* URL personale con token incorporato */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium text-zinc-400">Il tuo URL MCP personale</p>
+          <p className="text-xs font-medium text-text-2">Il tuo URL MCP personale</p>
           {info && (
-            <span className="text-[10px] text-zinc-600">
+            <span className="text-[10px] text-text-3">
               Creato il{" "}
               {new Date(info.created_at).toLocaleDateString("it-IT", {
                 day: "2-digit",
@@ -85,13 +85,13 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
 
         {revealedToken ? (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-3 py-2">
-              <code className="flex-1 truncate text-xs text-emerald-300">
+            <div className="flex items-center gap-2 rounded-lg border border-income/30 bg-income-subtle px-3 py-2">
+              <code className="flex-1 truncate text-xs text-income-fg">
                 {mcpUrl}/{revealedToken}
               </code>
               <button
                 onClick={() => handleCopy(`${mcpUrl}/${revealedToken}`, "url")}
-                className="shrink-0 text-emerald-500 transition-colors hover:text-emerald-300"
+                className="shrink-0 text-income-fg transition-colors hover:opacity-80"
                 aria-label="Copia URL"
               >
                 {copied === "url" ? (
@@ -101,16 +101,16 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
                 )}
               </button>
             </div>
-            <p className="text-[10px] text-amber-400/80">
+            <p className="text-[10px] text-pending-fg">
               Copia questo URL ora e incollalo in Claude.ai — non sarà più visibile dopo aver lasciato la pagina.
             </p>
           </div>
         ) : info ? (
-          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-900/50 px-3 py-2">
-            <code className="flex-1 text-xs text-zinc-600">{mcpUrl}/ob_••••••••••••••••••••••••</code>
+          <div className="flex items-center gap-2 rounded-lg border border-border-subtle bg-surface-2 px-3 py-2">
+            <code className="flex-1 text-xs text-text-3">{mcpUrl}/ob_••••••••••••••••••••••••</code>
           </div>
         ) : (
-          <p className="text-xs text-zinc-500">Genera un token per ottenere il tuo URL personale.</p>
+          <p className="text-xs text-text-3">Genera un token per ottenere il tuo URL personale.</p>
         )}
       </div>
 
@@ -120,7 +120,7 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
           size="sm"
           onClick={handleGenerate}
           disabled={isPending}
-          className="bg-violet-600 text-zinc-50 hover:bg-violet-500"
+          className="bg-shared text-white hover:opacity-90"
         >
           <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
           {info ? "Rigenera token" : "Genera token"}
@@ -132,7 +132,7 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
             variant="outline"
             onClick={handleRevoke}
             disabled={isPending}
-            className="border-white/15 bg-transparent text-zinc-400 hover:border-rose-500/50 hover:text-rose-400"
+            className="border-border-subtle bg-transparent text-text-2 hover:border-expense/50 hover:text-expense-fg"
           >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
             Revoca
@@ -143,21 +143,21 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
       {error && <p className="text-xs text-rose-400">{error}</p>}
 
       {/* Istruzioni */}
-      <div className="rounded-xl border border-white/10 bg-zinc-900/30 p-4 space-y-3">
-        <p className="text-xs font-medium text-zinc-300">Come configurare Claude.ai</p>
-        <ol className="space-y-1.5 text-xs text-zinc-400">
+      <div className="rounded-xl border border-border-subtle bg-surface-2/30 p-4 space-y-3">
+        <p className="text-xs font-medium text-text-1">Come configurare Claude.ai</p>
+        <ol className="space-y-1.5 text-xs text-text-2">
           <li>1. Genera il token e copia il tuo URL personale</li>
           <li>
             2. Apri{" "}
-            <span className="text-zinc-300">Claude.ai → Impostazioni → Integrazioni</span>
+            <span className="text-text-1">Claude.ai → Impostazioni → Integrazioni</span>
           </li>
           <li>
-            3. Clicca <span className="text-zinc-300">Aggiungi connettore personalizzato</span>
+            3. Clicca <span className="text-text-1">Aggiungi connettore personalizzato</span>
           </li>
           <li>4. Incolla l&apos;URL nel campo apposito (lascia OAuth vuoto)</li>
           <li>
             5. Carica la foto di uno scontrino in chat e scrivi:{" "}
-            <span className="italic text-zinc-300">&quot;Aggiungi questa spesa a OurBalance&quot;</span>
+            <span className="italic text-text-1">&quot;Aggiungi questa spesa a OurBalance&quot;</span>
           </li>
         </ol>
       </div>

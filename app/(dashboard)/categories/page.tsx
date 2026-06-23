@@ -25,8 +25,8 @@ export default async function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Categorie</h1>
-        <p className="text-xs text-zinc-400">
+        <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">Categorie</h1>
+        <p className="font-sans text-xs text-text-3 mt-1">
           Gestisci le categorie per classificare le tue transazioni (es. Alimentari, Trasporti).
         </p>
       </div>

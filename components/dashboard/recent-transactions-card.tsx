@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Users } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import type { RecentTransaction } from "@/lib/supabase/queries/transactions"
@@ -40,8 +41,19 @@ export function RecentTransactionsCard({ transactions }: { transactions: RecentT
                 <p className="font-sans text-sm font-medium text-text-1 truncate">
                   {tx.description || tx.category_name || "Transazione"}
                 </p>
-                <p className="font-sans text-[11px] text-text-3 mt-0.5">
-                  {tx.category_name ?? "—"} · {time}
+                <p className="font-sans text-[11px] text-text-3 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span>{tx.category_name ?? "—"}</span>
+                  <span>·</span>
+                  <span>{time}</span>
+                  {tx.scope === "family" && (
+                    <>
+                      <span>·</span>
+                      <span className="inline-flex items-center gap-0.5 text-shared font-medium">
+                        <Users className="h-2.5 w-2.5" />
+                        comune
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
               {/* Amount */}
