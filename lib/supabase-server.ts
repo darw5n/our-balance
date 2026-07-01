@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
+import { cache } from "react"
 
 /**
  * Crea un Supabase client server-side con gestione corretta dei cookie
@@ -32,10 +33,15 @@ export async function createSupabaseServerClient() {
 }
 
 /**
- * Ottiene l'utente autenticato dal server
- * Restituisce null se non autenticato
+ * Ottiene l'utente autenticato dal server.
+ * Restituisce null se non autenticato.
+ *
+ * Avvolto in `cache()` di React: `supabase.auth.getUser()` fa una richiesta
+ * di rete per validare il token, e questa funzione viene chiamata sia nel
+ * layout che nella pagina. `cache()` deduplica le chiamate nella stessa
+ * richiesta server, evitando round-trip di rete ripetuti a ogni navigazione.
  */
-export async function getServerUser() {
+export const getServerUser = cache(async () => {
   try {
     const supabase = await createSupabaseServerClient()
     const {
@@ -53,4 +59,4 @@ export async function getServerUser() {
     console.error("[getServerUser] Unexpected error:", error)
     return null
   }
-}
+})
