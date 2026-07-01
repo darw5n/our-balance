@@ -192,7 +192,50 @@ export async function confirmTransaction(
   amount: number,
   date: string
 ): Promise<TransactionActionResult> {
-  return updateTransaction(id, { status: "confirmed", amount, date })
+  const result = await updateTransaction(id, { status: "confirmed", amount, date })
+  if (!result.success) return result
+
+  // Clear pending_confirmation on any matching recurring_transaction so the
+  // dashboard no longer shows it as pending after early confirmation from
+  // the transactions page.
+  try {
+    const user = await getServerUser()
+    if (!user?.id) return result
+
+    const supabase = await createSupabaseServerClient()
+
+    // Fetch the confirmed transaction to get description + type for matching
+    const { data: tx } = await supabase
+      .from("transactions")
+      .select("description, type")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single()
+
+    if (tx) {
+      let query = supabase
+        .from("recurring_transactions")
+        .update({ pending_confirmation: false })
+        .eq("user_id", user.id)
+        .eq("pending_confirmation", true)
+        .eq("is_active", true)
+        .eq("type", tx.type)
+
+      if (tx.description) {
+        query = query.eq("description", tx.description)
+      } else {
+        query = query.is("description", null)
+      }
+
+      await query
+    }
+  } catch (err) {
+    // Non-critical: log but don't fail the confirmation
+    console.error("[confirmTransaction] Error clearing pending_confirmation:", err)
+  }
+
+  revalidatePath("/dashboard")
+  return result
 }
 
 export async function bulkDeleteTransactions(ids: string[]): Promise<TransactionActionResult> {

@@ -85,9 +85,8 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
             <label className="text-xs font-medium text-text-2">Importo</label>
             <div className="relative">
               <Input
-                type="number"
-                step="0.01"
-                min="0.01"
+                type="text"
+                inputMode="decimal"
                 value={amount}
                 onChange={(e) => { setAmount(e.target.value); setAmountError("") }}
                 placeholder="0,00"
