@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { formatCurrency } from "@/lib/utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
 import { EditTransactionDialog, type Transaction } from "@/components/dashboard/edit-transaction-dialog"
@@ -78,6 +79,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   const [confirmingTx, setConfirmingTx] = useState<Transaction | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [mobileActionsTx, setMobileActionsTx] = useState<Transaction | null>(null)
 
   const allSelected = transactions.length > 0 && selected.size === transactions.length
 
@@ -257,43 +259,57 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                       )}
                     </div>
 
-                    {/* Actions dropdown */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 flex-shrink-0 text-text-3 hover:text-text-1"
-                          aria-label="Azioni"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="min-w-[140px]">
-                        <DropdownMenuItem onClick={() => handleEdit(tx)}>
-                          <Pencil className="mr-2 h-3.5 w-3.5" />
-                          Modifica
-                        </DropdownMenuItem>
-                        {tx.status === "pending" && (
-                          <DropdownMenuItem
-                            onClick={() => handleConfirmTx(tx)}
-                            className="text-income-fg focus:text-income-fg"
+                    {/* Actions Trigger */}
+                    {/* Desktop dropdown */}
+                    <div className="hidden md:block">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 flex-shrink-0 text-text-3 hover:text-text-1"
+                            aria-label="Azioni"
                           >
-                            <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                            Conferma
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-[140px]">
+                          <DropdownMenuItem onClick={() => handleEdit(tx)}>
+                            <Pencil className="mr-2 h-3.5 w-3.5" />
+                            Modifica
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(tx)}
-                          disabled={deleting}
-                          className="text-expense-fg focus:text-expense-fg"
-                        >
-                          <Trash2 className="mr-2 h-3.5 w-3.5" />
-                          Elimina
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          {tx.status === "pending" && (
+                            <DropdownMenuItem
+                              onClick={() => handleConfirmTx(tx)}
+                              className="text-income-fg focus:text-income-fg"
+                            >
+                              <CheckCircle className="mr-2 h-3.5 w-3.5" />
+                              Conferma
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(tx)}
+                            disabled={deleting}
+                            className="text-expense-fg focus:text-expense-fg"
+                          >
+                            <Trash2 className="mr-2 h-3.5 w-3.5" />
+                            Elimina
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {/* Mobile bottom-sheet trigger */}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="md:hidden h-7 w-7 flex-shrink-0 text-text-3 hover:text-text-1"
+                      aria-label="Azioni"
+                      onClick={() => setMobileActionsTx(tx)}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
                 )
               })}
@@ -322,6 +338,81 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
         transaction={confirmingTx}
         onSuccess={() => router.refresh()}
       />
+
+      {/* Mobile actions bottom sheet */}
+      <Dialog open={!!mobileActionsTx} onOpenChange={(open) => { if (!open) setMobileActionsTx(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="truncate text-base font-semibold">
+              {mobileActionsTx?.description || (mobileActionsTx?.type === "income" ? "Entrata" : "Uscita")}
+            </DialogTitle>
+            <p className="text-xs text-text-3 font-medium mt-1">
+              {mobileActionsTx && (() => {
+                const rawAmount = mobileActionsTx.amount ?? 0
+                const displayAmount = mobileActionsTx.scope === "family" ? rawAmount * 0.5 : rawAmount
+                return (
+                  <span>
+                    {formatCurrency(displayAmount)}
+                    {mobileActionsTx.scope === "family" && (
+                      <span className="text-[10px] text-text-3 opacity-80 block mt-0.5">
+                        (totale in comune: {formatCurrency(rawAmount)})
+                      </span>
+                    )}
+                  </span>
+                )
+              })()}
+            </p>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start h-12 rounded-xl text-sm border-border-subtle bg-surface-2 hover:bg-surface-hover text-text-1"
+              onClick={() => {
+                if (mobileActionsTx) handleEdit(mobileActionsTx)
+                setMobileActionsTx(null)
+              }}
+            >
+              <Pencil className="mr-2.5 h-4 w-4 text-text-2" />
+              Modifica transazione
+            </Button>
+
+            {mobileActionsTx?.status === "pending" && (
+              <Button
+                variant="outline"
+                className="w-full justify-start h-12 rounded-xl text-sm border-income/30 bg-income-subtle hover:bg-income-subtle/80 text-income-fg"
+                onClick={() => {
+                  if (mobileActionsTx) handleConfirmTx(mobileActionsTx)
+                  setMobileActionsTx(null)
+                }}
+              >
+                <CheckCircle className="mr-2.5 h-4 w-4" />
+                Conferma transazione
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              className="w-full justify-start h-12 rounded-xl text-sm border-expense/30 bg-expense-subtle hover:bg-expense-subtle/80 text-expense-fg"
+              onClick={() => {
+                if (mobileActionsTx) handleDelete(mobileActionsTx)
+                setMobileActionsTx(null)
+              }}
+              disabled={deleting}
+            >
+              <Trash2 className="mr-2.5 h-4 w-4" />
+              Elimina transazione
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full h-11 rounded-xl text-sm text-text-3 hover:text-text-1 mt-1"
+              onClick={() => setMobileActionsTx(null)}
+            >
+              Annulla
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
