@@ -31,21 +31,23 @@ const DialogContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      className={cn(
-        "fixed inset-0 z-50 flex items-stretch justify-center md:items-center md:px-4",
-        "data-[state=closed]:animate-out data-[state=open]:animate-in",
-        className
-      )}
-      {...props}
-    >
-      <div className="flex w-full flex-1 flex-col rounded-none border-0 bg-surface-1 text-text-1 shadow-xl md:max-h-[85vh] md:flex-none md:max-w-lg md:rounded-xl md:border md:border-border-subtle md:backdrop-blur">
-        <div className="flex min-h-0 flex-1 flex-col px-5 pt-5">
+    <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center pointer-events-none">
+      <DialogPrimitive.Content
+        ref={ref}
+        className={cn(
+          "pointer-events-auto flex w-full max-w-full md:max-w-lg flex-col rounded-t-[24px] border-t border-x border-border-subtle bg-surface-1 text-text-1 shadow-2xl outline-none max-h-[90vh] md:max-h-[85vh]",
+          "data-[state=open]:animate-slide-in-bottom data-[state=closed]:animate-slide-out-bottom",
+          className
+        )}
+        {...props}
+      >
+        {/* Drag Handle Indicator */}
+        <div className="w-12 h-1.5 rounded-full bg-border-strong/20 mx-auto my-3 flex-shrink-0" />
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-6 md:pb-8 overflow-y-auto">
           {children}
         </div>
-      </div>
-    </DialogPrimitive.Content>
+      </DialogPrimitive.Content>
+    </div>
   </DialogPortal>
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName

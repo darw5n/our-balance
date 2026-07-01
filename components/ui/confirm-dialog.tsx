@@ -46,12 +46,12 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <DialogHeader>
               <DialogTitle>{pending.options.title ?? "Conferma"}</DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-zinc-300">{pending.options.message}</p>
+            <p className="text-sm text-text-2">{pending.options.message}</p>
             <div className="mt-5 flex justify-end gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/15 bg-transparent text-zinc-300 hover:bg-white/5"
+                className="border-border-subtle bg-transparent text-text-2 hover:bg-surface-hover"
                 onClick={() => handleClose(false)}
               >
                 Annulla
@@ -60,8 +60,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 size="sm"
                 className={
                   pending.options.destructive
-                    ? "bg-rose-500 text-white hover:bg-rose-400"
-                    : "bg-emerald-500 text-zinc-950 hover:bg-emerald-400"
+                    ? "bg-expense text-white hover:opacity-90"
+                    : "bg-accent-brand text-white hover:opacity-90"
                 }
                 onClick={() => handleClose(true)}
               >
