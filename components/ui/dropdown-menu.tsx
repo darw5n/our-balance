@@ -44,7 +44,7 @@ function DropdownMenuContent({
         className={cn(
           "z-50 max-h-(--radix-dropdown-menu-content-available-height) min-w-[8rem] origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           // Mobile Bottom Sheet Action Sheet styling
-          "max-md:!fixed max-md:!bottom-0 max-md:!left-0 max-md:!right-0 max-md:!top-auto max-md:!z-50 max-md:!flex max-md:!w-full max-md:!max-w-none max-md:!flex-col max-md:!rounded-t-[24px] max-md:!rounded-b-none max-md:!border-t max-md:!border-x-0 max-md:!border-b-0 max-md:!bg-surface-1 max-md:!p-4 max-md:!pb-safe-nav max-md:!shadow-2xl max-md:!max-h-[70vh] max-md:data-[state=open]:!animate-slide-in-bottom max-md:data-[state=closed]:!animate-slide-out-bottom",
+          "max-md:!fixed max-md:!bottom-0 max-md:!left-0 max-md:!right-0 max-md:!top-auto max-md:!transform-none max-md:!z-50 max-md:!flex max-md:!w-full max-md:!max-w-none max-md:!flex-col max-md:!rounded-t-[24px] max-md:!rounded-b-none max-md:!border-t max-md:!border-x-0 max-md:!border-b-0 max-md:!bg-surface-1 max-md:!p-4 max-md:!pb-safe-nav max-md:!shadow-2xl max-md:!max-h-[70vh] max-md:data-[state=open]:!animate-slide-in-bottom max-md:data-[state=closed]:!animate-slide-out-bottom",
           className
         )}
         {...props}
