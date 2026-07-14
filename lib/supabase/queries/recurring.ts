@@ -1,5 +1,6 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
+import { rewindDate, pendingTransactionDate } from "@/lib/supabase/query-utils"
 
 export type RecurringTransaction = {
   id: string
@@ -92,11 +93,34 @@ export const getPendingConfirmations = cache(async function getPendingConfirmati
     return []
   }
 
-  return (data ?? []).map((row) => {
+  return Promise.all((data ?? []).map(async (row) => {
     const cat = Array.isArray(row.categories) ? row.categories[0] : row.categories
-    return {
+    const mapped = {
       ...row,
       category: cat ? { name: (cat as { name: string }).name, color: (cat as { color: string }).color } : null,
+    } as RecurringTransaction
+
+    // Show the live amount from the actual pending transaction, in case the
+    // user already edited it from the Transactions page before this
+    // confirmation prompt appeared — avoids re-showing a stale template amount.
+    const dueDate = rewindDate(mapped.next_due_date, mapped.frequency)
+    const pendingDate = pendingTransactionDate(dueDate, mapped.type)
+    let pendingTxQuery = supabase
+      .from("transactions")
+      .select("amount")
+      .eq("user_id", userId)
+      .eq("date", pendingDate)
+      .eq("status", "pending")
+      .eq("type", mapped.type)
+      .limit(1)
+    pendingTxQuery = mapped.description
+      ? pendingTxQuery.eq("description", mapped.description)
+      : pendingTxQuery.is("description", null)
+    const { data: pendingTx } = await pendingTxQuery
+
+    if (pendingTx?.[0]?.amount != null) {
+      mapped.amount = pendingTx[0].amount
     }
-  }) as RecurringTransaction[]
+    return mapped
+  }))
 })
