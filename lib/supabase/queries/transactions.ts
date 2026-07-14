@@ -413,3 +413,34 @@ export async function getRecentTransactions(
     }
   })
 }
+
+/**
+ * Anni per cui l'utente ha almeno una transazione, dal più recente al più vecchio.
+ * Usato per popolare i selettori di anno del confronto. Se non ci sono transazioni,
+ * restituisce solo l'anno corrente.
+ */
+export const getTransactionYears = cache(async function getTransactionYears(
+  userId: string
+): Promise<number[]> {
+  const currentYear = new Date().getUTCFullYear()
+  if (!userId) return [currentYear]
+
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase
+    .from("transactions")
+    .select("date")
+    .eq("user_id", userId)
+    .order("date", { ascending: true })
+    .limit(1)
+
+  if (error || !data || data.length === 0 || !data[0].date) {
+    return [currentYear]
+  }
+
+  const firstYear = new Date(data[0].date as string).getUTCFullYear()
+  const startYear = Number.isFinite(firstYear) ? Math.min(firstYear, currentYear) : currentYear
+
+  const years: number[] = []
+  for (let y = currentYear; y >= startYear; y--) years.push(y)
+  return years
+})
