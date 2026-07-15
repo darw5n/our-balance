@@ -11,9 +11,10 @@ type Props = {
   to: string
   category: string
   categories: CategoryOption[]
+  actions?: React.ReactNode
 }
 
-export function TransactionsFilters({ q, from, to, category, categories }: Props) {
+export function TransactionsFilters({ q, from, to, category, categories, actions }: Props) {
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [fromDate, setFromDate] = useState(from)
   const [toDate, setToDate] = useState(to)
@@ -24,20 +25,20 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
     <form action="/transactions" method="get" className="space-y-2">
       {/* Search bar + Filtra pill */}
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5">
           <Search className="h-4 w-4 flex-shrink-0 text-text-3" />
           <input
             type="search"
             name="q"
             defaultValue={q}
             placeholder="Cerca movimenti..."
-            className="flex-1 bg-transparent font-sans text-sm text-text-1 outline-none placeholder:text-text-3"
+            className="min-w-0 flex-1 bg-transparent font-sans text-sm text-text-1 outline-none placeholder:text-text-3"
           />
         </div>
         <button
           type="button"
           onClick={() => setFiltersOpen((v) => !v)}
-          className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-4 py-2.5 font-sans text-sm font-medium transition-all duration-200 ${
+          className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 sm:px-4 ${
             filtersOpen || activeFilterCount > 0
               ? "border-accent-brand bg-accent-brand-bg text-accent-brand"
               : "border-border-subtle bg-surface-1 text-text-2 hover:text-text-1"
@@ -45,13 +46,14 @@ export function TransactionsFilters({ q, from, to, category, categories }: Props
           aria-label="Filtri avanzati"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
-          Filtra
+          <span className="hidden sm:inline">Filtra</span>
           {activeFilterCount > 0 && (
             <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent-brand text-[9px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
         </button>
+        {actions}
       </div>
 
       {/* Advanced filters — expandable panel */}

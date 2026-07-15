@@ -138,18 +138,14 @@ export default async function TransactionsPage({
     <div className="space-y-6">
       {header}
 
-      <div className="flex items-start gap-3">
-        <div className="min-w-0 flex-1">
-          <TransactionsFilters
-            q={q}
-            from={from}
-            to={to}
-            category={category}
-            categories={categories as CategoryOption[]}
-          />
-        </div>
-        <ExportCsvButton transactions={transactions} categories={categories as CategoryOption[]} />
-      </div>
+      <TransactionsFilters
+        q={q}
+        from={from}
+        to={to}
+        category={category}
+        categories={categories as CategoryOption[]}
+        actions={<ExportCsvButton transactions={transactions} categories={categories as CategoryOption[]} />}
+      />
 
       {hasFilters && (
         <TransactionsSummary income={totalIncome} expense={totalExpense} count={transactions.length} />
