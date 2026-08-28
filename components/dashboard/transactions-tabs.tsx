@@ -47,7 +47,7 @@ export function TransactionsTabs({ active }: { active: string }) {
             aria-selected={isActive}
             prefetch
             scroll={false}
-            className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 ${
+            className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               isActive
                 ? "rounded-full bg-surface-1 text-text-1 shadow-sm"
                 : "rounded-[10px] bg-transparent text-text-3 hover:text-text-2"

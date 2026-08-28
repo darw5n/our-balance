@@ -82,27 +82,27 @@ function PendingItem({ item }: { item: RecurringTransaction }) {
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-24 flex-shrink-0 border-border-subtle bg-surface-0 text-sm text-text-1"
+            className="w-20 flex-shrink-0 border-border-subtle bg-surface-0 text-sm text-text-1"
             disabled={isPending}
             aria-label="Importo"
           />
           <Button
             size="sm"
-            className="flex-1 bg-income text-white hover:bg-income-fg"
+            className="min-w-0 flex-1 bg-income text-white hover:bg-income-fg"
             onClick={handleConfirm}
             disabled={isPending}
           >
-            <CheckCircle className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
+            <CheckCircle className="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 sm:inline-block" />
             Conferma
           </Button>
           <Button
             size="sm"
             variant="outline"
-            className="flex-1 border-border-subtle bg-transparent text-text-2 hover:text-text-1"
+            className="min-w-0 flex-1 border-border-subtle bg-transparent text-text-2 hover:text-text-1"
             onClick={handleSkip}
             disabled={isPending}
           >
-            <SkipForward className="mr-1.5 h-3.5 w-3.5 flex-shrink-0" />
+            <SkipForward className="mr-1.5 hidden h-3.5 w-3.5 flex-shrink-0 sm:inline-block" />
             Salta
           </Button>
         </div>

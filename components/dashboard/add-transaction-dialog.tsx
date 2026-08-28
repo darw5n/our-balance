@@ -255,7 +255,7 @@ export function AddTransactionDialog({
           {!isControlled && (
             <DialogTrigger asChild>
               <Button
-                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-income text-2xl font-semibold text-zinc-950 shadow-lg shadow-emerald-500/30 hover:bg-income-fg focus-visible:ring-emerald-300 md:bottom-6"
+                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-income text-2xl font-semibold text-white shadow-lg hover:bg-income-fg md:bottom-6"
                 size="icon"
               >
                 <Plus className="h-6 w-6" />
@@ -414,7 +414,7 @@ export function AddTransactionDialog({
                   role="switch"
                   aria-checked={isRecurring}
                   onClick={() => setIsRecurring((v) => !v)}
-                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 ${
+                  className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                     isRecurring ? "bg-income" : "bg-surface-3"
                   }`}
                 >

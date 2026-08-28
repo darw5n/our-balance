@@ -199,8 +199,8 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
       </button>
 
       {/* Bottom nav — mobile only, floating island pill with FAB in center */}
-      <nav className="md:hidden fixed z-40 bottom-6 left-1/2 -translate-x-1/2">
-        <div className="flex items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
+      <nav className="md:hidden fixed inset-x-0 z-40 bottom-6 flex justify-center px-3">
+        <div className="flex max-w-full items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
           {/* First 2 nav items */}
           {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
             const active = isActive(href)
@@ -208,7 +208,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                className={`flex flex-col items-center gap-[2px] rounded-full px-2 py-2 transition-all duration-200 ease-out ${
                   active ? "bg-accent-brand-bg" : ""
                 }`}
               >
@@ -229,7 +229,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
           <button
             onClick={() => setAddOpen(true)}
             aria-label="Aggiungi transazione"
-            className="mx-1 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95"
+            className="mx-0.5 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(200,90,58,0.4)] transition-all duration-200 active:scale-95"
             style={{ backgroundColor: "var(--accent-brand)" }}
           >
             <Plus className="h-[22px] w-[22px] stroke-[2.5]" />
@@ -242,7 +242,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-col items-center gap-[2px] rounded-full px-3.5 py-2 transition-all duration-200 ease-out ${
+                className={`flex flex-col items-center gap-[2px] rounded-full px-2 py-2 transition-all duration-200 ease-out ${
                   active ? "bg-accent-brand-bg" : ""
                 }`}
               >

@@ -365,8 +365,23 @@
   ::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 
+  html,
   body {
     overflow-x: clip;
+  }
+  body {
     @apply bg-background text-foreground;
+  }
+
+  /* ---- Focus visibile e coerente per i controlli di form ----
+     Usa `outline` (non box-shadow/ring): l'outline non viene ritagliato
+     dall'overflow degli antenati, quindi resta visibile anche sui lati
+     di input full-width dentro container con padding stretto.
+     offset negativo → la linea sta dentro il bordo, non tocca i vicini. */
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
   }
 }

@@ -152,8 +152,8 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
               const dimmed = isPaused || isEnded
               return (
               <li key={rec.id}>
-                <Card className={`flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur ${dimmed ? "opacity-60" : ""}`}>
-                  <div className="flex items-center gap-3 min-w-0">
+                <Card className={`flex items-center justify-between gap-2 border-border-subtle bg-surface-1/50 p-4 backdrop-blur ${dimmed ? "opacity-60" : ""}`}>
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     {(() => {
                       const cat = rec.category_id ? catMap.get(rec.category_id) : undefined
                       const hasEmoji = !!cat?.emoji
@@ -164,13 +164,17 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                         </div>
                       )
                     })()}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="font-sans text-sm font-medium text-text-1 truncate">
                         {rec.description || "Senza descrizione"}
                         {isPaused && <span className="ml-2 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-text-3">In pausa</span>}
                         {isEnded && <span className="ml-2 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-text-3">Conclusa</span>}
                       </p>
-                      <p className="font-sans text-[11px] text-text-3">
+                      <p className="font-sans text-[11px] text-text-3 truncate">
+                        <span className={`font-semibold ${rec.type === "income" ? "text-income-fg" : "text-accent-brand"}`}>
+                          {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
+                        </span>
+                        {" · "}
                         {FREQUENCY_LABEL[rec.frequency]}
                         {isEnded
                           ? rec.end_date ? ` · conclusa il ${formatDate(rec.end_date)}` : ""
@@ -178,10 +182,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 items-center gap-1 ml-2">
-                    <span className={`font-sans font-semibold text-sm mr-1 ${rec.type === "income" ? "text-income-fg" : "text-accent-brand"}`}>
-                      {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
-                    </span>
+                  <div className="flex shrink-0 items-center gap-0.5">
                     {isPaused ? (
                       <Button
                         variant="ghost"
