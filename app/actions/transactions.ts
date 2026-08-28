@@ -193,15 +193,22 @@ export async function confirmTransaction(
 
     const supabase = await createSupabaseServerClient()
 
-    // Fetch the confirmed transaction to get description + type for matching
+    // Fetch the confirmed transaction: prefer the explicit recurring link,
+    // fall back to (description, type) matching for pre-link rows.
     const { data: tx } = await supabase
       .from("transactions")
-      .select("description, type")
+      .select("description, type, recurring_id")
       .eq("id", id)
       .eq("user_id", user.id)
       .single()
 
-    if (tx) {
+    if (tx?.recurring_id) {
+      await supabase
+        .from("recurring_transactions")
+        .update({ pending_confirmation: false })
+        .eq("id", tx.recurring_id)
+        .eq("user_id", user.id)
+    } else if (tx) {
       let query = supabase
         .from("recurring_transactions")
         .update({ pending_confirmation: false })
