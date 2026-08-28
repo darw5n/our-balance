@@ -98,7 +98,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
   const userInitial = userName.charAt(0).toUpperCase()
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface-0 text-text-1">
+    <div className="relative flex min-h-screen flex-col overflow-x-clip bg-surface-0 text-text-1">
 
       {/* Top bar — sticky, full width, content centered */}
       <header className="sticky top-0 z-50 bg-surface-overlay backdrop-blur-xl border-b border-border-subtle">
@@ -198,8 +198,10 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
         <Plus className="h-6 w-6 stroke-[2.5]" />
       </button>
 
-      {/* Bottom nav — mobile only, floating island pill with FAB in center */}
-      <nav className="md:hidden fixed inset-x-0 z-40 bottom-6 flex justify-center px-3">
+      {/* Bottom nav — mobile only, floating island pill with FAB in center.
+          Centrata con left-1/2 + translate (niente `right`, che su iOS può
+          estendere il box e generare uno scroll orizzontale fantasma). */}
+      <nav className="md:hidden fixed left-1/2 z-40 bottom-6 flex max-w-[calc(100%-1.5rem)] -translate-x-1/2 justify-center">
         <div className="flex max-w-full items-center gap-0.5 rounded-full border border-border-subtle bg-surface-overlay px-1.5 py-1.5 backdrop-blur-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15),_0_2px_8px_rgba(0,0,0,0.08)]">
           {/* First 2 nav items */}
           {NAV_ITEMS.slice(0, 2).map(({ href, label, icon: Icon }) => {
