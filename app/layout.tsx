@@ -48,15 +48,25 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme")?.value;
-  const isDark = theme === "dark";
+  // 'dark' / 'light' sono decisi qui lato server. 'system' (o cookie assente)
+  // viene risolto dallo script inline sotto, prima del paint, per evitare il flash.
+  const explicitDark = theme === "dark";
+  const useSystem = theme !== "dark" && theme !== "light";
 
   return (
-    <html lang="it" className={isDark ? "dark" : ""} suppressHydrationWarning>
+    <html lang="it" className={explicitDark ? "dark" : ""} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#09090b" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        {useSystem && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `try{if(matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('dark')}catch(e){}`,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${lora.variable} ${dmSans.variable} ${geistMono.variable} antialiased`}

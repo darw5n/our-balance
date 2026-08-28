@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase"
 import { AddTransactionDialog } from "@/components/dashboard/add-transaction-dialog"
 import { DarkModeToggle } from "@/components/dashboard/dark-mode-toggle"
 import type { Category } from "@/lib/supabase/queries/categories"
+import type { Theme } from "@/lib/supabase/queries/user-settings"
 
 const NAV_ITEMS = [
   { href: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
@@ -37,14 +38,27 @@ type Props = {
   children: React.ReactNode
   userEmail: string | null
   categories: Category[]
+  theme: Theme
 }
 
-export function DashboardShell({ children, userEmail, categories }: Props) {
+export function DashboardShell({ children, userEmail, categories, theme }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [addOpen, setAddOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // Allinea il cookie del tema alla preferenza salvata (utile su un nuovo
+  // dispositivo dove il cookie non c'è ancora). Il DB è la fonte di verità.
+  useEffect(() => {
+    const cookieTheme = document.cookie.match(/(?:^|;\s*)theme=(light|dark|system)/)?.[1]
+    if (cookieTheme === theme) return
+    document.cookie = `theme=${theme}; path=/; max-age=${365 * 24 * 60 * 60}; SameSite=Lax`
+    const dark =
+      theme === "dark" ||
+      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches)
+    document.documentElement.classList.toggle("dark", dark)
+  }, [theme])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -119,7 +133,7 @@ export function DashboardShell({ children, userEmail, categories }: Props) {
 
           {/* Right: dark mode toggle + avatar */}
           <div className="flex items-center gap-2.5">
-            <DarkModeToggle />
+            <DarkModeToggle initialTheme={theme} />
 
             {/* Avatar — opens secondary dropdown */}
             <div className="relative" ref={menuRef}>

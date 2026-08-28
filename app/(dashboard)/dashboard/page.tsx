@@ -16,6 +16,7 @@ import {
   type ViewMode,
 } from "@/lib/supabase/queries/transactions"
 import { getPendingConfirmations, getUpcomingRecurring } from "@/lib/supabase/queries/recurring"
+import { getUserSettings } from "@/lib/supabase/queries/user-settings"
 import { processRecurringTransactions } from "@/app/actions/recurring"
 import { getServerUser } from "@/lib/supabase-server"
 import { formatCurrency } from "@/lib/utils"
@@ -26,8 +27,12 @@ export default async function DashboardPage({
   searchParams: Promise<{ view?: string }>
 }) {
   const { view } = await searchParams
-  const viewMode: ViewMode = view === "family" ? "family" : "personal"
   const user = await getServerUser()
+
+  // Se ?view= è assente si usa la preferenza dell'utente.
+  const defaultView = user ? (await getUserSettings(user.id)).defaultView : "personal"
+  const viewMode: ViewMode =
+    view === "family" ? "family" : view === "personal" ? "personal" : defaultView
 
   if (!user) {
     return (
