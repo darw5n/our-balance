@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState, useEffect, useRef } from "react"
 import {
   motion,
+  MotionConfig,
   useScroll,
   useTransform,
   useMotionValue,
@@ -16,16 +17,32 @@ import {
   BarChart2,
   ArrowLeftRight,
   Users,
-  TrendingUp,
+  Repeat,
   ShieldCheck,
   Heart,
   Banknote,
   Building2,
-  ShoppingBasket,
-  ChefHat,
-  Briefcase,
+  Wifi,
+  TrendingDown,
 } from "lucide-react"
 
+/* Palette — allineata ai token dark dell'app (terracotta, superfici calde). */
+const C = {
+  bg: "#141210",
+  surface1: "#1E1A17",
+  surface2: "#272320",
+  border: "rgba(255,255,255,0.08)",
+  text1: "#F0EDE8",
+  text2: "#9A8D85",
+  text3: "#6B5F57",
+  accent: "#D9674A",
+  income: "#4BAA7E",
+  expense: "#E05C6A",
+  heroA: "#2A1F1A",
+  heroB: "#3D2E28",
+}
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 
 /* ─────────────────────────────────────────
    FADE UP
@@ -37,10 +54,10 @@ function FadeUp({ children, delay = 0, className = "" }: {
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 32 }}
+      initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.6, delay, ease: EASE }}
       className={className}
     >
       {children}
@@ -49,17 +66,17 @@ function FadeUp({ children, delay = 0, className = "" }: {
 }
 
 /* ─────────────────────────────────────────
-   COUNTER ANIMATO
+   CONTATORE ANIMATO — formato valuta IT dell'app
 ───────────────────────────────────────── */
 function AnimatedCounter({ value }: { value: number }) {
   const motionVal = useMotionValue(0)
-  const spring = useSpring(motionVal, { stiffness: 50, damping: 16 })
+  const spring = useSpring(motionVal, { stiffness: 55, damping: 18 })
   const ref = useRef<HTMLSpanElement>(null)
-  const [display, setDisplay] = useState("+€0,00")
+  const [display, setDisplay] = useState("0,00 €")
 
   useEffect(() => {
     const unsub = spring.on("change", (v) =>
-      setDisplay(`+€${v.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`)
+      setDisplay(`${v.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`)
     )
     const observer = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) motionVal.set(value) },
@@ -73,14 +90,13 @@ function AnimatedCounter({ value }: { value: number }) {
 }
 
 /* ─────────────────────────────────────────
-   AREA CHART SVG (coerente con l'app)
+   MINI CASHFLOW — stile grafico "Netto" dell'app
 ───────────────────────────────────────── */
-const AREA_LINE = "M0,48 C8,44 14,36 24,32 C34,28 40,38 52,30 C64,22 70,14 82,16 C94,18 100,28 112,22 C124,16 130,8 142,10 C154,12 160,18 172,14 C184,10 192,6 200,8"
-const AREA_FILL = `${AREA_LINE} L200,60 L0,60 Z`
+const NET_LINE = "M0,44 C10,42 16,30 26,26 C36,22 42,32 54,24 C66,16 72,30 84,22 C96,14 102,6 114,10 C126,14 132,22 144,16 C156,10 164,14 176,8 C188,2 194,8 200,6"
 
-function AreaChartMock() {
+function CashflowMock() {
   const [drawn, setDrawn] = useState(false)
-  const ref = useRef<SVGPathElement>(null)
+  const ref = useRef<SVGSVGElement>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -92,57 +108,48 @@ function AreaChartMock() {
   }, [])
 
   return (
-    <div className="rounded-xl bg-zinc-800/50 p-4">
-      <p className="mb-3 text-[10px] font-medium text-zinc-500">Cashflow · ultimi 12 mesi</p>
-      <svg viewBox="0 0 200 60" className="w-full overflow-visible">
+    <div className="rounded-[14px] p-4" style={{ background: C.surface2 }}>
+      <p className="mb-3 font-mono text-[10px] uppercase tracking-wider" style={{ color: C.text3 }}>
+        Netto · ultimi 12 mesi
+      </p>
+      <svg ref={ref} viewBox="0 0 200 56" className="w-full overflow-visible">
         <defs>
-          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+          <linearGradient id="netGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={C.accent} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={C.accent} stopOpacity="0" />
           </linearGradient>
-          <clipPath id="areaClip">
+          <clipPath id="netClip">
             <motion.rect
-              x="0" y="0" height="60"
+              x="0" y="0" height="56"
               initial={{ width: 0 }}
               animate={{ width: drawn ? 200 : 0 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 1.1, ease: EASE }}
             />
           </clipPath>
         </defs>
-
-        {/* Area fill */}
-        <path d={AREA_FILL} fill="url(#areaGrad)" clipPath="url(#areaClip)" />
-
-        {/* Line */}
+        <path d={`${NET_LINE} L200,56 L0,56 Z`} fill="url(#netGrad)" clipPath="url(#netClip)" />
         <motion.path
-          ref={ref}
-          d={AREA_LINE}
+          d={NET_LINE}
           fill="none"
-          stroke="#10b981"
-          strokeWidth="1.5"
+          stroke={C.accent}
+          strokeWidth="1.6"
           strokeLinecap="round"
           strokeLinejoin="round"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: drawn ? 1 : 0, opacity: drawn ? 1 : 0 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: drawn ? 1 : 0 }}
+          transition={{ duration: 1.1, ease: EASE }}
         />
-
-        {/* Dot finale */}
         {drawn && (
           <motion.circle
-            cx="200" cy="8" r="3"
-            fill="#10b981"
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 1.1, duration: 0.3 }}
+            cx="200" cy="6" r="3" fill={C.accent}
+            initial={{ scale: 0 }} animate={{ scale: 1 }}
+            transition={{ delay: 1, duration: 0.3 }}
           />
         )}
       </svg>
-
-      {/* Labels mesi */}
-      <div className="mt-1 flex justify-between px-0.5">
-        {["Apr", "Giu", "Ago", "Ott", "Dic", "Mar"].map((m) => (
-          <span key={m} className="text-[8px] text-zinc-600">{m}</span>
+      <div className="mt-1 flex justify-between">
+        {["Set", "Nov", "Gen", "Mar", "Mag", "Ago"].map((m) => (
+          <span key={m} className="font-mono text-[8px]" style={{ color: C.text3 }}>{m}</span>
         ))}
       </div>
     </div>
@@ -150,89 +157,85 @@ function AreaChartMock() {
 }
 
 /* ─────────────────────────────────────────
-   MOCK DASHBOARD
+   MOCK APP — ricalca la dashboard attuale
 ───────────────────────────────────────── */
-const MOCK_TRANSACTIONS = [
-  { label: "Stipendio",          amount: "+€2.400,00", category: "Entrate",          color: "#10b981", icon: Banknote,       income: true  },
-  { label: "Affitto / Mutuo",    amount: "-€850,00",   category: "Casa",             color: "#eab308", icon: Building2,      income: false },
-  { label: "Spesa supermercato", amount: "-€94,30",    category: "Alimentari",       color: "#fb923c", icon: ShoppingBasket, income: false },
-  { label: "Ristoranti & Asporto",amount: "-€38,50",   category: "Alimentari",       color: "#f97316", icon: ChefHat,        income: false },
-  { label: "Freelance & Extra",  amount: "+€600,00",   category: "Entrate",          color: "#34d399", icon: Briefcase,      income: true  },
+const MOCK_ROWS = [
+  { label: "Stipendio",       meta: "Entrate · 1 ago",       amount: "+2.400,00 €", income: true,  Icon: Banknote },
+  { label: "Affitto",         meta: "Casa · 3 ago · comune", amount: "-425,00 €",   income: false, Icon: Building2 },
+  { label: "Internet",        meta: "Utenze · 5 ago",        amount: "-25,00 €",    income: false, Icon: Wifi },
+  { label: "Spesa + farmacia", meta: "Alimentari · 8 ago",   amount: "-72,40 €",    income: false, Icon: TrendingDown },
 ]
 
-function MockDashboard() {
+function MockApp() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 56, scale: 0.95 }}
+      initial={{ opacity: 0, y: 48, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.85, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.8, delay: 0.25, ease: EASE }}
     >
       <motion.div
         animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-        className="w-full max-w-[480px] rounded-2xl border border-white/10 bg-zinc-900/90 shadow-2xl shadow-black/50 backdrop-blur"
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="w-full max-w-[440px] overflow-hidden rounded-[24px] border shadow-2xl"
+        style={{ borderColor: C.border, background: C.surface1, boxShadow: "0 40px 80px -20px rgba(0,0,0,0.6)" }}
       >
-        {/* Chrome bar */}
-        <div className="flex items-center justify-between rounded-t-2xl border-b border-white/5 bg-zinc-800/50 px-5 py-3">
-          <div className="flex gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full bg-rose-500/70" />
-            <div className="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
-            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
-          </div>
-          <span className="text-[10px] font-medium text-zinc-500">OurBalance — Dashboard</span>
-          <div className="w-12" />
+        {/* Barra finestra */}
+        <div className="flex items-center justify-between border-b px-5 py-3" style={{ borderColor: C.border, background: C.surface2 }}>
+          <span className="font-serif text-sm font-semibold" style={{ color: C.text1 }}>OurBalance</span>
+          <span className="font-mono text-[10px]" style={{ color: C.text3 }}>Personale</span>
         </div>
 
-        <div className="p-5">
-          {/* Saldo */}
-          <div className="mb-5 flex items-start justify-between">
-            <div>
-              <p className="mb-0.5 text-[10px] text-zinc-500">Saldo netto · Marzo 2026</p>
-              <p className="text-4xl font-bold tracking-tight text-zinc-50">
-                <AnimatedCounter value={2017.20} />
-              </p>
+        <div className="space-y-4 p-5">
+          {/* Hero balance card — come nell'app */}
+          <div className="rounded-[18px] px-5 py-4" style={{ background: `linear-gradient(135deg, ${C.heroA}, ${C.heroB})` }}>
+            <p className="mb-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: "rgba(240,237,232,0.45)" }}>
+              Saldo disponibile · agosto
+            </p>
+            <p className="font-serif text-3xl font-bold leading-none" style={{ color: C.text1 }}>
+              <AnimatedCounter value={1877.60} />
+            </p>
+            <div className="mt-4 flex gap-6 border-t pt-3" style={{ borderColor: "rgba(240,237,232,0.1)" }}>
+              <div>
+                <p className="text-[10px]" style={{ color: "rgba(240,237,232,0.45)" }}>Entrate</p>
+                <p className="text-sm font-semibold" style={{ color: "#5DC98E" }}>+3.000,00 €</p>
+              </div>
+              <div>
+                <p className="text-[10px]" style={{ color: "rgba(240,237,232,0.45)" }}>Uscite</p>
+                <p className="text-sm font-semibold" style={{ color: "#E07B6A" }}>-1.122,40 €</p>
+              </div>
             </div>
-            <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-medium text-emerald-400">
-              +18% vs Feb
-            </span>
           </div>
 
-          {/* Area chart */}
-          <div className="mb-5">
-            <AreaChartMock />
-          </div>
+          <CashflowMock />
 
-          {/* Transazioni */}
-          <div className="space-y-1.5">
-            <p className="mb-2 text-[10px] font-medium text-zinc-500">Ultime transazioni</p>
-            {MOCK_TRANSACTIONS.map((t, i) => (
-              <motion.div
-                key={t.label}
-                initial={{ opacity: 0, x: -14 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + i * 0.08, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-                className="flex items-center justify-between rounded-lg bg-zinc-800/50 px-3 py-2"
-              >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="rounded-md p-1.5"
-                    style={{ backgroundColor: `${t.color}18` }}
-                  >
-                    <t.icon className="h-3 w-3" style={{ color: t.color }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-zinc-200">{t.label}</p>
-                    <p className="text-[10px] text-zinc-500">{t.category}</p>
-                  </div>
-                </div>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: t.income ? "#10b981" : "#fb7185" }}
+          {/* Movimenti recenti */}
+          <div>
+            <p className="mb-2 font-mono text-[10px] uppercase tracking-wider" style={{ color: C.text3 }}>
+              Movimenti recenti
+            </p>
+            <div className="space-y-1">
+              {MOCK_ROWS.map((r, i) => (
+                <motion.div
+                  key={r.label}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.6 + i * 0.09, duration: 0.4, ease: EASE }}
+                  className="flex items-center gap-3 rounded-[12px] px-3 py-2"
+                  style={{ background: C.surface2 }}
                 >
-                  {t.amount}
-                </span>
-              </motion.div>
-            ))}
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[10px]" style={{ background: C.surface1 }}>
+                    <r.Icon className="h-4 w-4" style={{ color: C.text3 }} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium" style={{ color: C.text1 }}>{r.label}</p>
+                    <p className="text-[10px]" style={{ color: C.text3 }}>{r.meta}</p>
+                  </div>
+                  <span className="flex-shrink-0 text-xs font-semibold" style={{ color: r.income ? C.income : C.text1 }}>
+                    {r.amount}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </motion.div>
@@ -241,21 +244,15 @@ function MockDashboard() {
 }
 
 /* ─────────────────────────────────────────
-   FEATURES
+   FUNZIONALITÀ
 ───────────────────────────────────────── */
 const FEATURES = [
-  { icon: ArrowLeftRight, title: "Transazioni in un tap",      description: "Registra entrate e uscite in pochi secondi. Categorizza, filtra e cerca tra tutte le tue transazioni." },
-  { icon: BarChart2,      title: "Cashflow a colpo d'occhio",  description: "Grafici interattivi che mostrano dove vanno i tuoi soldi, mese per mese. Senza fogli Excel." },
-  { icon: Users,          title: "Finanze di coppia",          description: "Tieni separati i conti personali da quelli condivisi. Perfetto per gestire le spese con il partner." },
-  { icon: TrendingUp,     title: "Budget e obiettivi",         description: "Imposta budget per categoria e monitora in tempo reale quanto stai spendendo rispetto al piano." },
-  { icon: ShieldCheck,    title: "I tuoi dati, al sicuro",     description: "Autenticazione sicura, dati cifrati su Supabase. Nessuna banca collegata, nessun dato sensibile." },
-  { icon: Wallet,         title: "Sempre con te",              description: "Funziona come app sul telefono (PWA) senza installare nulla. Accedi da qualsiasi dispositivo." },
-]
-
-const HERO_LINES = [
-  { text: "Tieni sotto", accent: false },
-  { text: "controllo",   accent: true  },
-  { text: "ogni euro.",  accent: false },
+  { Icon: ArrowLeftRight, title: "Transazioni in un tap",     description: "Registra entrate e uscite in pochi secondi. Categorizza, filtra e cerca per descrizione o categoria." },
+  { Icon: BarChart2,      title: "Cashflow a colpo d'occhio", description: "Grafici mensili e annuali che mostrano dove vanno i soldi. Senza fogli Excel." },
+  { Icon: Users,          title: "Spese di coppia",           description: "Segna una spesa come condivisa: conta al 50% sul tuo personale, senza confondere i conti." },
+  { Icon: Repeat,         title: "Ricorrenze",                description: "Affitto, stipendio, abbonamenti: si registrano da soli. Metti in pausa o imposta una data di fine." },
+  { Icon: Wallet,         title: "Budget per categoria",      description: "Imposta un limite mensile e vedi in tempo reale quanto ti resta." },
+  { Icon: ShieldCheck,    title: "I tuoi dati, al sicuro",    description: "Accesso con email o Google. Nessuna banca collegata, nessun dato sensibile." },
 ]
 
 /* ─────────────────────────────────────────
@@ -265,77 +262,82 @@ export function LandingPage() {
   const { navigate } = usePageTransition()
   const { scrollY } = useScroll()
 
-  const heroTextY = useTransform(scrollY, [0, 500], [0, -55])
-  const glowY     = useTransform(scrollY, [0, 600], [0, -85])
-  const mockY     = useTransform(scrollY, [0, 500], [0, -25])
+  const heroTextY = useTransform(scrollY, [0, 500], [0, -50])
+  const glowY     = useTransform(scrollY, [0, 600], [0, -80])
+  const mockY     = useTransform(scrollY, [0, 500], [0, -20])
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <MotionConfig reducedMotion="user">
+    <div className="min-h-screen" style={{ background: C.bg, color: C.text1 }}>
       {/* ── HERO ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-24">
-        {/* Glow */}
         <motion.div
-          style={{ y: glowY }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.45, 0.85, 0.45] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="pointer-events-none absolute left-1/2 top-1/3 h-[640px] w-[640px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[140px]"
+          style={{ y: glowY, background: C.accent }}
+          animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.2, 0.12] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="pointer-events-none absolute left-1/2 top-1/3 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[150px]"
         />
 
-        <div className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-12 lg:flex-row lg:items-center lg:gap-16">
+        <div className="relative z-10 flex w-full max-w-6xl flex-col items-center gap-14 lg:flex-row lg:gap-16">
           {/* Testo */}
           <motion.div
             style={{ y: heroTextY }}
             className="flex w-full flex-col items-center text-center lg:flex-1 lg:items-start lg:text-left"
           >
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400"
+              transition={{ duration: 0.5, ease: EASE }}
+              className="mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium"
+              style={{ borderColor: `${C.accent}33`, background: `${C.accent}1a`, color: C.accent }}
             >
               <motion.span
-                animate={{ opacity: [1, 0.2, 1] }}
+                animate={{ opacity: [1, 0.25, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: C.accent }}
               />
               Finanze personali, finalmente semplici
             </motion.div>
 
-            <h1 className="text-5xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
-              {HERO_LINES.map(({ text, accent }, i) => (
+            <h1 className="font-serif text-5xl font-semibold italic leading-[1.08] tracking-tight sm:text-[64px]">
+              {["Tieni sotto controllo", "ogni euro."].map((line, i) => (
                 <motion.span
-                  key={text}
-                  className={`block ${accent ? "text-emerald-400" : ""}`}
-                  initial={{ opacity: 0, y: 28 }}
+                  key={line}
+                  className="block"
+                  style={i === 1 ? { color: C.accent } : undefined}
+                  initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.65, delay: 0.1 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.6, delay: 0.1 + i * 0.1, ease: EASE }}
                 >
-                  {text}
+                  {line}
                 </motion.span>
               ))}
             </h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
-              className="mt-6 text-lg leading-relaxed text-zinc-400"
+              transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
+              className="mt-6 max-w-md text-lg leading-relaxed"
+              style={{ color: C.text2 }}
             >
-              OurBalance è il modo più semplice per tracciare entrate e uscite,
-              capire dove finiscono i tuoi soldi e gestire le tue finanze e di coppia.
+              OurBalance traccia entrate e uscite, ti fa capire dove finiscono i soldi
+              e tiene separate le spese personali da quelle di coppia.
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.54, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.52, ease: EASE }}
               className="mt-8 flex flex-col gap-3 sm:flex-row"
             >
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate("/signup")}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-emerald-400"
+                className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                style={{ background: C.accent }}
               >
                 Inizia gratis <ArrowRight className="h-4 w-4" />
               </motion.button>
@@ -343,7 +345,8 @@ export function LandingPage() {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => navigate("/login")}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 px-6 py-3 text-sm font-semibold text-zinc-200 transition-colors hover:bg-surface-2"
+                className="inline-flex items-center justify-center gap-2 rounded-full border px-6 py-3 text-sm font-semibold transition-colors"
+                style={{ borderColor: C.border, color: C.text1 }}
               >
                 Accedi
               </motion.button>
@@ -352,53 +355,54 @@ export function LandingPage() {
 
           {/* Mock */}
           <motion.div style={{ y: mockY }} className="flex w-full justify-center lg:flex-1 lg:justify-end">
-            <MockDashboard />
+            <MockApp />
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.6, duration: 0.8 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
           className="absolute bottom-10 left-1/2 -translate-x-1/2"
         >
           <motion.div
             animate={{ y: [0, 7, 0] }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            className="flex h-8 w-5 items-start justify-center rounded-full border border-white/15 pt-1.5"
+            className="flex h-8 w-5 items-start justify-center rounded-full border pt-1.5"
+            style={{ borderColor: C.border }}
           >
-            <div className="h-1.5 w-1 rounded-full bg-white/30" />
+            <div className="h-1.5 w-1 rounded-full" style={{ background: C.text3 }} />
           </motion.div>
         </motion.div>
       </section>
 
-      {/* ── FEATURES ── */}
+      {/* ── FUNZIONALITÀ ── */}
       <section className="px-4 py-28">
         <div className="mx-auto max-w-5xl">
-          <FadeUp className="mb-16 text-center">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-emerald-400">Funzionalità</p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Tutto quello che ti serve,
-              <br /><span className="text-zinc-400">niente di più.</span>
+          <FadeUp className="mb-14 text-center">
+            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em]" style={{ color: C.accent }}>
+              Funzionalità
+            </p>
+            <h2 className="font-serif text-3xl font-semibold italic tracking-tight sm:text-4xl">
+              Tutto quello che ti serve,{" "}
+              <span style={{ color: C.text2 }}>niente di più.</span>
             </h2>
           </FadeUp>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f, i) => (
-              <FadeUp key={f.title} delay={i * 0.06}>
+              <FadeUp key={f.title} delay={i * 0.05}>
                 <motion.div
-                  whileHover={{ y: -5, transition: { duration: 0.22 } }}
-                  className="h-full rounded-xl border border-white/5 bg-zinc-900/60 p-6 transition-colors hover:border-emerald-500/20 hover:bg-zinc-900"
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full rounded-[18px] border p-6"
+                  style={{ borderColor: C.border, background: C.surface1 }}
                 >
-                  <motion.div
-                    whileHover={{ scale: 1.12, transition: { duration: 0.2 } }}
-                    className="mb-4 inline-flex rounded-lg bg-emerald-500/10 p-2.5"
-                  >
-                    <f.icon className="h-5 w-5 text-emerald-400" />
-                  </motion.div>
-                  <h3 className="mb-2 text-sm font-semibold text-zinc-100">{f.title}</h3>
-                  <p className="text-sm leading-relaxed text-zinc-500">{f.description}</p>
+                  <div className="mb-4 inline-flex rounded-[12px] p-2.5" style={{ background: `${C.accent}1a` }}>
+                    <f.Icon className="h-5 w-5" style={{ color: C.accent }} />
+                  </div>
+                  <h3 className="mb-2 text-sm font-semibold" style={{ color: C.text1 }}>{f.title}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: C.text2 }}>{f.description}</p>
                 </motion.div>
               </FadeUp>
             ))}
@@ -406,55 +410,58 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── CLOSING CTA ── */}
-      <section className="px-4 py-28">
+      {/* ── CTA FINALE ── */}
+      <section className="px-4 pb-28 pt-4">
         <FadeUp>
-          <motion.div
-            whileInView={{ boxShadow: ["0 0 0px rgba(52,211,153,0)", "0 0 80px rgba(52,211,153,0.07)", "0 0 0px rgba(52,211,153,0)"] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            viewport={{ once: false }}
-            className="mx-auto max-w-2xl rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-8 py-16 text-center"
+          <div
+            className="mx-auto max-w-2xl rounded-[24px] border px-8 py-16 text-center"
+            style={{ borderColor: `${C.accent}33`, background: `${C.accent}0d` }}
           >
-            <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-emerald-400">Inizia oggi</p>
-            <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              Pronto a prendere<br />il controllo?
+            <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em]" style={{ color: C.accent }}>
+              Inizia oggi
+            </p>
+            <h2 className="mb-4 font-serif text-3xl font-semibold italic tracking-tight sm:text-4xl">
+              Pronto a prendere il controllo?
             </h2>
-            <p className="mb-8 text-zinc-400">Gratuito, senza carta di credito, senza sorprese.</p>
+            <p className="mb-8" style={{ color: C.text2 }}>Gratuito, senza carta di credito, senza sorprese.</p>
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => navigate("/signup")}
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-8 py-3 text-sm font-semibold text-zinc-950 transition-colors hover:bg-emerald-400"
+              className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ background: C.accent }}
             >
               Crea il tuo account <ArrowRight className="h-4 w-4" />
             </motion.button>
-          </motion.div>
+          </div>
         </FadeUp>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-white/5 px-4 py-8">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-xs text-zinc-600 sm:flex-row">
-          <span className="font-semibold text-zinc-500">OurBalance</span>
+      <footer className="border-t px-4 py-8" style={{ borderColor: C.border }}>
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-xs sm:flex-row" style={{ color: C.text3 }}>
+          <span className="font-serif font-semibold" style={{ color: C.text2 }}>OurBalance</span>
           <span className="flex items-center gap-1.5">
             2026 — Fatto con{" "}
-            <Heart className="inline h-3 w-3 fill-rose-500 text-rose-500" />{" "}
+            <Heart className="inline h-3 w-3" style={{ fill: C.accent, color: C.accent }} />{" "}
             da{" "}
             <a
               href="https://github.com/darw5n"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 underline-offset-2 transition-colors hover:text-zinc-200 hover:underline"
+              className="underline-offset-2 transition-colors hover:underline"
+              style={{ color: C.text2 }}
             >
               Darwin
             </a>
           </span>
           <div className="flex gap-4">
-            <Link href="/privacy" className="transition-colors hover:text-zinc-400">Privacy</Link>
-            <Link href="/cookies" className="transition-colors hover:text-zinc-400">Cookies</Link>
+            <Link href="/privacy" className="transition-colors hover:opacity-70">Privacy</Link>
+            <Link href="/cookies" className="transition-colors hover:opacity-70">Cookies</Link>
           </div>
         </div>
       </footer>
     </div>
+    </MotionConfig>
   )
 }
