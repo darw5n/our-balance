@@ -14,7 +14,7 @@ import type { Category } from "@/lib/supabase/queries/categories"
 
 async function getTransactions(
   userId: string,
-  filter?: { query?: string; from?: string; to?: string; category_id?: string }
+  filter?: { from?: string; to?: string; category_id?: string }
 ): Promise<Transaction[]> {
   const supabase = await createSupabaseServerClient()
 
@@ -25,13 +25,31 @@ async function getTransactions(
 
   if (filter?.from) query = query.gte("date", filter.from)
   if (filter?.to) query = query.lte("date", filter.to)
-  if (filter?.query) query = query.ilike("description", `%${filter.query}%`)
   if (filter?.category_id) query = query.eq("category_id", filter.category_id)
 
   const { data, error } = await query.order("date", { ascending: false })
 
   if (error || !data) return []
   return data as Transaction[]
+}
+
+/**
+ * Filtra le transazioni per testo libero: cerca sia nella descrizione sia nel
+ * nome della categoria. Fatto lato JS per evitare di interpolare input utente
+ * nei filtri PostgREST.
+ */
+function filterByQuery(
+  transactions: Transaction[],
+  query: string,
+  categoryNameById: Map<string, string>
+): Transaction[] {
+  const needle = query.trim().toLowerCase()
+  if (!needle) return transactions
+  return transactions.filter((tx) => {
+    const desc = tx.description?.toLowerCase() ?? ""
+    const catName = tx.category_id ? (categoryNameById.get(tx.category_id)?.toLowerCase() ?? "") : ""
+    return desc.includes(needle) || catName.includes(needle)
+  })
 }
 
 export default async function TransactionsPage({
@@ -53,7 +71,6 @@ export default async function TransactionsPage({
   const params = await searchParams
 
   const tab = params?.tab === "confronto" ? "confronto" : "lista"
-  const viewMode: ViewMode = params?.view === "family" ? "family" : "personal"
 
   const header = (
     <div className="space-y-4">
@@ -67,6 +84,7 @@ export default async function TransactionsPage({
 
   // ── Tab CONFRONTO ──
   if (tab === "confronto") {
+    const viewMode: ViewMode = params?.view === "family" ? "family" : "personal"
     const currentYear = new Date().getUTCFullYear()
     const [categories, availableYears]: [Category[], number[]] = user?.id
       ? await Promise.all([getCategories(user.id), getTransactionYears(user.id)])
@@ -107,10 +125,9 @@ export default async function TransactionsPage({
   const to = params?.to ?? ""
   const category = params?.category ?? ""
 
-  const [transactions, categories] = await Promise.all([
+  const [allTransactions, categories] = await Promise.all([
     user?.id
       ? getTransactions(user.id, {
-          query: q || undefined,
           from: from || undefined,
           to: to || undefined,
           category_id: category || undefined,
@@ -118,6 +135,9 @@ export default async function TransactionsPage({
       : Promise.resolve([]),
     user?.id ? getCategories(user.id) : Promise.resolve([]),
   ])
+
+  const categoryNameById = new Map(categories.map((c) => [c.id, c.name]))
+  const transactions = q ? filterByQuery(allTransactions, q, categoryNameById) : allTransactions
 
   const hasFilters = !!(q || from || to || category)
 

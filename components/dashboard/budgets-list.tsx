@@ -86,7 +86,7 @@ export function BudgetsList({
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-text-2">
-            {budgets.length} {budgets.length === 1 ? "budget" : "budget"} impostati
+            {budgets.length} {budgets.length === 1 ? "budget impostato" : "budget impostati"}
           </p>
           {canAddMore && (
             <Button
