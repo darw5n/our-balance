@@ -119,13 +119,6 @@ export function AddTransactionDialog({
     debounceRef.current = setTimeout(async () => {
       try {
         const suggested = await suggestCategory(trimmed, type)
-        if (process.env.NODE_ENV === "development") {
-          console.log(`[CategorySuggestion] desc="${trimmed}" type=${type} → suggested=${suggested}`)
-          if (suggested) {
-            const found = categories.find((c) => c.id === suggested)
-            console.log(`[CategorySuggestion] category in prop: ${found ? found.name : "NOT FOUND"}`)
-          }
-        }
         setSuggestedCategoryId(suggested)
       } catch (err) {
         console.warn("[CategorySuggestion] errore:", err)
@@ -144,11 +137,6 @@ export function AddTransactionDialog({
         data: { user },
       } = await supabase.auth.getUser()
       setIsAuthenticated(!!user)
-      if (!user) {
-        console.warn("[AddTransactionDialog] User not authenticated")
-      } else {
-        console.log("[AddTransactionDialog] User authenticated:", user.id)
-      }
     }
     checkAuth()
   }, [])

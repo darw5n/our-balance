@@ -31,11 +31,8 @@ export async function createTransaction(
 
     if (!user?.id) {
       console.error("[createTransaction] No authenticated user found")
-      console.error("[createTransaction] User object:", user)
       return { success: false, error: "Utente non autenticato. Effettua il login per continuare." }
     }
-
-    console.log("[createTransaction] Authenticated user ID:", user.id)
 
     // Validate input
     if (!input.amount || !input.type || !input.date) {
@@ -66,9 +63,6 @@ export async function createTransaction(
       scope: input.scope || "personal",
     }
 
-    // Debug logging
-    console.log("[createTransaction] Payload:", JSON.stringify(payload, null, 2))
-
     // Create Supabase client and insert transaction
     const supabase = await createSupabaseServerClient()
 
@@ -76,9 +70,6 @@ export async function createTransaction(
 
     if (error) {
       console.error("[createTransaction] Insert error:", error)
-      console.error("[createTransaction] Error code:", error.code)
-      console.error("[createTransaction] Error details:", JSON.stringify(error, null, 2))
-      console.error("[createTransaction] Error hint:", error.hint)
       return {
         success: false,
         error: error.message || "Errore durante il salvataggio. Controlla la console per i dettagli.",
@@ -88,8 +79,6 @@ export async function createTransaction(
     if (!data?.id) {
       return { success: false, error: "Transazione creata ma ID non restituito." }
     }
-
-    console.log("[createTransaction] Transaction created successfully:", data.id)
 
     // Revalidate dashboard and transactions pages
     revalidatePath("/dashboard")
