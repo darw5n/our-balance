@@ -3,9 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { formatCurrency } from "@/lib/utils"
+import { MONTH_LABELS } from "@/components/dashboard/charts/chart-config"
 import type { CategoryMonthRow } from "@/lib/supabase/queries/analytics"
-
-const MONTH_LABELS = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"]
 
 const MACRO_LABELS: Record<string, string> = {
   necessita: "Necessità",

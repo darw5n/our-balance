@@ -5,24 +5,13 @@ import * as Popover from "@radix-ui/react-popover"
 import { ChevronDown, Search, ArrowLeft } from "lucide-react"
 import { buildGroupedOptions } from "@/components/dashboard/add-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
+import { useIsMobile } from "@/lib/hooks/use-is-mobile"
 
 type CategoryComboboxProps = {
   categories: CategoryOption[]
   txType: string
   value: string
   onChange: (value: string) => void
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)")
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-  return isMobile
 }
 
 function CategoryList({

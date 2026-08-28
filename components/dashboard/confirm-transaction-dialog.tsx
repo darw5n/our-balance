@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { DateInput } from "@/components/ui/date-input"
 import { confirmTransaction } from "@/app/actions/transactions"
 import { validateAmount } from "@/lib/utils"
+import { useFormState } from "@/lib/hooks/use-form-state"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 
 type Props = {
@@ -26,7 +27,7 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
   const [amount, setAmount] = useState("")
   const [date, setDate] = useState("")
   const [amountError, setAmountError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const { submitting, error: formError, setError: setFormError, wrap } = useFormState()
 
   useEffect(() => {
     if (open && transaction) {
@@ -34,12 +35,14 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
       const txDate = transaction.date ?? todayISO()
       setDate(txDate.slice(0, 10))
       setAmountError("")
+      setFormError(null)
     }
-  }, [open, transaction])
+  }, [open, transaction, setFormError])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!transaction) return
+    setFormError(null)
 
     const validation = validateAmount(amount)
     if (!validation.ok) {
@@ -47,18 +50,15 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
       return
     }
 
-    setLoading(true)
-    try {
+    await wrap(async () => {
       const result = await confirmTransaction(transaction.id, validation.value, date)
       if (!result.success) {
-        setAmountError(result.error ?? "Errore durante la conferma.")
+        setFormError(result.error ?? "Errore durante la conferma.")
         return
       }
       onOpenChange(false)
       onSuccess()
-    } finally {
-      setLoading(false)
-    }
+    })
   }
 
   if (!transaction) return null
@@ -103,12 +103,14 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
             <DateInput value={date} onChange={setDate} />
           </div>
 
+          {formError && <p className="text-xs text-expense-fg">{formError}</p>}
+
           <div className="flex justify-end gap-2 pt-1">
             <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
               Annulla
             </Button>
-            <Button type="submit" size="sm" disabled={loading} className="bg-emerald-600 text-white hover:bg-emerald-700">
-              {loading ? "Salvataggio…" : "Conferma"}
+            <Button type="submit" size="sm" disabled={submitting} className="bg-emerald-600 text-white hover:bg-emerald-700">
+              {submitting ? "Salvataggio…" : "Conferma"}
             </Button>
           </div>
         </form>

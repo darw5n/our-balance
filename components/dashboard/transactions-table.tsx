@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { formatCurrency } from "@/lib/utils"
+import { applyScope } from "@/lib/supabase/query-utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
 import { EditTransactionDialog, type Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import { ConfirmTransactionDialog } from "@/components/dashboard/confirm-transaction-dialog"
@@ -191,7 +192,8 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
             {/* Card containing all transactions for this date */}
             <div className="overflow-hidden rounded-[22px] border border-border-subtle bg-surface-1">
               {group.transactions.map((tx, index) => {
-                const amount = Math.abs(tx.amount ?? 0)
+                const rawAmount = Math.abs(tx.amount ?? 0)
+                const amount = applyScope(rawAmount, tx.scope, "personal")
                 const cat = tx.category_id ? catMap.get(tx.category_id) : undefined
                 const categoryName = cat?.name ?? "—"
                 const hasEmoji = !!cat?.emoji
@@ -250,11 +252,11 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                           tx.type === "income" ? "text-income-fg" : "text-text-1"
                         }`}
                       >
-                        {tx.type === "income" ? "+" : "−"}{formatCurrency(tx.scope === "family" ? amount * 0.5 : amount)}
+                        {tx.type === "income" ? "+" : "−"}{formatCurrency(amount)}
                       </span>
                       {tx.scope === "family" && (
                         <span className="text-[10px] text-text-3 font-normal mt-0.5">
-                          totale {formatCurrency(amount)}
+                          totale {formatCurrency(rawAmount)}
                         </span>
                       )}
                     </div>
@@ -348,8 +350,8 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
             </DialogTitle>
             <p className="text-xs text-text-3 font-medium mt-1">
               {mobileActionsTx && (() => {
-                const rawAmount = mobileActionsTx.amount ?? 0
-                const displayAmount = mobileActionsTx.scope === "family" ? rawAmount * 0.5 : rawAmount
+                const rawAmount = Math.abs(mobileActionsTx.amount ?? 0)
+                const displayAmount = applyScope(rawAmount, mobileActionsTx.scope, "personal")
                 return (
                   <span>
                     {formatCurrency(displayAmount)}

@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import {
   AreaChart,
   Area,
@@ -12,33 +11,13 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
+import { useIsMobile } from "@/lib/hooks/use-is-mobile"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type CashflowChartProps = {
   data: CashflowMonthlyPoint[]
   hideIncome?: boolean
-}
-
-const AXIS_TICK = { fill: "var(--text-3)", fontSize: 12 }
-const AXIS_LINE = { stroke: "var(--border-subtle)" }
-const TOOLTIP_STYLE = {
-  background: "var(--surface-1)",
-  border: "1px solid var(--border-subtle)",
-  borderRadius: 8,
-  color: "var(--text-1)",
-  fontSize: 12,
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)")
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-  return isMobile
 }
 
 export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) {

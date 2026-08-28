@@ -3,42 +3,14 @@
 import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
+import { useIsMobile } from "@/lib/hooks/use-is-mobile"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTHS_SHORT, MONTH_FULL } from "@/components/dashboard/charts/chart-config"
 
 type Props = {
   monthsA: number[]   // 12 valori, indice 0 = Gennaio (primo anno)
   monthsB: number[]   // 12 valori, indice 0 = Gennaio (secondo anno)
   labelA: string      // es. "2025"
   labelB: string      // es. "2026"
-}
-
-const MONTHS_SHORT = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
-
-const MONTH_FULL: Record<string, string> = {
-  gen: "Gennaio", feb: "Febbraio", mar: "Marzo", apr: "Aprile",
-  mag: "Maggio", giu: "Giugno", lug: "Luglio", ago: "Agosto",
-  set: "Settembre", ott: "Ottobre", nov: "Novembre", dic: "Dicembre",
-}
-
-const AXIS_TICK = { fill: "var(--text-3)", fontSize: 12 }
-const AXIS_LINE = { stroke: "var(--border-subtle)" }
-const TOOLTIP_STYLE = {
-  background: "var(--surface-1)",
-  border: "1px solid var(--border-subtle)",
-  borderRadius: 8,
-  color: "var(--text-1)",
-  fontSize: 12,
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)")
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-  return isMobile
 }
 
 function useReducedMotion() {

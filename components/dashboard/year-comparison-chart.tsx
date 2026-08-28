@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
+import { useIsMobile } from "@/lib/hooks/use-is-mobile"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -16,34 +17,6 @@ type ChartPoint = {
   month: string
   current: number
   prev: number
-}
-
-const MONTH_FULL: Record<string, string> = {
-  gen: "Gennaio", feb: "Febbraio", mar: "Marzo", apr: "Aprile",
-  mag: "Maggio", giu: "Giugno", lug: "Luglio", ago: "Agosto",
-  set: "Settembre", ott: "Ottobre", nov: "Novembre", dic: "Dicembre",
-}
-
-const AXIS_TICK = { fill: "var(--text-3)", fontSize: 12 }
-const AXIS_LINE = { stroke: "var(--border-subtle)" }
-const TOOLTIP_STYLE = {
-  background: "var(--surface-1)",
-  border: "1px solid var(--border-subtle)",
-  borderRadius: 8,
-  color: "var(--text-1)",
-  fontSize: 12,
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)")
-    setIsMobile(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-  return isMobile
 }
 
 export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "personal" }: Props) {
