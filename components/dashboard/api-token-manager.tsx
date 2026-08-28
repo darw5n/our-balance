@@ -31,7 +31,7 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
       const result = await generateApiToken()
       if (result.success) {
         setRevealedToken(result.token)
-        setInfo({ id: "new", created_at: new Date().toISOString() })
+        setInfo({ id: "new", created_at: new Date().toISOString(), last_used_at: null })
       } else {
         setError(result.error)
       }
@@ -79,6 +79,13 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
                 month: "short",
                 year: "numeric",
               })}
+              {" · "}
+              {info.last_used_at
+                ? `usato il ${new Date(info.last_used_at).toLocaleDateString("it-IT", {
+                    day: "2-digit",
+                    month: "short",
+                  })}`
+                : "mai usato"}
             </span>
           )}
         </div>
@@ -160,6 +167,10 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
             <span className="italic text-text-1">&quot;Aggiungi questa spesa a OurBalance&quot;</span>
           </li>
         </ol>
+        <p className="text-[11px] text-text-3">
+          L&apos;URL contiene il tuo token: trattalo come una password. Chiunque abbia
+          l&apos;URL può aggiungere transazioni. Se pensi sia stato esposto, rigeneralo.
+        </p>
       </div>
     </div>
   )
