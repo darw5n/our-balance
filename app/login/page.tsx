@@ -66,8 +66,8 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="rounded-full border border-income/30 bg-income-subtle p-3">
-            <Wallet className="h-6 w-6 text-income-fg" />
+          <div className="rounded-full border border-accent-brand/30 bg-accent-brand-bg p-3">
+            <Wallet className="h-6 w-6 text-accent-brand" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-1">Bentornato</h1>
