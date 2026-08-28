@@ -1,7 +1,7 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
 import type { ViewMode } from "@/lib/supabase/queries/transactions"
-import { toNumber, getMonthRange, resolveJoin } from "@/lib/supabase/query-utils"
+import { toNumber, getMonthRange, resolveJoin, parseMonthParam } from "@/lib/supabase/query-utils"
 
 export type BudgetWithProgress = {
   id: string
@@ -12,12 +12,6 @@ export type BudgetWithProgress = {
   spent: number
   percentage: number
   is_exceeded: boolean
-}
-
-function parseMonthParam(month?: string): Date | undefined {
-  if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
-  const [year, mon] = month.split("-").map(Number)
-  return new Date(Date.UTC(year, mon - 1, 1))
 }
 
 export const getBudgetsWithProgress = cache(async function getBudgetsWithProgress(

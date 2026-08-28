@@ -21,6 +21,13 @@ export function getYearRange(year: number) {
   return { startISO: start.toISOString(), endISO: end.toISOString() }
 }
 
+/** Parse a "YYYY-MM" param into the first day (UTC) of that month, or undefined if malformed. */
+export function parseMonthParam(month?: string): Date | undefined {
+  if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
+  const [year, mon] = month.split("-").map(Number)
+  return new Date(Date.UTC(year, mon - 1, 1))
+}
+
 export function applyScope(amount: number, scope: string | null | undefined, viewMode: ViewMode): number {
   if (viewMode === "personal" && scope === "family") return amount * 0.5
   return amount

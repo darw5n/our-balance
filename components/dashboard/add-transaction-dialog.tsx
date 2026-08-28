@@ -128,7 +128,7 @@ export function AddTransactionDialog({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [description, type]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [description, type])
 
   // Check authentication status
   useEffect(() => {

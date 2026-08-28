@@ -1,6 +1,6 @@
 import { cache } from "react"
 import { createSupabaseServerClient } from "@/lib/supabase-server"
-import { toNumber, getMonthRange, getYearRange, applyScope, resolveJoin } from "@/lib/supabase/query-utils"
+import { toNumber, getMonthRange, getYearRange, applyScope, resolveJoin, parseMonthParam } from "@/lib/supabase/query-utils"
 
 export type ViewMode = "personal" | "family"
 
@@ -53,12 +53,6 @@ function getLastMonthsRange(months: number, now = new Date()) {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1), 1, 0, 0, 0, 0))
   const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0, 0))
   return { fromISO: from.toISOString(), toISO: to.toISOString() }
-}
-
-function parseMonthParam(month?: string): Date | undefined {
-  if (!month || !/^\d{4}-\d{2}$/.test(month)) return undefined
-  const [year, mon] = month.split("-").map(Number)
-  return new Date(Date.UTC(year, mon - 1, 1))
 }
 
 function computeSummary(data: TransactionRow[], viewMode: ViewMode): DashboardSummary {
@@ -373,7 +367,7 @@ type RecentTransactionRow = {
   }>
 }
 
-export async function getRecentTransactions(
+export const getRecentTransactions = cache(async function getRecentTransactions(
   userId: string,
   limit: number = 5,
   viewMode: ViewMode = "personal"
@@ -399,7 +393,7 @@ export async function getRecentTransactions(
   return (data as unknown as RecentTransactionRow[]).map(row => {
     const cat = resolveJoin<{ name: string | null; emoji: string | null; color: string | null }>(row.categories)
     const rawAmount = row.amount != null ? Math.abs(row.amount) : null
-    const amount = (rawAmount != null && viewMode === "personal" && row.scope === "family") ? rawAmount * 0.5 : rawAmount
+    const amount = rawAmount != null ? applyScope(rawAmount, row.scope, viewMode) : null
     return {
       id: row.id,
       description: row.description,
@@ -412,7 +406,7 @@ export async function getRecentTransactions(
       category_color: cat?.color ?? null,
     }
   })
-}
+})
 
 /**
  * Anni per cui l'utente ha almeno una transazione, dal più recente al più vecchio.
