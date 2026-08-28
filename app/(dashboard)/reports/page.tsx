@@ -16,6 +16,7 @@ import {
   getCategoryMonthlyBreakdown,
 } from "@/lib/supabase/queries/analytics"
 import { formatCurrency } from "@/lib/utils"
+import { getUserSettings } from "@/lib/supabase/queries/user-settings"
 
 export default async function ReportsPage({
   searchParams,
@@ -23,7 +24,6 @@ export default async function ReportsPage({
   searchParams: Promise<{ view?: string; year?: string }>
 }) {
   const { view, year: yearParam } = await searchParams
-  const viewMode: ViewMode = view === "family" ? "family" : "personal"
 
   const currentUTCYear = new Date().getUTCFullYear()
   const year = yearParam ? parseInt(yearParam, 10) : currentUTCYear
@@ -33,6 +33,11 @@ export default async function ReportsPage({
 
   const user = await getServerUser()
   if (!user) return null
+
+  // Se ?view= è assente si usa la preferenza dell'utente.
+  const defaultView = (await getUserSettings(user.id)).defaultView
+  const viewMode: ViewMode =
+    view === "family" ? "family" : view === "personal" ? "personal" : defaultView
 
   const [summary, cashflowCurrent, cashflowPrev, macroBreakdown, categoryMonthly] =
     await Promise.all([
