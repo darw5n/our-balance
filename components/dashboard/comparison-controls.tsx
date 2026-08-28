@@ -16,7 +16,7 @@ type Props = {
 }
 
 const SELECT_CLASS =
-  "h-10 w-full appearance-none rounded-md border border-border-subtle bg-surface-0 pl-3 pr-9 text-sm text-text-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+  "h-10 w-full appearance-none rounded-md border border-border-subtle bg-surface-0 pl-3 pr-9 text-sm text-text-1"
 
 /**
  * Controlli del confronto: categoria + due anni + vista personale/comune.

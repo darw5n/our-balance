@@ -95,7 +95,7 @@ export function BudgetFormDialog({
                 id="budget-category"
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full rounded-md border border-border-subtle bg-surface-0 px-3 py-2 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="w-full rounded-md border border-border-subtle bg-surface-0 px-3 py-2 text-sm text-text-1"
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
@@ -127,7 +127,7 @@ export function BudgetFormDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-2"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -135,7 +135,7 @@ export function BudgetFormDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-income text-zinc-950 hover:bg-income-fg"
+              className="bg-income text-white hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}

@@ -27,14 +27,14 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
     <form action="/transactions" method="get" className="space-y-2">
       {/* Search bar + Filtra pill */}
       <div className="flex items-center gap-2">
-        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5 focus-within:border-ring">
           <Search className="h-4 w-4 flex-shrink-0 text-text-3" />
           <input
             type="search"
             name="q"
             defaultValue={q}
             placeholder="Cerca per descrizione o categoria…"
-            className="min-w-0 flex-1 bg-transparent font-sans text-sm text-text-1 outline-none placeholder:text-text-3"
+            className="min-w-0 flex-1 bg-transparent font-sans text-sm text-text-1 outline-none focus-visible:outline-none placeholder:text-text-3"
           />
         </div>
         <button
@@ -68,7 +68,7 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
             <select
               name="category"
               defaultValue={category}
-              className="h-8 w-full appearance-none rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-7 font-sans text-xs text-text-1 outline-none"
+              className="h-8 w-full appearance-none rounded-md border border-border-subtle bg-surface-2 py-0 pl-2 pr-7 font-sans text-xs text-text-1"
             >
               <option value="">Tutte le categorie</option>
               {categories.map((cat) => (

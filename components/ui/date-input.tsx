@@ -101,7 +101,7 @@ export function DateInput({ id, value, onChange, name, required, className }: Pr
         onClick={openPicker}
         tabIndex={-1}
         aria-label="Apri calendario"
-        className="absolute right-2 text-zinc-400 hover:text-zinc-200"
+        className="absolute right-2 text-text-3 transition-colors hover:text-text-1"
       >
         <CalendarDays className="h-4 w-4" />
       </button>

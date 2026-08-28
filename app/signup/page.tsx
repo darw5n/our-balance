@@ -280,13 +280,13 @@ export default function SignupPage() {
                 </button>
               </div>
               {confirmPassword && confirmPassword !== password && (
-                <p className="text-xs text-rose-400">Le password non coincidono</p>
+                <p className="text-xs text-expense-fg">Le password non coincidono</p>
               )}
             </div>
 
             {error && (
-              <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2">
-                <p className="text-xs text-rose-400">{error}</p>
+              <div className="rounded-md border border-expense/30 bg-expense-subtle px-3 py-2">
+                <p className="text-xs text-expense-fg">{error}</p>
               </div>
             )}
 

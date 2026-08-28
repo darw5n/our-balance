@@ -14,10 +14,10 @@ const MACRO_LABELS: Record<string, string> = {
 }
 
 const MACRO_COLORS: Record<string, string> = {
-  necessita: "text-amber-600",
-  svago: "text-violet-600",
-  risparmi: "text-emerald-600",
-  investimenti: "text-blue-600",
+  necessita: "text-pending-fg",
+  svago: "text-shared",
+  risparmi: "text-income-fg",
+  investimenti: "text-info",
 }
 
 type Props = {
