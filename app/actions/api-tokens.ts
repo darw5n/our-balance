@@ -4,10 +4,12 @@ import { revalidatePath } from "next/cache"
 import { randomBytes } from "crypto"
 import { createAdminClient } from "@/lib/supabase-admin"
 import { getServerUser } from "@/lib/supabase-server"
+import { MCP_TOKEN_PREFIX, hashToken } from "@/lib/mcp/token"
 
 export type ApiTokenInfo = {
   id: string
   created_at: string
+  last_used_at: string | null
 }
 
 export async function getApiTokenInfo(): Promise<ApiTokenInfo | null> {
@@ -17,7 +19,7 @@ export async function getApiTokenInfo(): Promise<ApiTokenInfo | null> {
   const admin = createAdminClient()
   const { data } = await admin
     .from("api_tokens")
-    .select("id, created_at")
+    .select("id, created_at, last_used_at")
     .eq("user_id", user.id)
     .single()
 
@@ -35,12 +37,13 @@ export async function generateApiToken(): Promise<
   // Rimuove eventuale token esistente
   await admin.from("api_tokens").delete().eq("user_id", user.id)
 
-  const token = "ob_" + randomBytes(32).toString("hex")
+  const token = MCP_TOKEN_PREFIX + randomBytes(32).toString("hex")
 
   const { error } = await admin.from("api_tokens").insert({
     user_id: user.id,
-    token,
+    token_hash: hashToken(token),
     name: "Claude MCP",
+    last_used_at: null,
   })
 
   if (error) return { success: false, error: error.message }

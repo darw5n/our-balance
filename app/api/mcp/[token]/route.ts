@@ -1,16 +1,52 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createHash } from "crypto"
 import { createAdminClient } from "@/lib/supabase-admin"
+import { MCP_TOKEN_PREFIX, hashToken } from "@/lib/mcp/token"
+
+// ─── Limiti ────────────────────────────────────────────────────────────────────
+
+const MAX_AMOUNT = 100_000
+const RATE_LIMIT = { windowMs: 60_000, max: 20 } // 20 tools/call al minuto per utente
+const IDEMPOTENCY_WINDOW_MS = 600_000 // 10 minuti
+const MIN_DATE = "2000-01-01"
+
+function maxDate(): string {
+  const d = new Date()
+  d.setUTCFullYear(d.getUTCFullYear() + 1)
+  return d.toISOString().split("T")[0]
+}
+
+// JSON con chiavi ordinate ricorsivamente — per una chiave di idempotenza stabile.
+function canonicalJSON(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(canonicalJSON).join(",")}]`
+  const keys = Object.keys(value as Record<string, unknown>).sort()
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJSON((value as Record<string, unknown>)[k])}`).join(",")}}`
+}
 
 // ─── Auth ──────────────────────────────────────────────────────────────────────
 
-async function getUserIdFromToken(token: string): Promise<string | null> {
+type AuthResult = { tokenId: string; userId: string }
+
+async function authenticate(token: string): Promise<AuthResult | null> {
+  if (!token.startsWith(MCP_TOKEN_PREFIX)) return null
+
   const admin = createAdminClient()
   const { data } = await admin
     .from("api_tokens")
-    .select("user_id")
-    .eq("token", token)
+    .select("id, user_id")
+    .eq("token_hash", hashToken(token))
     .single()
-  return data?.user_id ?? null
+
+  if (!data) return null
+
+  // Traccia l'ultimo utilizzo (update singolo su indice, veloce).
+  await admin
+    .from("api_tokens")
+    .update({ last_used_at: new Date().toISOString() })
+    .eq("id", data.id)
+
+  return { tokenId: data.id, userId: data.user_id }
 }
 
 // ─── Tool definitions ──────────────────────────────────────────────────────────
@@ -69,17 +105,35 @@ const TOOLS = [
 
 // ─── Tool handlers ─────────────────────────────────────────────────────────────
 
+type ToolResult = {
+  content: { type: string; text: string }[]
+  isError?: boolean
+  _transactionId?: string
+}
+
+function toolError(text: string): ToolResult {
+  return { content: [{ type: "text", text }], isError: true }
+}
+
 async function handleCreateTransaction(
   args: Record<string, unknown>,
   userId: string
-) {
+): Promise<ToolResult> {
   const { amount, type, date, description, category_name, scope } = args
 
-  if (!amount || !type || !date) {
-    return {
-      content: [{ type: "text", text: "Errore: i campi amount, type e date sono obbligatori." }],
-      isError: true,
-    }
+  // ── Validazione ──
+  if (type !== "expense" && type !== "income") {
+    return toolError("Errore: 'type' deve essere 'expense' o 'income'.")
+  }
+
+  const scopeValue = scope === undefined || scope === null ? "personal" : scope
+  if (scopeValue !== "personal" && scopeValue !== "family") {
+    return toolError("Errore: 'scope' deve essere 'personal' o 'family'.")
+  }
+
+  const amountNum = Number(amount)
+  if (!Number.isFinite(amountNum) || amountNum <= 0 || amountNum > MAX_AMOUNT) {
+    return toolError(`Errore: 'amount' deve essere un numero positivo fino a ${MAX_AMOUNT}.`)
   }
 
   let formattedDate: string
@@ -88,21 +142,27 @@ async function handleCreateTransaction(
     if (isNaN(d.getTime())) throw new Error()
     formattedDate = d.toISOString().split("T")[0]
   } catch {
-    return {
-      content: [{ type: "text", text: "Errore: formato data non valido. Usa YYYY-MM-DD." }],
-      isError: true,
-    }
+    return toolError("Errore: formato data non valido. Usa YYYY-MM-DD.")
+  }
+  if (formattedDate < MIN_DATE || formattedDate > maxDate()) {
+    return toolError("Errore: la data è fuori dall'intervallo consentito.")
   }
 
+  const descValue =
+    description == null ? null : String(description).trim().slice(0, 200) || null
+  const categoryName =
+    category_name == null ? null : String(category_name).trim().slice(0, 100) || null
+
+  // ── Insert ──
   const admin = createAdminClient()
 
   let category_id: string | null = null
-  if (category_name) {
+  if (categoryName) {
     const { data: cat } = await admin
       .from("categories")
       .select("id")
       .eq("user_id", userId)
-      .ilike("name", `%${String(category_name)}%`)
+      .ilike("name", `%${categoryName}%`)
       .limit(1)
       .single()
     category_id = cat?.id ?? null
@@ -112,28 +172,25 @@ async function handleCreateTransaction(
     .from("transactions")
     .insert({
       user_id: userId,
-      amount: Number(amount),
-      type: String(type),
+      amount: amountNum,
+      type,
       date: formattedDate,
-      description: description ? String(description) : null,
+      description: descValue,
       category_id,
       status: "confirmed",
-      scope: scope ? String(scope) : "personal",
+      scope: scopeValue,
     })
     .select("id")
     .single()
 
   if (error) {
-    return {
-      content: [{ type: "text", text: `Errore durante il salvataggio: ${error.message}` }],
-      isError: true,
-    }
+    return toolError(`Errore durante il salvataggio: ${error.message}`)
   }
 
   const typeLabel = type === "expense" ? "Spesa" : "Entrata"
-  const amountStr = `€${Number(amount).toFixed(2)}`
-  const desc = description ? ` — ${description}` : ""
-  const catMsg = !category_id && category_name ? " (categoria non trovata, salvata senza)" : ""
+  const amountStr = `€${amountNum.toFixed(2)}`
+  const desc = descValue ? ` — ${descValue}` : ""
+  const catMsg = !category_id && categoryName ? " (categoria non trovata, salvata senza)" : ""
 
   return {
     content: [
@@ -142,10 +199,11 @@ async function handleCreateTransaction(
         text: `✅ ${typeLabel} creata: ${amountStr}${desc} del ${formattedDate}${catMsg}. Ora visibile in OurBalance.`,
       },
     ],
+    _transactionId: data.id,
   }
 }
 
-async function handleGetCategories(userId: string) {
+async function handleGetCategories(userId: string): Promise<ToolResult> {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from("categories")
@@ -155,10 +213,7 @@ async function handleGetCategories(userId: string) {
     .order("name", { ascending: true })
 
   if (error || !data) {
-    return {
-      content: [{ type: "text", text: "Errore nel recupero delle categorie." }],
-      isError: true,
-    }
+    return toolError("Errore nel recupero delle categorie.")
   }
 
   const lines = data.map(
@@ -185,14 +240,16 @@ type McpRequest = {
   params?: Record<string, unknown>
 }
 
+const MUTATING_TOOLS = new Set(["create_transaction"])
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
 
-  const userId = await getUserIdFromToken(token)
-  if (!userId) {
+  const auth = await authenticate(token)
+  if (!auth) {
     return NextResponse.json(
       {
         jsonrpc: "2.0",
@@ -202,6 +259,7 @@ export async function POST(
       { status: 401 }
     )
   }
+  const { userId, tokenId } = auth
 
   let body: McpRequest
   try {
@@ -241,22 +299,85 @@ export async function POST(
   }
 
   if (method === "tools/call") {
+    const admin = createAdminClient()
     const toolName = (mcpParams as { name?: string })?.name
     const toolArgs = (mcpParams as { arguments?: Record<string, unknown> })?.arguments ?? {}
 
-    let result
+    // ── Rate limit ──
+    const windowStart = new Date(Date.now() - RATE_LIMIT.windowMs).toISOString()
+    const { count } = await admin
+      .from("mcp_request_log")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", windowStart)
+    if ((count ?? 0) >= RATE_LIMIT.max) {
+      return NextResponse.json(
+        {
+          jsonrpc: "2.0",
+          id,
+          error: { code: -32029, message: "Troppe richieste. Riprova tra un minuto." },
+        },
+        { status: 429 }
+      )
+    }
+
+    // ── Idempotenza (solo tool che scrivono) ──
+    let idempotencyKey: string | null = null
+    if (toolName && MUTATING_TOOLS.has(toolName)) {
+      idempotencyKey = createHash("sha256")
+        .update(`${userId}|${toolName}|${canonicalJSON(toolArgs)}`)
+        .digest("hex")
+      const idemWindow = new Date(Date.now() - IDEMPOTENCY_WINDOW_MS).toISOString()
+      const { data: prior } = await admin
+        .from("mcp_request_log")
+        .select("response_text, is_error")
+        .eq("user_id", userId)
+        .eq("idempotency_key", idempotencyKey)
+        .gte("created_at", idemWindow)
+        .limit(1)
+      if (prior?.length) {
+        return NextResponse.json({
+          jsonrpc: "2.0",
+          id,
+          result: {
+            content: [{ type: "text", text: prior[0].response_text ?? "" }],
+            ...(prior[0].is_error ? { isError: true } : {}),
+          },
+        })
+      }
+    }
+
+    // ── Dispatch ──
+    let result: ToolResult
     if (toolName === "create_transaction") {
       result = await handleCreateTransaction(toolArgs, userId)
     } else if (toolName === "get_categories") {
       result = await handleGetCategories(userId)
     } else {
-      result = {
-        content: [{ type: "text", text: `Tool '${toolName}' non esistente.` }],
-        isError: true,
-      }
+      result = toolError(`Tool '${toolName}' non esistente.`)
     }
 
-    return NextResponse.json({ jsonrpc: "2.0", id, result })
+    // ── Log (serve a idempotenza, rate limit e audit) ──
+    const responseText = result.content?.[0]?.text ?? ""
+    const { error: logError } = await admin.from("mcp_request_log").insert({
+      user_id: userId,
+      token_id: tokenId,
+      method,
+      tool_name: toolName ?? null,
+      request_id: id != null ? String(id) : null,
+      idempotency_key: idempotencyKey,
+      response_text: responseText,
+      created_transaction_id: result._transactionId ?? null,
+      is_error: !!result.isError,
+    })
+    // 23505 = chiamata identica concorrente: restituiamo comunque il risultato.
+    if (logError && logError.code !== "23505") {
+      console.error("[mcp] log insert error:", logError)
+    }
+
+    const { _transactionId, ...clientResult } = result
+    void _transactionId
+    return NextResponse.json({ jsonrpc: "2.0", id, result: clientResult })
   }
 
   return NextResponse.json({
