@@ -15,10 +15,12 @@ type Props = {
 }
 
 export function TransactionsFilters({ q, from, to, category, categories, actions }: Props) {
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const activeFilterCount = [from, to, category].filter(Boolean).length
+  // Il pannello parte aperto se ci sono già filtri avanzati attivi, così l'utente
+  // li vede senza doverlo espandere a mano.
+  const [filtersOpen, setFiltersOpen] = useState(activeFilterCount > 0)
   const [fromDate, setFromDate] = useState(from)
   const [toDate, setToDate] = useState(to)
-  const activeFilterCount = [from, to, category].filter(Boolean).length
   const hasReset = !!(q || from || to || category)
 
   return (
@@ -31,7 +33,7 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
             type="search"
             name="q"
             defaultValue={q}
-            placeholder="Cerca movimenti..."
+            placeholder="Cerca per descrizione o categoria…"
             className="min-w-0 flex-1 bg-transparent font-sans text-sm text-text-1 outline-none placeholder:text-text-3"
           />
         </div>
