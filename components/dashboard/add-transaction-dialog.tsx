@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, TrendingUp, TrendingDown, User, Users } from "lucide-react"
+import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DateInput } from "@/components/ui/date-input"
@@ -62,20 +62,16 @@ export function buildGroupedOptions(categories: CategoryOption[], txType: string
 
 type AddTransactionDialogProps = {
   categories?: CategoryOption[]
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export function AddTransactionDialog({
   categories = [],
-  open: externalOpen,
-  onOpenChange: externalSetOpen,
+  open,
+  onOpenChange: setOpen,
 }: AddTransactionDialogProps) {
   const router = useRouter()
-  const isControlled = externalOpen !== undefined
-  const [internalOpen, setInternalOpen] = useState(false)
-  const open = isControlled ? externalOpen! : internalOpen
-  const setOpen = isControlled ? externalSetOpen! : setInternalOpen
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [amount, setAmount] = useState("")
   const [type, setType] = useState<TransactionType>("expense")
@@ -88,14 +84,8 @@ export function AddTransactionDialog({
   const [confirmationDelay, setConfirmationDelay] = useState(0)
   const { submitting, error, setError, wrap } = useFormState()
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [mounted, setMounted] = useState(false)
   const [suggestedCategoryId, setSuggestedCategoryId] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  // Prevent hydration mismatch by only rendering DialogTrigger client-side
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Keyboard shortcut: press 'N' to open the dialog (unless focus is in an input/textarea)
   useEffect(() => {
@@ -249,20 +239,7 @@ export function AddTransactionDialog({
   }
 
   return (
-    <>
-      {(mounted || isControlled) ? (
-        <Dialog open={open} onOpenChange={setOpen}>
-          {!isControlled && (
-            <DialogTrigger asChild>
-              <Button
-                className="fixed bottom-20 right-6 z-40 h-14 w-14 rounded-full bg-income text-2xl font-semibold text-white shadow-lg hover:bg-income-fg md:bottom-6"
-                size="icon"
-              >
-                <Plus className="h-6 w-6" />
-              </Button>
-            </DialogTrigger>
-          )}
-
+    <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent>
           <DialogHeader>
             <DialogTitle>Aggiungi transazione</DialogTitle>
@@ -281,7 +258,7 @@ export function AddTransactionDialog({
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "income"
                       ? "border-income bg-income-subtle text-income-fg"
-                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                   }`}
                 >
                   <TrendingUp className="h-4 w-4" />
@@ -293,7 +270,7 @@ export function AddTransactionDialog({
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     type === "expense"
                       ? "border-expense bg-expense-subtle text-expense-fg"
-                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                   }`}
                 >
                   <TrendingDown className="h-4 w-4" />
@@ -312,8 +289,8 @@ export function AddTransactionDialog({
                   onClick={() => setScope("personal")}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     scope === "personal"
-                      ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                      ? "border-info bg-info-subtle text-info"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                   }`}
                 >
                   <User className="h-4 w-4" />
@@ -325,7 +302,7 @@ export function AddTransactionDialog({
                   className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                     scope === "family"
                       ? "border-shared bg-shared-subtle text-shared"
-                      : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                      : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                   }`}
                 >
                   <Users className="h-4 w-4" />
@@ -439,7 +416,7 @@ export function AddTransactionDialog({
                           className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                             frequency === f
                               ? "border-pending bg-pending-subtle text-pending-fg"
-                              : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                              : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                           }`}
                         >
                           {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
@@ -478,7 +455,7 @@ export function AddTransactionDialog({
                             className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
                               confirmationDelay === value
                                 ? "border-info bg-info-subtle text-info"
-                                : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                                : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                             }`}
                           >
                             {label}
@@ -512,7 +489,7 @@ export function AddTransactionDialog({
 
               <Button
                 type="submit"
-                className="bg-income text-zinc-950 hover:bg-income-fg"
+                className="bg-income text-white hover:bg-income-fg"
                 disabled={submitting}
               >
                 {submitting ? "Salvataggio..." : isRecurring ? "Crea ricorrenza" : "Salva"}
@@ -520,12 +497,7 @@ export function AddTransactionDialog({
             </div>
           </form>
           </DialogContent>
-        </Dialog>
-      ) : (
-        // Placeholder durante SSR — solo in modalità non controllata (FAB)
-        !isControlled && <div className="fixed bottom-6 right-6 z-40 h-14 w-14" />
-      )}
-    </>
+    </Dialog>
   )
 }
 

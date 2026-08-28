@@ -41,10 +41,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             key={t.id}
             className={`flex min-w-[220px] max-w-sm items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-xl backdrop-blur ${
               t.variant === "error"
-                ? "border-rose-500/30 bg-rose-950/95 text-rose-200"
+                ? "border-expense/30 bg-expense-subtle text-expense-fg"
                 : t.variant === "success"
-                ? "border-emerald-500/30 bg-emerald-950/95 text-emerald-200"
-                : "border-white/15 bg-zinc-900/95 text-zinc-100"
+                ? "border-income/30 bg-income-subtle text-income-fg"
+                : "border-border-subtle bg-surface-1 text-text-1"
             }`}
           >
             <span className="flex-1">{t.message}</span>

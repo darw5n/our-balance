@@ -71,7 +71,7 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-base">
-            <CheckCircle className="h-4 w-4 text-emerald-400" />
+            <CheckCircle className="h-4 w-4 text-income-fg" />
             Conferma {label.toLowerCase()}
           </DialogTitle>
         </DialogHeader>
@@ -109,7 +109,7 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
             <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
               Annulla
             </Button>
-            <Button type="submit" size="sm" disabled={submitting} className="bg-emerald-600 text-white hover:bg-emerald-700">
+            <Button type="submit" size="sm" disabled={submitting} className="bg-income text-white hover:bg-income-fg">
               {submitting ? "Salvataggio…" : "Conferma"}
             </Button>
           </div>

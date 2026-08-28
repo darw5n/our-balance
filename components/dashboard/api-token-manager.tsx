@@ -147,7 +147,7 @@ export function ApiTokenManager({ tokenInfo, mcpUrl }: Props) {
         )}
       </div>
 
-      {error && <p className="text-xs text-rose-400">{error}</p>}
+      {error && <p className="text-xs text-expense-fg">{error}</p>}
 
       {/* Istruzioni */}
       <div className="rounded-xl border border-border-subtle bg-surface-2/30 p-4 space-y-3">

@@ -27,9 +27,9 @@ const MACRO_OPTIONS: { value: MacroCategory | null; label: string }[] = [
 
 const MACRO_ACTIVE: Record<string, string> = {
   none:        "bg-surface-2 text-text-1 border-border-strong",
-  necessita:   "bg-amber-500/15 text-amber-600 border-amber-400/40",
-  svago:       "bg-violet-500/15 text-violet-600 border-violet-400/40",
-  investimenti:"bg-blue-500/15 text-blue-600 border-blue-400/40",
+  necessita:   "bg-pending-subtle text-pending-fg border-pending/40",
+  svago:       "bg-shared-subtle text-shared border-shared/40",
+  investimenti:"bg-info-subtle text-info border-info/40",
 }
 
 type CategoryFormDialogProps = {

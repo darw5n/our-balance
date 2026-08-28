@@ -123,7 +123,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "income"
                     ? "border-income bg-income-subtle text-income-fg"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <TrendingUp className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   type === "expense"
                     ? "border-expense bg-expense-subtle text-expense-fg"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <TrendingDown className="h-4 w-4" />
@@ -154,8 +154,8 @@ export function EditTransactionDialog({
                 onClick={() => setScope("personal")}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "personal"
-                    ? "border-blue-500 bg-blue-500/20 text-blue-400"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                    ? "border-info bg-info-subtle text-info"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <User className="h-4 w-4" />
@@ -167,7 +167,7 @@ export function EditTransactionDialog({
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   scope === "family"
                     ? "border-shared bg-shared-subtle text-shared"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-white/5"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Users className="h-4 w-4" />
@@ -235,7 +235,7 @@ export function EditTransactionDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-2"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -243,7 +243,7 @@ export function EditTransactionDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-income text-zinc-950 hover:bg-income-fg"
+              className="bg-income text-white hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : "Salva"}

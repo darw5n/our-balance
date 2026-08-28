@@ -37,7 +37,7 @@ export default async function SettingsPage() {
 
       <div className="rounded-xl border border-border-subtle bg-surface-1/50 p-5 backdrop-blur">
         {configError ? (
-          <p className="text-sm text-rose-400">
+          <p className="text-sm text-expense-fg">
             Configurazione incompleta: <code className="text-xs">{configError}</code>
           </p>
         ) : (

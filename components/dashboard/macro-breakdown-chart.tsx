@@ -79,8 +79,8 @@ export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
             <tr>
               <td className="py-2">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-sm bg-amber-400" />
-                  <span className="text-amber-500 dark:text-amber-400">Necessità</span>
+                  <span className="h-2.5 w-2.5 rounded-sm bg-pending" />
+                  <span className="text-text-1">Necessità</span>
                 </div>
               </td>
               <td className="py-2 text-right text-text-1">{formatCurrency(necessita / monthsElapsed)}</td>
@@ -90,8 +90,8 @@ export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
             <tr>
               <td className="py-2">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-sm bg-violet-400" />
-                  <span className="text-violet-600 dark:text-violet-400">Svago</span>
+                  <span className="h-2.5 w-2.5 rounded-sm bg-shared" />
+                  <span className="text-text-1">Svago</span>
                 </div>
               </td>
               <td className="py-2 text-right text-text-1">{formatCurrency(svago / monthsElapsed)}</td>
@@ -102,8 +102,8 @@ export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
               <tr>
                 <td className="py-2">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-                    <span className="text-emerald-600 dark:text-emerald-400">Investimenti</span>
+                    <span className="h-2.5 w-2.5 rounded-sm bg-income" />
+                    <span className="text-text-1">Investimenti</span>
                   </div>
                 </td>
                 <td className="py-2 text-right text-text-1">{formatCurrency(investimenti / monthsElapsed)}</td>
@@ -115,8 +115,8 @@ export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
               <tr>
                 <td className="py-2">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-sm bg-sky-400" />
-                    <span className="text-sky-600 dark:text-sky-400">Risparmiato</span>
+                    <span className="h-2.5 w-2.5 rounded-sm bg-info" />
+                    <span className="text-text-1">Risparmiato</span>
                   </div>
                 </td>
                 <td className="py-2 text-right text-text-1">{formatCurrency(risparmi / monthsElapsed)}</td>

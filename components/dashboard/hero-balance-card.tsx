@@ -28,10 +28,10 @@ export function HeroBalanceCard({ summary, monthLabel, viewMode = "personal" }: 
     >
       {/* Top row: label + month badge */}
       <div className="mb-2 flex items-start justify-between">
-        <p className="font-sans text-[10px] font-medium uppercase tracking-wider text-white/40">
+        <p className="font-sans text-[10px] font-medium uppercase tracking-wider text-hero-text/40">
           Saldo disponibile · {new Date().toLocaleDateString("it-IT", { month: "long" })}
         </p>
-        <span className="rounded-[8px] bg-white/10 px-2.5 py-0.5 font-sans text-[11px] font-medium text-white/60">
+        <span className="rounded-[8px] bg-hero-text/10 px-2.5 py-0.5 font-sans text-[11px] font-medium text-hero-text/60">
           {monthLabel}
         </span>
       </div>
@@ -49,20 +49,20 @@ export function HeroBalanceCard({ summary, monthLabel, viewMode = "personal" }: 
         style={{ borderColor: "rgba(255,255,255,0.08)" }}
       >
         <div>
-          <p className="font-sans text-[10px] text-white/40 mb-0.5">Entrate</p>
+          <p className="font-sans text-[10px] text-hero-text/40 mb-0.5">Entrate</p>
           <p className="font-sans text-sm font-semibold text-hero-income">
             +{formatCurrency(entrateTotale)}
           </p>
         </div>
         <div className={viewMode !== "family" ? "border-x px-2" : "pl-2"} style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-          <p className="font-sans text-[10px] text-white/40 mb-0.5">Uscite</p>
+          <p className="font-sans text-[10px] text-hero-text/40 mb-0.5">Uscite</p>
           <p className="font-sans text-sm font-semibold text-hero-expense">
             -{formatCurrency(summary.uscite)}
           </p>
         </div>
         {viewMode !== "family" && (
           <div className="pl-2">
-            <p className="font-sans text-[10px] text-white/40 mb-0.5">Risparmio</p>
+            <p className="font-sans text-[10px] text-hero-text/40 mb-0.5">Risparmio</p>
             <p className="font-sans text-sm font-semibold text-hero-text/70">
               {entrateTotale > 0 ? `${savingsRate}%` : "—"}
             </p>

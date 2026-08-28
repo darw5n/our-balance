@@ -127,7 +127,7 @@ export function BudgetFormDialog({
             <Button
               type="button"
               variant="outline"
-              className="border-border-subtle bg-transparent text-text-1 hover:bg-white/5"
+              className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-2"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
@@ -135,7 +135,7 @@ export function BudgetFormDialog({
             </Button>
             <Button
               type="submit"
-              className="bg-income text-zinc-950 hover:bg-income-fg"
+              className="bg-income text-white hover:bg-income-fg"
               disabled={submitting}
             >
               {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}

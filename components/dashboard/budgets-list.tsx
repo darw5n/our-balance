@@ -91,7 +91,7 @@ export function BudgetsList({
           {canAddMore && (
             <Button
               onClick={openCreate}
-              className="bg-income text-zinc-950 hover:bg-income-fg"
+              className="bg-income text-white hover:bg-income-fg"
               size="sm"
             >
               <Plus className="mr-2 h-4 w-4" />

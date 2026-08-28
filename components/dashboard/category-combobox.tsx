@@ -42,7 +42,7 @@ function CategoryList({
       <button
         type="button"
         onClick={() => onSelect("")}
-        className={`flex w-full items-center px-4 py-3 text-sm hover:bg-white/5 ${
+        className={`flex w-full items-center px-4 py-3 text-sm hover:bg-surface-2 ${
           !value ? "text-text-1" : "text-text-2"
         }`}
       >
@@ -58,7 +58,7 @@ function CategoryList({
               key={cat.id}
               type="button"
               onClick={() => onSelect(cat.id)}
-              className={`flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 ${
+              className={`flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-surface-2 ${
                 value === cat.id ? "text-text-1" : "text-text-2"
               }`}
             >
@@ -84,7 +84,7 @@ function CategoryList({
                 key={cat.id}
                 type="button"
                 onClick={() => onSelect(cat.id)}
-                className={`flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 ${
+                className={`flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-surface-2 ${
                   value === cat.id ? "text-text-1" : "text-text-2"
                 }`}
               >
@@ -164,7 +164,7 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-white/5 hover:text-text-1"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text-1"
                 aria-label="Chiudi"
               >
                 <ArrowLeft className="h-5 w-5" />
