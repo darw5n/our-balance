@@ -30,6 +30,9 @@ export function useFormState() {
     setSubmitting(true)
     try {
       await fn()
+    } catch (err) {
+      console.error("[useFormState] Errore non gestito:", err)
+      setError("Qualcosa è andato storto. Riprova.")
     } finally {
       setSubmitting(false)
     }

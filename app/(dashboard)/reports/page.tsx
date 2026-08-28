@@ -94,12 +94,8 @@ export default async function ReportsPage({
           </p>
         </div>
         {isFutureYear ? (
-          <span
-            className="flex h-8 w-8 cursor-not-allowed items-center justify-center rounded-[10px] border border-border-subtle text-text-3"
-            aria-disabled="true"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </span>
+          /* Nessun anno futuro navigabile: spaziatore per tenere il titolo centrato */
+          <span className="block h-8 w-8" aria-hidden="true" />
         ) : (
           <a
             href={makeUrl(safeYear + 1)}

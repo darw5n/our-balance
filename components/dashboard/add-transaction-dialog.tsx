@@ -16,6 +16,12 @@ import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 import { validateAmount } from "@/lib/utils"
 import { useFormState } from "@/lib/hooks/use-form-state"
 
+const CONFIRMATION_DELAY_OPTIONS = [
+  { value: 0, label: "Immediato", hint: "Si conferma nel mese di competenza" },
+  { value: 1, label: "+1 ciclo", hint: "Es. stipendio feb → conferma mar" },
+  { value: 2, label: "+2 cicli", hint: "Es. stipendio gen → conferma mar" },
+] as const
+
 export type CategoryOption = {
   id: string
   name: string
@@ -463,11 +469,7 @@ export function AddTransactionDialog({
                     <div className="ml-7 space-y-1.5">
                       <p className="text-xs text-text-2">Quando chiedere conferma?</p>
                       <div className="flex gap-2">
-                        {([
-                          { value: 0, label: "Immediato", hint: "Si conferma nel mese di competenza" },
-                          { value: 1, label: "+1 ciclo", hint: "Es. stipendio feb → conferma mar" },
-                          { value: 2, label: "+2 cicli", hint: "Es. stipendio gen → conferma mar" },
-                        ] as const).map(({ value, label, hint }) => (
+                        {CONFIRMATION_DELAY_OPTIONS.map(({ value, label, hint }) => (
                           <button
                             key={value}
                             type="button"
@@ -484,11 +486,7 @@ export function AddTransactionDialog({
                         ))}
                       </div>
                       <p className="text-[11px] text-text-3">
-                        {[
-                          { value: 0, hint: "Si conferma nel mese di competenza" },
-                          { value: 1, hint: "Es. stipendio feb → conferma mar" },
-                          { value: 2, hint: "Es. stipendio gen → conferma mar" },
-                        ].find((o) => o.value === confirmationDelay)?.hint}
+                        {CONFIRMATION_DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
                       </p>
                     </div>
                   )}

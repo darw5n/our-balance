@@ -2,28 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import {
-  Pencil,
-  Trash2,
-  Plus,
-  // Group icons (section headers)
-  UtensilsCrossed,
-  PawPrint,
-  Home,
-  Zap,
-  BarChart2,
-  BookOpen,
-  Activity,
-  ShoppingBag,
-  Smile,
-  Car,
-  Plane,
-  Wallet,
-  MoreHorizontal,
-  Tag,
-  type LucideIcon,
-} from "lucide-react"
-import { CATEGORY_ICONS } from "@/lib/category-icons"
+import { Pencil, Trash2, Plus, Tag } from "lucide-react"
+import { getCategoryIcon, GROUP_ICONS } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { CategoryFormDialog } from "@/components/dashboard/category-form-dialog"
@@ -34,26 +14,6 @@ import { useToast } from "@/components/ui/toast-provider"
 import { useConfirm } from "@/components/ui/confirm-dialog"
 import { formatAmount } from "@/lib/utils"
 
-// Icon per group (section header)
-const GROUP_ICONS: Record<string, LucideIcon> = {
-  Alimentari: UtensilsCrossed,
-  Animali: PawPrint,
-  Altro: MoreHorizontal,
-  Casa: Home,
-  Utenze: Zap,
-  Finanza: BarChart2,
-  Formazione: BookOpen,
-  Salute: Activity,
-  Shopping: ShoppingBag,
-  Svago: Smile,
-  Trasporti: Car,
-  Viaggi: Plane,
-  Entrate: Wallet,
-}
-
-function getCategoryIcon(cat: Category): LucideIcon {
-  return CATEGORY_ICONS[cat.name] ?? GROUP_ICONS[cat.group_name ?? ""] ?? Tag
-}
 
 type CategoriesListProps = {
   categories: Category[]
@@ -165,7 +125,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                   </div>
                   <ul className="grid gap-2 sm:grid-cols-2">
                     {items.map((cat) => {
-                      const Icon = getCategoryIcon(cat)
+                      const Icon = getCategoryIcon(cat.name, cat.group_name)
                       const b = budgetMap.get(cat.id)
                       return (
                         <li key={cat.id}>

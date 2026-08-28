@@ -33,6 +33,16 @@ import {
   Briefcase,
   Banknote,
   Tag,
+  UtensilsCrossed,
+  PawPrint,
+  Home,
+  Zap,
+  BarChart2,
+  Activity,
+  ShoppingBag,
+  Smile,
+  Wallet,
+  MoreHorizontal,
   type LucideIcon,
 } from "lucide-react"
 
@@ -88,6 +98,26 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Stipendio": Banknote,
 }
 
-export function getCategoryIcon(name: string): LucideIcon {
-  return CATEGORY_ICONS[name] ?? Tag
+/** Icona per gruppo di categorie (intestazioni di sezione). */
+export const GROUP_ICONS: Record<string, LucideIcon> = {
+  Alimentari: UtensilsCrossed,
+  Animali: PawPrint,
+  Altro: MoreHorizontal,
+  Casa: Home,
+  Utenze: Zap,
+  Finanza: BarChart2,
+  Formazione: BookOpen,
+  Salute: Activity,
+  Shopping: ShoppingBag,
+  Svago: Smile,
+  Trasporti: Car,
+  Viaggi: Plane,
+  Entrate: Wallet,
+}
+
+/**
+ * Icona per una categoria: prima per nome esatto, poi per gruppo, infine `Tag`.
+ */
+export function getCategoryIcon(name: string, groupName?: string | null): LucideIcon {
+  return CATEGORY_ICONS[name] ?? GROUP_ICONS[groupName ?? ""] ?? Tag
 }
