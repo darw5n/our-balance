@@ -113,8 +113,8 @@ export default function SignupPage() {
       <div className="flex min-h-screen items-center justify-center bg-surface-0 px-4">
         <div className="w-full max-w-sm space-y-6 text-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="rounded-full border border-income/30 bg-income-subtle p-4">
-              <Mail className="h-8 w-8 text-income-fg" />
+            <div className="rounded-full border border-accent-brand/30 bg-accent-brand-bg p-4">
+              <Mail className="h-8 w-8 text-accent-brand" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-text-1">Controlla la email</h1>
