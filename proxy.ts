@@ -1,8 +1,28 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+/**
+ * Prefissi di URL che richiedono l'autenticazione.
+ * Corrispondono alle pagine dentro il route group /app/(dashboard).
+ */
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/transactions",
+  "/reports",
+  "/recurring",
+  "/budgets",
+  "/categories",
+  "/settings",
+]
+
+function isProtectedPath(pathname: string): boolean {
+  return PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  )
+}
+
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -26,19 +46,14 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - required for Server Components and Server Actions
+  // Refresh della sessione se scaduta — necessario per Server Components e Server Actions.
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser()
 
-  // Log for debugging (only in development)
-  if (process.env.NODE_ENV === "development") {
-    if (error) {
-      console.log("[Middleware] Auth error:", error.message)
-    } else {
-      console.log("[Middleware] User authenticated:", user?.id ? `Yes (${user.id})` : "No")
-    }
+  // Route protette: se non autenticato, redirect al login.
+  if (!user && isProtectedPath(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
   return response

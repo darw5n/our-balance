@@ -5,7 +5,7 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getServerUser()
-  if (!user) redirect("/")
+  if (!user) redirect("/login")
 
   const categories = await getCategories(user.id)
 

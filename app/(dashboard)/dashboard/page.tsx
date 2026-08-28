@@ -40,6 +40,10 @@ export default async function DashboardPage({
     )
   }
 
+  // Unico punto in cui le ricorrenze vengono elaborate al caricamento pagina.
+  // La query è indicizzata su next_due_date e nel caso normale (niente in
+  // scadenza) torna vuota subito. La logica di recupero gestisce i cicli
+  // arretrati quando l'app non viene aperta per un po'.
   await processRecurringTransactions(user.id)
 
   const currentYear = new Date().getUTCFullYear()

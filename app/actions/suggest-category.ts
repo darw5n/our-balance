@@ -10,11 +10,21 @@ import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server
  * 1. Full description ILIKE match → find most-used category
  * 2. If no result, fallback to individual words (≥3 chars)
  */
+/**
+ * Rimuove i caratteri che hanno significato speciale nella grammatica del
+ * filtro PostgREST `.or()` (virgole, parentesi, punti) e i metacaratteri
+ * LIKE (`%`, `_`, `\`). Senza questo, una descrizione tipo "bar, ) pizza"
+ * potrebbe alterare o rompere la query.
+ */
+function sanitizeSearchTerm(term: string): string {
+  return term.replace(/[,()."%_\\]/g, " ").trim()
+}
+
 export async function suggestCategory(
   description: string,
   type: string
 ): Promise<string | null> {
-  const desc = description.trim()
+  const desc = sanitizeSearchTerm(description)
   if (desc.length < 3) return null
 
   const user = await getServerUser()

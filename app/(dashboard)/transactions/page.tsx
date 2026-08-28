@@ -1,13 +1,13 @@
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { getTransactionYears, type ViewMode } from "@/lib/supabase/queries/transactions"
+import { applyScope } from "@/lib/supabase/query-utils"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
 import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
 import { TransactionsTabs } from "@/components/dashboard/transactions-tabs"
 import { CategoryComparisonView } from "@/components/dashboard/category-comparison-view"
 import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
 import { TransactionsSummary } from "@/components/dashboard/transactions-summary"
-import { processRecurringTransactions } from "@/app/actions/recurring"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import type { Category } from "@/lib/supabase/queries/categories"
@@ -21,7 +21,7 @@ async function getTransactions(
   let query = supabase
     .from("transactions")
     .select("id, date, created_at, amount, description, type, status, scope, category_id")
-    .eq("user_id", userId) as any
+    .eq("user_id", userId)
 
   if (filter?.from) query = query.gte("date", filter.from)
   if (filter?.to) query = query.lte("date", filter.to)
@@ -54,8 +54,6 @@ export default async function TransactionsPage({
 
   const tab = params?.tab === "confronto" ? "confronto" : "lista"
   const viewMode: ViewMode = params?.view === "family" ? "family" : "personal"
-
-  if (user?.id) await processRecurringTransactions(user.id)
 
   const header = (
     <div className="space-y-4">
@@ -126,7 +124,7 @@ export default async function TransactionsPage({
   const { totalIncome, totalExpense } = transactions.reduce(
     (acc, tx) => {
       const raw = Math.abs(Number(tx.amount) || 0)
-      const amount = tx.scope === "family" ? raw * 0.5 : raw
+      const amount = applyScope(raw, tx.scope, "personal")
       if (tx.type === "income") acc.totalIncome += amount
       else acc.totalExpense += amount
       return acc
