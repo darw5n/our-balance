@@ -12,11 +12,13 @@ export type RecurringTransaction = {
   category_id: string | null
   frequency: "weekly" | "monthly" | "yearly"
   start_date: string
+  end_date: string | null
   next_due_date: string
   requires_confirmation: boolean
   confirmation_delay: number
   pending_confirmation: boolean
   is_active: boolean
+  status: "active" | "paused" | "ended"
   created_at: string
   category?: { name: string; color: string } | null
 }
@@ -60,6 +62,7 @@ export const getUpcomingRecurring = cache(async function getUpcomingRecurring(us
     .select("*, categories ( name, color )")
     .eq("user_id", userId)
     .eq("is_active", true)
+    .eq("status", "active")
     .eq("pending_confirmation", false)
     .gt("next_due_date", now.toISOString())
     .lte("next_due_date", future.toISOString())
@@ -87,6 +90,7 @@ export const getPendingConfirmations = cache(async function getPendingConfirmati
     .eq("user_id", userId)
     .eq("pending_confirmation", true)
     .eq("is_active", true)
+    .in("status", ["active", "ended"])
 
   if (error) {
     console.error("[getPendingConfirmations] Error:", error.message, error.code, error.details)
@@ -105,18 +109,34 @@ export const getPendingConfirmations = cache(async function getPendingConfirmati
     // confirmation prompt appeared — avoids re-showing a stale template amount.
     const dueDate = rewindDate(mapped.next_due_date, mapped.frequency)
     const pendingDate = pendingTransactionDate(dueDate, mapped.type)
-    let pendingTxQuery = supabase
+
+    // Prefer the explicit link (oldest still-pending cycle); fall back to the
+    // (date, type, description) heuristic for rows created before recurring_id.
+    const { data: linkedTx } = await supabase
       .from("transactions")
       .select("amount")
       .eq("user_id", userId)
-      .eq("date", pendingDate)
+      .eq("recurring_id", mapped.id)
       .eq("status", "pending")
-      .eq("type", mapped.type)
+      .order("date", { ascending: true })
       .limit(1)
-    pendingTxQuery = mapped.description
-      ? pendingTxQuery.eq("description", mapped.description)
-      : pendingTxQuery.is("description", null)
-    const { data: pendingTx } = await pendingTxQuery
+
+    let pendingTx = linkedTx
+    if (!pendingTx?.length) {
+      let pendingTxQuery = supabase
+        .from("transactions")
+        .select("amount")
+        .eq("user_id", userId)
+        .eq("date", pendingDate)
+        .eq("status", "pending")
+        .eq("type", mapped.type)
+        .limit(1)
+      pendingTxQuery = mapped.description
+        ? pendingTxQuery.eq("description", mapped.description)
+        : pendingTxQuery.is("description", null)
+      const { data: heuristic } = await pendingTxQuery
+      pendingTx = heuristic
+    }
 
     if (pendingTx?.[0]?.amount != null) {
       mapped.amount = pendingTx[0].amount

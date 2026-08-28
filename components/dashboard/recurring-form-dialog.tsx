@@ -51,6 +51,7 @@ export function RecurringFormDialog({
   const [categoryId, setCategoryId] = useState("")
   const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
   const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
   const [confirmationDelay, setConfirmationDelay] = useState(0)
   const { submitting, error, setError, wrap } = useFormState()
@@ -66,6 +67,7 @@ export function RecurringFormDialog({
       setCategoryId(recurring?.category_id ?? "")
       setFrequency(recurring?.frequency ?? "monthly")
       setStartDate(recurring?.start_date ?? "")
+      setEndDate(recurring?.end_date ?? "")
       setRequiresConfirmation(recurring?.requires_confirmation ?? false)
       setConfirmationDelay(recurring?.confirmation_delay ?? 0)
       setError(null)
@@ -110,6 +112,10 @@ export function RecurringFormDialog({
       setError("La data di inizio è obbligatoria.")
       return
     }
+    if (endDate && endDate < startDate) {
+      setError("La data di fine deve essere successiva alla data di inizio.")
+      return
+    }
 
     await wrap(async () => {
       const input: CreateRecurringInput = {
@@ -120,6 +126,7 @@ export function RecurringFormDialog({
         category_id: categoryId || null,
         frequency,
         start_date: startDate,
+        end_date: endDate || null,
         requires_confirmation: requiresConfirmation,
         confirmation_delay: requiresConfirmation ? confirmationDelay : 0,
       }
@@ -289,6 +296,22 @@ export function RecurringFormDialog({
               onChange={setStartDate}
               className="border-border-subtle bg-surface-0 text-text-1"
             />
+          </div>
+
+          {/* End Date (optional) */}
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-text-2" htmlFor="rec-end">
+              Data fine <span className="text-text-3">(opzionale)</span>
+            </label>
+            <DateInput
+              id="rec-end"
+              value={endDate}
+              onChange={setEndDate}
+              className="border-border-subtle bg-surface-0 text-text-1"
+            />
+            <p className="text-[11px] text-text-3">
+              Dopo questa data la ricorrenza non genera più movimenti.
+            </p>
           </div>
 
           {/* Requires confirmation */}

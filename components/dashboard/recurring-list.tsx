@@ -2,13 +2,17 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Plus, RefreshCw } from "lucide-react"
+import { Pencil, Trash2, Plus, RefreshCw, Pause, Play } from "lucide-react"
 import { getCategoryIcon } from "@/lib/category-icons"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { RecurringFormDialog } from "@/components/dashboard/recurring-form-dialog"
-import { deleteRecurringTransaction } from "@/app/actions/recurring"
+import {
+  deleteRecurringTransaction,
+  pauseRecurringTransaction,
+  resumeRecurringTransaction,
+} from "@/app/actions/recurring"
 import type { RecurringTransaction } from "@/lib/supabase/queries/recurring"
 import type { Category } from "@/lib/supabase/queries/categories"
 import { useToast } from "@/components/ui/toast-provider"
@@ -19,6 +23,8 @@ const FREQUENCY_LABEL: Record<string, string> = {
   monthly: "Mensile",
   yearly: "Annuale",
 }
+
+const STATUS_ORDER: Record<string, number> = { active: 0, paused: 1, ended: 2 }
 
 type RecurringListProps = {
   recurring: RecurringTransaction[]
@@ -37,6 +43,14 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
   useEffect(() => {
     setRecurring(initialRecurring)
   }, [initialRecurring])
+
+  const sorted = useMemo(
+    () => [...recurring].sort((a, b) => (STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0)),
+    [recurring]
+  )
+  const activeCount = recurring.filter((r) => r.status === "active").length
+  const pausedCount = recurring.filter((r) => r.status === "paused").length
+  const endedCount = recurring.filter((r) => r.status === "ended").length
 
   function handleSuccess() {
     router.refresh()
@@ -74,12 +88,36 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     }
   }
 
+  async function handlePause(rec: RecurringTransaction) {
+    const result = await pauseRecurringTransaction(rec.id)
+    if (result.success) {
+      setRecurring((prev) => prev.map((r) => (r.id === rec.id ? { ...r, status: "paused" } : r)))
+      toast("Ricorrenza in pausa.", "success")
+      router.refresh()
+    } else {
+      toast(result.error ?? "Errore.", "error")
+    }
+  }
+
+  async function handleResume(rec: RecurringTransaction) {
+    const result = await resumeRecurringTransaction(rec.id)
+    if (result.success) {
+      setRecurring((prev) => prev.map((r) => (r.id === rec.id ? { ...r, status: "active" } : r)))
+      toast("Ricorrenza riattivata.", "success")
+      router.refresh()
+    } else {
+      toast(result.error ?? "Errore.", "error")
+    }
+  }
+
   return (
     <>
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-text-2">
-            {recurring.length} {recurring.length === 1 ? "ricorrenza attiva" : "ricorrenze attive"}
+            {activeCount} {activeCount === 1 ? "ricorrenza attiva" : "ricorrenze attive"}
+            {pausedCount > 0 && ` · ${pausedCount} in pausa`}
+            {endedCount > 0 && ` · ${endedCount} conclus${endedCount === 1 ? "a" : "e"}`}
           </p>
           <Button
             onClick={openCreate}
@@ -108,14 +146,18 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
           </Card>
         ) : (
           <ul className="space-y-2">
-            {recurring.map((rec) => (
+            {sorted.map((rec) => {
+              const isPaused = rec.status === "paused"
+              const isEnded = rec.status === "ended"
+              const dimmed = isPaused || isEnded
+              return (
               <li key={rec.id}>
-                <Card className="flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur">
+                <Card className={`flex items-center justify-between border-border-subtle bg-surface-1/50 p-4 backdrop-blur ${dimmed ? "opacity-60" : ""}`}>
                   <div className="flex items-center gap-3 min-w-0">
                     {(() => {
                       const cat = rec.category_id ? catMap.get(rec.category_id) : undefined
                       const hasEmoji = !!cat?.emoji
-                      const CatIcon = getCategoryIcon(cat?.name ?? "")
+                      const CatIcon = getCategoryIcon(cat?.name ?? "", cat?.group_name)
                       return (
                         <div className="w-11 h-11 rounded-[14px] bg-surface-2 flex items-center justify-center text-[19px] flex-shrink-0">
                           {hasEmoji ? cat!.emoji : <CatIcon className="h-5 w-5 text-text-3" />}
@@ -125,10 +167,14 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <div className="min-w-0">
                       <p className="font-sans text-sm font-medium text-text-1 truncate">
                         {rec.description || "Senza descrizione"}
+                        {isPaused && <span className="ml-2 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-text-3">In pausa</span>}
+                        {isEnded && <span className="ml-2 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-text-3">Conclusa</span>}
                       </p>
                       <p className="font-sans text-[11px] text-text-3">
                         {FREQUENCY_LABEL[rec.frequency]}
-                        {rec.next_due_date ? ` · ${formatDate(rec.next_due_date)}` : ""}
+                        {isEnded
+                          ? rec.end_date ? ` · conclusa il ${formatDate(rec.end_date)}` : ""
+                          : rec.next_due_date ? ` · ${formatDate(rec.next_due_date)}` : ""}
                       </p>
                     </div>
                   </div>
@@ -136,6 +182,27 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                     <span className={`font-sans font-semibold text-sm mr-1 ${rec.type === "income" ? "text-income-fg" : "text-accent-brand"}`}>
                       {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
                     </span>
+                    {isPaused ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-text-2 hover:text-income-fg"
+                        onClick={() => handleResume(rec)}
+                        aria-label="Riprendi"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                    ) : !isEnded ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-text-2 hover:text-text-1"
+                        onClick={() => handlePause(rec)}
+                        aria-label="Metti in pausa"
+                      >
+                        <Pause className="h-4 w-4" />
+                      </Button>
+                    ) : null}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -157,7 +224,8 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                   </div>
                 </Card>
               </li>
-            ))}
+              )
+            })}
           </ul>
         )}
       </div>
