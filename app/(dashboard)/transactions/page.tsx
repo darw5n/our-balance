@@ -8,7 +8,6 @@ import { TransactionsTabs } from "@/components/dashboard/transactions-tabs"
 import { CategoryComparisonView } from "@/components/dashboard/category-comparison-view"
 import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
 import { TransactionsSummary } from "@/components/dashboard/transactions-summary"
-import { processRecurringTransactions } from "@/app/actions/recurring"
 import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import type { Category } from "@/lib/supabase/queries/categories"
@@ -55,8 +54,6 @@ export default async function TransactionsPage({
 
   const tab = params?.tab === "confronto" ? "confronto" : "lista"
   const viewMode: ViewMode = params?.view === "family" ? "family" : "personal"
-
-  if (user?.id) await processRecurringTransactions(user.id)
 
   const header = (
     <div className="space-y-4">
