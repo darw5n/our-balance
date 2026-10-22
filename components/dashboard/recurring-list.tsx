@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus, RefreshCw, Pause, Play } from "lucide-react"
 import { getCategoryIcon } from "@/lib/category-icons"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -32,7 +31,6 @@ type RecurringListProps = {
 }
 
 export function RecurringList({ recurring: initialRecurring, categories }: RecurringListProps) {
-  const router = useRouter()
   const toast = useToast()
   const confirm = useConfirm()
   const [recurring, setRecurring] = useState(initialRecurring)
@@ -53,7 +51,6 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
   const endedCount = recurring.filter((r) => r.status === "ended").length
 
   function handleSuccess() {
-    router.refresh()
     setFormOpen(false)
     setEditingRecurring(null)
   }
@@ -82,7 +79,6 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     if (result.success) {
       setRecurring((prev) => prev.filter((r) => r.id !== rec.id))
       toast(`"${label}" eliminata.`, "success")
-      router.refresh()
     } else {
       toast(result.error ?? "Errore durante l'eliminazione.", "error")
     }
@@ -93,7 +89,6 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     if (result.success) {
       setRecurring((prev) => prev.map((r) => (r.id === rec.id ? { ...r, status: "paused" } : r)))
       toast("Ricorrenza in pausa.", "success")
-      router.refresh()
     } else {
       toast(result.error ?? "Errore.", "error")
     }
@@ -104,7 +99,6 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
     if (result.success) {
       setRecurring((prev) => prev.map((r) => (r.id === rec.id ? { ...r, status: "active" } : r)))
       toast("Ricorrenza riattivata.", "success")
-      router.refresh()
     } else {
       toast(result.error ?? "Errore.", "error")
     }

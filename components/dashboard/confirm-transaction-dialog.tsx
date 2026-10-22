@@ -15,7 +15,7 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   transaction: Transaction | null
-  onSuccess: () => void
+  onSuccess?: () => void
 }
 
 function todayISO() {
@@ -57,7 +57,7 @@ export function ConfirmTransactionDialog({ open, onOpenChange, transaction, onSu
         return
       }
       onOpenChange(false)
-      onSuccess()
+      onSuccess?.()
     })
   }
 

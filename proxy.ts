@@ -47,12 +47,12 @@ export async function proxy(request: NextRequest) {
   )
 
   // Refresh della sessione se scaduta — necessario per Server Components e Server Actions.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getClaims() verifica il JWT in locale: niente chiamata al server Auth a ogni richiesta.
+  const { data } = await supabase.auth.getClaims()
+  const isAuthenticated = Boolean(data?.claims?.sub)
 
   // Route protette: se non autenticato, redirect al login.
-  if (!user && isProtectedPath(request.nextUrl.pathname)) {
+  if (!isAuthenticated && isProtectedPath(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/login", request.url))
   }
 
@@ -66,8 +66,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
+     * - public folder (immagini, manifest.json)
+     * - api/mcp (autenticato col token personale, non con la sessione)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|api/mcp|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 }

@@ -231,6 +231,7 @@ export async function confirmTransaction(
   }
 
   revalidatePath("/dashboard")
+  revalidatePath("/transactions")
   return result
 }
 

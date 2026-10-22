@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
@@ -31,7 +30,6 @@ export function BudgetsList({
   categoriesWithoutBudget: initialCategoriesWithoutBudget,
   hasCategories,
 }: BudgetsListProps) {
-  const router = useRouter()
   const toast = useToast()
   const confirm = useConfirm()
   const [budgets, setBudgets] = useState(initialBudgets)
@@ -46,7 +44,6 @@ export function BudgetsList({
   const [editingBudget, setEditingBudget] = useState<BudgetWithProgress | null>(null)
 
   function handleSuccess() {
-    router.refresh()
     setFormOpen(false)
     setEditingBudget(null)
   }
@@ -73,7 +70,6 @@ export function BudgetsList({
     if (result.success) {
       setBudgets((prev) => prev.filter((b) => b.id !== budget.id))
       toast(`Budget per "${budget.category_name}" eliminato.`, "success")
-      router.refresh()
     } else {
       toast(result.error ?? "Errore durante l'eliminazione.", "error")
     }
