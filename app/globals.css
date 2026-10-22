@@ -359,8 +359,8 @@
   animation: content-in 180ms ease backwards;
 }
 
-/* Lo skeleton aspetta 120 ms: se i dati arrivano prima, non lampeggia. */
-.route-fade > :has(.skeleton) {
+/* Lo skeleton (radice con data-loading) aspetta 120 ms: se i dati arrivano prima, non lampeggia. */
+.route-fade > [data-loading] {
   animation-delay: 120ms;
 }
 

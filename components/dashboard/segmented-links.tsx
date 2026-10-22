@@ -49,9 +49,7 @@ export function SegmentedLinks({ segments, active, tabsLabel, replace }: Segment
             role={tabsLabel ? "tab" : undefined}
             aria-selected={tabsLabel ? isShown : undefined}
             aria-current={!tabsLabel && isShown ? "page" : undefined}
-            onClick={() => {
-              if (value !== active) setPending({ from: active, value })
-            }}
+            onClick={() => setPending({ from: active, value })}
             className={`relative z-10 flex min-h-11 flex-1 items-center justify-center whitespace-nowrap rounded-full px-3 py-2 font-sans text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               isShown ? "text-text-1" : "text-text-3 hover:text-text-2"
             }`}

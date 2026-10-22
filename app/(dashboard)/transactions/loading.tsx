@@ -1,6 +1,6 @@
 export default function TransactionsLoading() {
   return (
-    <div className="space-y-6">
+    <div data-loading className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <div className="skeleton h-8 w-40 !rounded-lg" />

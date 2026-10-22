@@ -29,7 +29,7 @@ function ListCardSkeleton({ rows }: { rows: number }) {
 /** Grafico cashflow + "Dove vanno i soldi" + "Movimenti recenti". */
 export function DashboardDetailsSkeleton() {
   return (
-    <div className="space-y-3" aria-hidden="true">
+    <div data-loading className="space-y-3" aria-hidden="true">
       <Card className="p-5">
         <div className="space-y-2">
           <div className="skeleton h-5 w-44" />
