@@ -50,7 +50,7 @@ export function DashboardTopSkeleton() {
       <div className="pt-1 pb-2">
         <div className="skeleton h-8 w-36" />
         <div className="skeleton mt-2 mb-4 h-3 w-64" />
-        <div className="skeleton h-11 w-full !rounded-[14px]" />
+        <div className="skeleton h-[52px] w-full !rounded-[14px]" />
       </div>
       <div className="skeleton mt-3 h-[196px] w-full !rounded-[22px]" />
     </div>

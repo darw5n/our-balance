@@ -13,6 +13,12 @@ export const TOOLTIP_STYLE = {
   fontSize: 12,
 }
 
+/**
+ * Animazione delle serie: breve e senza rimbalzi (il default di Recharts dura 1,5 s).
+ * Da usare con `isAnimationActive={!reduceMotion}`.
+ */
+export const SERIES_ANIMATION = { animationDuration: 600, animationEasing: "ease-out" } as const
+
 /** Mesi abbreviati minuscoli — combaciano con le chiavi di `Intl` month:"short" it-IT. */
 export const MONTHS_SHORT = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
 

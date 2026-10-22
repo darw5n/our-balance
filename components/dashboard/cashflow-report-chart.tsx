@@ -14,7 +14,8 @@ import {
 } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
-import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL } from "@/components/dashboard/charts/chart-config"
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL, SERIES_ANIMATION } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -32,6 +33,7 @@ const LEGEND_LABELS: Record<string, string> = {
 
 export function CashflowReportChart({ data, year, viewMode = "personal" }: Props) {
   const isMobile = useIsMobile()
+  const reduceMotion = useReducedMotion()
   const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
 
   const isFamily = viewMode === "family"
@@ -81,13 +83,15 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
             {!isFamily && <ReferenceLine y={0} stroke="var(--border-strong)" strokeDasharray="4 3" />}
             {!isFamily && (
               <>
-                <Bar dataKey="entrate" stackId="e" fill="var(--income-fg)" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="entrate_provvisorie" stackId="e" fill="var(--income-fg)" fillOpacity={0.35} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="entrate" stackId="e" fill="var(--income-fg)" radius={[0, 0, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
+                <Bar dataKey="entrate_provvisorie" stackId="e" fill="var(--income-fg)" fillOpacity={0.35} radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
               </>
             )}
-            <Bar dataKey="uscite" fill="var(--expense-fg)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="uscite" fill="var(--expense-fg)" radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
             {!isFamily && (
               <Line
+                {...SERIES_ANIMATION}
+                isAnimationActive={!reduceMotion}
                 type="monotone"
                 dataKey="netto"
                 stroke="var(--info)"
