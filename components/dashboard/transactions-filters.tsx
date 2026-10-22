@@ -1,6 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useFormStatus } from "react-dom"
+import Form from "next/form"
+import Link from "next/link"
 import { Search, SlidersHorizontal, ChevronDown, X } from "lucide-react"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import { DateInput } from "@/components/ui/date-input"
@@ -14,6 +17,20 @@ type Props = {
   actions?: React.ReactNode
 }
 
+/** Nel modulo: mentre la nuova lista arriva, il pulsante dice che sta lavorando. */
+function ApplyButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="col-span-2 h-11 rounded-full bg-accent-brand px-4 font-sans text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {pending ? "Applico…" : "Applica"}
+    </button>
+  )
+}
+
 export function TransactionsFilters({ q, from, to, category, categories, actions }: Props) {
   const activeFilterCount = [from, to, category].filter(Boolean).length
   // Il pannello parte aperto se ci sono già filtri avanzati attivi, così l'utente
@@ -24,7 +41,8 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
   const hasReset = !!(q || from || to || category)
 
   return (
-    <form action="/transactions" method="get" className="space-y-2">
+    // next/form naviga lato client (niente ricarica completa) e aggiorna l'URL con i campi.
+    <Form action="/transactions" scroll={false} className="space-y-2">
       {/* Search bar + Filtra pill */}
       <div className="flex items-center gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-border-subtle bg-surface-1 px-4 py-2.5 focus-within:border-ring">
@@ -80,24 +98,20 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
             <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-3" />
           </div>
 
-          <button
-            type="submit"
-            className="col-span-2 h-8 rounded-full bg-accent-brand px-4 font-sans text-xs font-medium text-white transition-colors hover:opacity-90"
-          >
-            Applica
-          </button>
+          <ApplyButton />
 
           {hasReset && (
-            <a
+            <Link
               href="/transactions"
-              className="col-span-2 flex h-8 items-center justify-center gap-1 rounded-full border border-border-subtle px-3 font-sans text-xs text-text-2 transition-colors hover:text-text-1"
+              scroll={false}
+              className="col-span-2 flex h-11 items-center justify-center gap-1 rounded-full border border-border-subtle px-3 font-sans text-sm text-text-2 transition-colors hover:text-text-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <X className="h-3 w-3" />
+              <X className="h-3.5 w-3.5" />
               Reset
-            </a>
+            </Link>
           )}
         </div>
       )}
-    </form>
+    </Form>
   )
 }

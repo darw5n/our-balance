@@ -1,5 +1,6 @@
 "use client"
 
+import { useTransition } from "react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
@@ -26,13 +27,17 @@ export function ComparisonControls({ categories, cat, y1, y2, viewMode, availabl
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  // Mentre il confronto si ricalcola sul server, i controlli si attenuano: la scelta è stata presa.
+  const [isPending, startTransition] = useTransition()
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
     params.set("tab", "confronto")
     if (value) params.set(key, value)
     else params.delete(key)
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    startTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+    })
   }
 
   const viewExtraParams: Record<string, string> = {
@@ -46,7 +51,11 @@ export function ComparisonControls({ categories, cat, y1, y2, viewMode, availabl
     <div className="space-y-3">
       <ViewModeSwitcher currentView={viewMode} basePath="/transactions" extraParams={viewExtraParams} />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div
+        aria-busy={isPending}
+        className={`flex flex-col gap-3 transition-opacity duration-200 sm:flex-row sm:items-end ${isPending ? "opacity-60" : ""}`}
+      >
+        <span role="status" className="sr-only">{isPending ? "Aggiorno il confronto…" : ""}</span>
         {/* Categoria */}
         <div className="min-w-0 flex-1">
           <label className="mb-1.5 block font-sans text-xs font-medium text-text-2">Categoria</label>
