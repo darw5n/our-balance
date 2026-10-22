@@ -58,8 +58,10 @@ Tailwind CSS v4, shadcn/ui, Supabase, Vercel.
 - Gli importi sono salvati come `float`. In vista "personale" le spese con
   `scope = "family"` vengono dimezzate al 50% tramite l'helper `applyScope()` —
   usalo sempre, non riscrivere il calcolo a mano.
-- `processRecurringTransactions()` gira **solo** dalla pagina dashboard
-  (elabora le ricorrenze scadute; ha già la logica di recupero per i cicli arretrati).
+- `processRecurringTransactions()` gira **solo** dalla pagina dashboard, **dopo la risposta**
+  dentro `after()` (elabora le ricorrenze scadute; ha già la logica di recupero per i cicli arretrati).
+  In `after()` non si possono leggere i cookie: il client va creato prima con
+  `createSupabaseClientForAfter()` e passato alla funzione.
 
 ## Design tokens
 
