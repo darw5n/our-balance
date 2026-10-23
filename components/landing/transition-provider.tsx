@@ -10,6 +10,7 @@ import {
 } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "motion/react"
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
 
 type Phase = "idle" | "drawing"
 
@@ -29,6 +30,7 @@ export function TransitionProvider({
   const router = useRouter()
   const [phase, setPhase] = useState<Phase>("idle")
   const busy = useRef(false)
+  const reduceMotion = useReducedMotion()
 
   // Login e registrazione sono le mete di ogni dissolvenza: si preparano subito,
   // così dopo il nero la pagina nuova è già pronta.
@@ -40,6 +42,11 @@ export function TransitionProvider({
   const navigate = useCallback(
     async (href: string) => {
       if (busy.current) return
+      // Con "Riduci movimento" niente schermo nero: si cambia pagina e basta.
+      if (reduceMotion) {
+        router.push(href)
+        return
+      }
       busy.current = true
       setPhase("drawing")
       await sleep(200)        // fade-in completato
@@ -49,7 +56,7 @@ export function TransitionProvider({
       await sleep(250)
       busy.current = false
     },
-    [router]
+    [router, reduceMotion]
   )
 
   return (
