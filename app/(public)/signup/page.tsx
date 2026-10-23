@@ -5,17 +5,27 @@ import { Wallet, Eye, EyeOff, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { supabase } from "@/lib/supabase"
+import { unmetPasswordRules } from "@/lib/password-rules"
+import { PasswordChecklist } from "./password-checklist"
 import { usePageTransition } from "@/components/landing/transition-provider"
 
 const AUTH_ERRORS: Record<string, string> = {
   "User already registered": "Esiste già un account con questa email.",
-  "Password should be at least 6 characters": "La password deve essere di almeno 6 caratteri.",
   "Unable to validate email address: invalid format": "Formato email non valido.",
   "Too many requests": "Troppi tentativi. Riprova tra qualche minuto.",
 }
 
-function translateError(message: string): string {
-  return AUTH_ERRORS[message] ?? message
+function translateError(error: { message: string; code?: string }, password: string): string {
+  // Password troppo debole per le regole di Supabase: diciamo cosa manca, in italiano.
+  if (error.code === "weak_password") return weakPasswordMessage(password)
+  return AUTH_ERRORS[error.message] ?? error.message
+}
+
+function weakPasswordMessage(password: string): string {
+  const missing = unmetPasswordRules(password).map((rule) => rule.label.toLowerCase())
+  return missing.length
+    ? `La password non è abbastanza sicura. Manca: ${missing.join(", ")}.`
+    : "La password è troppo facile da indovinare. Scegline un'altra."
 }
 
 export default function SignupPage() {
@@ -55,8 +65,8 @@ export default function SignupPage() {
       return
     }
 
-    if (password.length < 6) {
-      setError("La password deve essere di almeno 6 caratteri.")
+    if (unmetPasswordRules(password).length > 0) {
+      setError(weakPasswordMessage(password))
       return
     }
 
@@ -74,7 +84,7 @@ export default function SignupPage() {
       })
 
       if (error) {
-        setError(translateError(error.message))
+        setError(translateError(error, password))
         return
       }
 
@@ -232,10 +242,9 @@ export default function SignupPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimo 6 caratteri"
                   required
                   autoComplete="new-password"
-                  minLength={6}
+                  aria-describedby="password-rules"
                   className="pr-10"
                 />
                 <button
@@ -247,6 +256,7 @@ export default function SignupPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <PasswordChecklist id="password-rules" password={password} />
             </div>
 
             <div className="space-y-1">
