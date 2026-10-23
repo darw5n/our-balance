@@ -1,6 +1,6 @@
 export default function ReportsLoading() {
   return (
-    <div className="space-y-6">
+    <div data-loading className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-3">
           <div className="skeleton h-8 w-8 !rounded-lg" />

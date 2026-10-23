@@ -1,3 +1,5 @@
+import { Suspense } from "react"
+import { after } from "next/server"
 import { TrendingDown, Calendar } from "lucide-react"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { PendingConfirmations } from "@/components/dashboard/pending-confirmations"
@@ -5,7 +7,7 @@ import { HeroBalanceCard } from "@/components/dashboard/hero-balance-card"
 import { UpcomingCard } from "@/components/dashboard/upcoming-card"
 import { CategorySpendingCard } from "@/components/dashboard/category-spending-card"
 import { RecentTransactionsCard } from "@/components/dashboard/recent-transactions-card"
-import { CashflowChart } from "@/components/dashboard/cashflow-chart"
+import { CashflowChart } from "@/components/dashboard/charts/lazy-charts"
 import { Card } from "@/components/ui/card"
 import {
   getDashboardSummary,
@@ -18,21 +20,16 @@ import {
 import { getPendingConfirmations, getUpcomingRecurring } from "@/lib/supabase/queries/recurring"
 import { getUserSettings } from "@/lib/supabase/queries/user-settings"
 import { processRecurringTransactions } from "@/app/actions/recurring"
-import { getServerUser } from "@/lib/supabase-server"
+import { createSupabaseClientForAfter, getServerUser } from "@/lib/supabase-server"
 import { formatCurrency } from "@/lib/utils"
+import { DashboardDetailsSkeleton } from "./dashboard-skeletons"
 
 export default async function DashboardPage({
   searchParams,
 }: {
   searchParams: Promise<{ view?: string }>
 }) {
-  const { view } = await searchParams
-  const user = await getServerUser()
-
-  // Se ?view= è assente si usa la preferenza dell'utente.
-  const defaultView = user ? (await getUserSettings(user.id)).defaultView : "personal"
-  const viewMode: ViewMode =
-    view === "family" ? "family" : view === "personal" ? "personal" : defaultView
+  const [{ view }, user] = await Promise.all([searchParams, getServerUser()])
 
   if (!user) {
     return (
@@ -45,29 +42,29 @@ export default async function DashboardPage({
     )
   }
 
+  // Se ?view= è assente si usa la preferenza dell'utente (già in cache: la legge anche il layout).
+  const viewMode: ViewMode =
+    view === "family" || view === "personal" ? view : (await getUserSettings(user.id)).defaultView
+
   // Unico punto in cui le ricorrenze vengono elaborate al caricamento pagina.
-  // La query è indicizzata su next_due_date e nel caso normale (niente in
-  // scadenza) torna vuota subito. La logica di recupero gestisce i cicli
-  // arretrati quando l'app non viene aperta per un po'.
-  await processRecurringTransactions(user.id)
+  // Gira dopo la risposta (`after`), così la dashboard non la aspetta: le
+  // transazioni create compaiono al caricamento successivo. La logica di
+  // recupero gestisce i cicli arretrati quando l'app non viene aperta per un po'.
+  const recurringClient = await createSupabaseClientForAfter()
+  after(() => processRecurringTransactions(user.id, recurringClient))
 
   const currentYear = new Date().getUTCFullYear()
 
-  const [summary, summaryYear, topCategories, recentTransactions, pendingConfirmations, upcoming, cashflowData] =
-    await Promise.all([
-      getDashboardSummary(user.id, viewMode),
-      getDashboardSummaryYear(user.id, viewMode, currentYear),
-      getTopCategories(user.id, 5, viewMode),
-      getRecentTransactions(user.id, 5, viewMode),
-      getPendingConfirmations(user.id),
-      getUpcomingRecurring(user.id),
-      getCashflowMonthly(user.id, 12, viewMode),
-    ])
+  // "Uscite da gennaio" si mostra solo nella vista in comune.
+  const [summary, summaryYear, pendingConfirmations, upcoming] = await Promise.all([
+    getDashboardSummary(user.id, viewMode),
+    viewMode === "family" ? getDashboardSummaryYear(user.id, viewMode, currentYear) : null,
+    getPendingConfirmations(user.id),
+    getUpcomingRecurring(user.id),
+  ])
 
-  const now = new Date()
-  const monthLabel = now.toLocaleDateString("it-IT", { month: "short", year: "numeric" })
+  const monthLabel = new Date().toLocaleDateString("it-IT", { month: "short", year: "numeric" })
     .replace(/^\w/, (c) => c.toUpperCase())
-  const currentMonthLabel = now.toLocaleDateString("it-IT", { month: "long", year: "numeric" })
 
   return (
     <div className="space-y-3">
@@ -111,7 +108,7 @@ export default async function DashboardPage({
               </div>
             </div>
             <p className="font-serif text-xl font-semibold text-expense-fg">
-              {formatCurrency(summaryYear.uscite)}
+              {formatCurrency(summaryYear?.uscite ?? 0)}
             </p>
           </Card>
         </div>
@@ -122,6 +119,29 @@ export default async function DashboardPage({
       {/* In scadenza */}
       {upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}
 
+      {/* Grafico e liste arrivano in streaming: hero e totali compaiono prima. */}
+      <div className="route-fade">
+        <Suspense key={viewMode} fallback={<DashboardDetailsSkeleton />}>
+          <div className="space-y-3">
+            <DashboardDetails userId={user.id} viewMode={viewMode} />
+          </div>
+        </Suspense>
+      </div>
+    </div>
+  )
+}
+
+async function DashboardDetails({ userId, viewMode }: { userId: string; viewMode: ViewMode }) {
+  const [topCategories, recentTransactions, cashflowData] = await Promise.all([
+    getTopCategories(userId, 5, viewMode),
+    getRecentTransactions(userId, 5, viewMode),
+    getCashflowMonthly(userId, 12, viewMode),
+  ])
+
+  const currentMonthLabel = new Date().toLocaleDateString("it-IT", { month: "long", year: "numeric" })
+
+  return (
+    <>
       {/* Cashflow chart */}
       <Card className="p-5">
         <h2 className="font-serif text-[18px] font-semibold text-text-1">
@@ -144,6 +164,6 @@ export default async function DashboardPage({
       {recentTransactions.length > 0 && (
         <RecentTransactionsCard transactions={recentTransactions} />
       )}
-    </div>
+    </>
   )
 }

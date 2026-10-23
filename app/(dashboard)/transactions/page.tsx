@@ -1,55 +1,31 @@
-import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
+import { getServerUser } from "@/lib/supabase-server"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { getTransactionYears, type ViewMode } from "@/lib/supabase/queries/transactions"
-import { applyScope } from "@/lib/supabase/query-utils"
+import {
+  getTransactionList,
+  getTransactionTotals,
+  sumTotals,
+  TRANSACTIONS_PAGE_SIZE,
+  type TransactionListFilters,
+} from "@/lib/supabase/queries/transaction-list"
 import { TransactionsTable } from "@/components/dashboard/transactions-table"
 import { TransactionsFilters } from "@/components/dashboard/transactions-filters"
 import { TransactionsTabs } from "@/components/dashboard/transactions-tabs"
 import { CategoryComparisonView } from "@/components/dashboard/category-comparison-view"
 import { ExportCsvButton } from "@/components/dashboard/export-csv-button"
 import { TransactionsSummary } from "@/components/dashboard/transactions-summary"
-import type { Transaction } from "@/components/dashboard/edit-transaction-dialog"
+import { LoadMoreLink } from "@/components/dashboard/load-more-link"
 import type { CategoryOption } from "@/components/dashboard/add-transaction-dialog"
 import type { Category } from "@/lib/supabase/queries/categories"
 
-async function getTransactions(
-  userId: string,
-  filter?: { from?: string; to?: string; category_id?: string }
-): Promise<Transaction[]> {
-  const supabase = await createSupabaseServerClient()
+// Tetto alle righe caricate in una volta: oltre conviene filtrare o esportare.
+const MAX_LIMIT = 5000
 
-  let query = supabase
-    .from("transactions")
-    .select("id, date, created_at, amount, description, type, status, scope, category_id")
-    .eq("user_id", userId)
-
-  if (filter?.from) query = query.gte("date", filter.from)
-  if (filter?.to) query = query.lte("date", filter.to)
-  if (filter?.category_id) query = query.eq("category_id", filter.category_id)
-
-  const { data, error } = await query.order("date", { ascending: false })
-
-  if (error || !data) return []
-  return data as Transaction[]
-}
-
-/**
- * Filtra le transazioni per testo libero: cerca sia nella descrizione sia nel
- * nome della categoria. Fatto lato JS per evitare di interpolare input utente
- * nei filtri PostgREST.
- */
-function filterByQuery(
-  transactions: Transaction[],
-  query: string,
-  categoryNameById: Map<string, string>
-): Transaction[] {
-  const needle = query.trim().toLowerCase()
-  if (!needle) return transactions
-  return transactions.filter((tx) => {
-    const desc = tx.description?.toLowerCase() ?? ""
-    const catName = tx.category_id ? (categoryNameById.get(tx.category_id)?.toLowerCase() ?? "") : ""
-    return desc.includes(needle) || catName.includes(needle)
-  })
+/** "?limit=" dell'URL arrotondato a un multiplo della pagina, tra una pagina e il tetto. */
+function parseLimit(raw?: string): number {
+  const n = Number.parseInt(raw ?? "", 10)
+  if (!Number.isFinite(n) || n <= TRANSACTIONS_PAGE_SIZE) return TRANSACTIONS_PAGE_SIZE
+  return Math.min(Math.ceil(n / TRANSACTIONS_PAGE_SIZE) * TRANSACTIONS_PAGE_SIZE, MAX_LIMIT)
 }
 
 export default async function TransactionsPage({
@@ -65,10 +41,10 @@ export default async function TransactionsPage({
     y1?: string
     y2?: string
     view?: string
+    limit?: string
   }>
 }) {
-  const user = await getServerUser()
-  const params = await searchParams
+  const [user, params] = await Promise.all([getServerUser(), searchParams])
 
   const tab = params?.tab === "confronto" ? "confronto" : "lista"
 
@@ -119,38 +95,38 @@ export default async function TransactionsPage({
     )
   }
 
-  // ── Tab LISTA (comportamento esistente) ──
+  // ── Tab LISTA ──
   const q = params?.q ?? ""
   const from = params?.from ?? ""
   const to = params?.to ?? ""
   const category = params?.category ?? ""
+  const limit = parseLimit(params?.limit)
+  const filters: TransactionListFilters = {
+    q: q || undefined,
+    from: from || undefined,
+    to: to || undefined,
+    categoryId: category || undefined,
+  }
+  const hasFilters = !!(q || from || to || category)
 
-  const [allTransactions, categories] = await Promise.all([
-    user?.id
-      ? getTransactions(user.id, {
-          from: from || undefined,
-          to: to || undefined,
-          category_id: category || undefined,
-        })
-      : Promise.resolve([]),
+  const [{ transactions, total }, categories] = await Promise.all([
+    user?.id ? getTransactionList(user.id, filters, limit) : Promise.resolve({ transactions: [], total: 0 }),
     user?.id ? getCategories(user.id) : Promise.resolve([]),
   ])
 
-  const categoryNameById = new Map(categories.map((c) => [c.id, c.name]))
-  const transactions = q ? filterByQuery(allTransactions, q, categoryNameById) : allTransactions
+  // I totali servono solo con i filtri attivi. Se la lista è già completa si sommano
+  // le righe caricate, altrimenti si chiedono al database su tutte le corrispondenze.
+  let totals: { income: number; expense: number } | null = null
+  if (hasFilters && user?.id) {
+    totals = transactions.length >= total ? sumTotals(transactions) : await getTransactionTotals(user.id, filters)
+  }
 
-  const hasFilters = !!(q || from || to || category)
-
-  const { totalIncome, totalExpense } = transactions.reduce(
-    (acc, tx) => {
-      const raw = Math.abs(Number(tx.amount) || 0)
-      const amount = applyScope(raw, tx.scope, "personal")
-      if (tx.type === "income") acc.totalIncome += amount
-      else acc.totalExpense += amount
-      return acc
-    },
-    { totalIncome: 0, totalExpense: 0 }
-  )
+  const loadMoreParams = new URLSearchParams()
+  for (const [key, value] of Object.entries({ q, from, to, category })) {
+    if (value) loadMoreParams.set(key, value)
+  }
+  loadMoreParams.set("limit", String(limit + TRANSACTIONS_PAGE_SIZE))
+  const canLoadMore = transactions.length < total && limit < MAX_LIMIT
 
   return (
     <div className="space-y-6">
@@ -162,15 +138,23 @@ export default async function TransactionsPage({
         to={to}
         category={category}
         categories={categories as CategoryOption[]}
-        actions={<ExportCsvButton transactions={transactions} categories={categories as CategoryOption[]} />}
+        actions={total > 0 ? <ExportCsvButton filters={filters} /> : null}
       />
 
-      {hasFilters && (
-        <TransactionsSummary income={totalIncome} expense={totalExpense} count={transactions.length} />
+      {totals && (
+        <TransactionsSummary income={totals.income} expense={totals.expense} count={total} />
       )}
 
       <section>
         <TransactionsTable transactions={transactions} categories={categories as CategoryOption[]} />
+        {canLoadMore && (
+          <LoadMoreLink
+            href={`/transactions?${loadMoreParams.toString()}`}
+            shown={transactions.length}
+            total={total}
+            step={TRANSACTIONS_PAGE_SIZE}
+          />
+        )}
       </section>
     </div>
   )

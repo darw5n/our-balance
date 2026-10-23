@@ -1,4 +1,4 @@
-import { getServerUser, createSupabaseServerClient } from "@/lib/supabase-server"
+import { getServerUser } from "@/lib/supabase-server"
 import { redirect } from "next/navigation"
 import { getCategories } from "@/lib/supabase/queries/categories"
 import { getBudgetsWithProgress } from "@/lib/supabase/queries/budgets"
@@ -9,18 +9,17 @@ export default async function CategoriesPage() {
   const user = await getServerUser()
   if (!user) redirect("/login")
 
-  // Auto-seed default categories for new users
-  const supabase = await createSupabaseServerClient()
-  const { count } = await supabase
-    .from("categories")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-  if (!count) await createDefaultCategories()
-
+  // getCategories è già in cache: la legge anche il layout.
   const [categories, budgets] = await Promise.all([
     getCategories(user.id),
     getBudgetsWithProgress(user.id, "personal"),
   ])
+
+  // Auto-seed default categories for new users, poi ricarica per leggerle.
+  if (categories.length === 0) {
+    const seeded = await createDefaultCategories()
+    if (seeded.created > 0) redirect("/categories")
+  }
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Wallet, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +21,7 @@ function translateError(message: string): string {
 
 export default function LoginPage() {
   const { navigate } = usePageTransition()
+  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -45,6 +47,8 @@ export default function LoginPage() {
     setError(null)
     setSubmitting(true)
 
+    // Il pulsante resta "in corso" fino all'arrivo della dashboard: niente doppio invio.
+    let navigating = false
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -54,10 +58,14 @@ export default function LoginPage() {
       }
 
       if (data.session) {
-        window.location.href = "/dashboard"
+        navigating = true
+        // Navigazione client: niente ricarica completa. refresh() fa rileggere al server
+        // la sessione appena salvata nei cookie.
+        router.replace("/dashboard")
+        router.refresh()
       }
     } finally {
-      setSubmitting(false)
+      if (!navigating) setSubmitting(false)
     }
   }
 

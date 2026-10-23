@@ -13,6 +13,18 @@ export const TOOLTIP_STYLE = {
   fontSize: 12,
 }
 
+/**
+ * Animazione delle serie: breve e senza rimbalzi (il default di Recharts dura 1,5 s).
+ * Da usare con `isAnimationActive={!reduceMotion}`.
+ */
+export const SERIES_ANIMATION = { animationDuration: 600, animationEasing: "ease-out" } as const
+
+/**
+ * Dimensione di partenza dei ResponsiveContainer, prima che misurino il contenitore:
+ * evita l'avviso "width(-1) and height(-1)" di Recharts al primo render.
+ */
+export const CHART_INITIAL_DIMENSION = { width: 1, height: 1 }
+
 /** Mesi abbreviati minuscoli — combaciano con le chiavi di `Intl` month:"short" it-IT. */
 export const MONTHS_SHORT = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"]
 

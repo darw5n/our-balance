@@ -1,28 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
-import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTHS_SHORT, MONTH_FULL } from "@/components/dashboard/charts/chart-config"
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTHS_SHORT, MONTH_FULL, SERIES_ANIMATION, CHART_INITIAL_DIMENSION } from "@/components/dashboard/charts/chart-config"
 
 type Props = {
   monthsA: number[]   // 12 valori, indice 0 = Gennaio (primo anno)
   monthsB: number[]   // 12 valori, indice 0 = Gennaio (secondo anno)
   labelA: string      // es. "2025"
   labelB: string      // es. "2026"
-}
-
-function useReducedMotion() {
-  const [reduce, setReduce] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
-    setReduce(mq.matches)
-    const handler = (e: MediaQueryListEvent) => setReduce(e.matches)
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [])
-  return reduce
 }
 
 export function CategoryComparisonChart({ monthsA, monthsB, labelA, labelB }: Props) {
@@ -40,7 +28,7 @@ export function CategoryComparisonChart({ monthsA, monthsB, labelA, labelB }: Pr
 
   return (
     <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" initialDimension={CHART_INITIAL_DIMENSION}>
         <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--border-subtle)" vertical={false} />
           <XAxis
@@ -79,6 +67,7 @@ export function CategoryComparisonChart({ monthsA, monthsB, labelA, labelB }: Pr
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}
+            {...SERIES_ANIMATION}
             isAnimationActive={!reduce}
           />
           <Line
@@ -90,6 +79,7 @@ export function CategoryComparisonChart({ monthsA, monthsB, labelA, labelB }: Pr
             strokeDasharray="5 5"
             dot={false}
             activeDot={{ r: 4 }}
+            {...SERIES_ANIMATION}
             isAnimationActive={!reduce}
           />
         </LineChart>

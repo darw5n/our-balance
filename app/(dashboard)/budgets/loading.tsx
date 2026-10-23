@@ -1,6 +1,6 @@
 export default function BudgetsLoading() {
   return (
-    <div className="space-y-6">
+    <div data-loading className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <div className="skeleton h-7 w-32 !rounded-lg" />

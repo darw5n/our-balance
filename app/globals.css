@@ -331,22 +331,53 @@
   }
 }
 
-/* ---- Skeleton loader ---- */
-@keyframes shimmer {
-  0%   { background-position: -400% 0; }
-  100% { background-position:  400% 0; }
+/* ---- Motion ----
+   Il movimento è feedback, non spettacolo: entra il contenuto nuovo, niente coreografie.
+   Solo opacity e transform; con "riduci movimento" resta la dissolvenza, senza spostamenti. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --t-ui: 240ms;
+  --t-route: 280ms;
 }
 
+@keyframes content-in {
+  from { opacity: 0; }
+}
+
+@keyframes route-in {
+  from { opacity: 0; transform: translateY(6px); }
+}
+
+@keyframes skeleton-breathe {
+  50% { opacity: 0.55; }
+}
+
+/* Ogni figlio diretto entra quando viene montato: la pagina nuova, lo skeleton
+   e poi il contenuto che lo sostituisce. "backwards" e non "both": finita
+   l'animazione non resta nessun transform (romperebbe position: fixed/sticky). */
+.route-fade > * {
+  animation: content-in 180ms ease backwards;
+}
+
+/* Lo skeleton (radice con data-loading) aspetta 120 ms: se i dati arrivano prima, non lampeggia. */
+.route-fade > [data-loading] {
+  animation-delay: 120ms;
+}
+
+/* ---- Skeleton loader: barre piatte alla misura del contenuto vero ---- */
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--surface-2) 25%,
-    var(--surface-3) 50%,
-    var(--surface-2) 75%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  background: var(--surface-2);
   border-radius: 0.375rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .route-fade > * {
+    animation: route-in var(--t-route) var(--ease-out) backwards;
+  }
+
+  .skeleton {
+    animation: skeleton-breathe 1.6s ease-in-out infinite;
+  }
 }
 
 /* ---- Layer base: scrollbar + body + form controls ---- */

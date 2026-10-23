@@ -5,7 +5,7 @@ import type { CategoryOption } from "@/components/dashboard/add-transaction-dial
 import { Card } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import { ComparisonControls } from "@/components/dashboard/comparison-controls"
-import { CategoryComparisonChart } from "@/components/dashboard/category-comparison-chart"
+import { CategoryComparisonChart } from "@/components/dashboard/charts/lazy-charts"
 
 type Props = {
   userId: string
