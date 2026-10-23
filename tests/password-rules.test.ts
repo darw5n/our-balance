@@ -16,5 +16,6 @@ describe("unmetPasswordRules", () => {
   it("conta come simboli solo quelli accettati da Supabase", () => {
     expect(unmet("Password123€")).toEqual(["symbol"])
     expect(unmet("Password123~")).toEqual([])
+    expect(unmet("Password123\\")).toEqual(["symbol"])
   })
 })

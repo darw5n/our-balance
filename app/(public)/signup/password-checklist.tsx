@@ -8,14 +8,13 @@ export function PasswordChecklist({ id, password }: { id: string; password: stri
       {PASSWORD_RULES.map((rule) => {
         const met = rule.test(password)
         return (
-          <li
-            key={rule.id}
-            className={`flex items-center gap-1.5 text-xs ${met ? "text-income-fg" : "text-text-2"}`}
-          >
+          // Il testo resta nel colore pieno (contrasto AA in entrambi i temi): lo stato lo dicono
+          // forma e colore dell'icona, più il testo nascosto per i lettori di schermo.
+          <li key={rule.id} className="flex items-center gap-1.5 text-xs text-text-1">
             {met ? (
-              <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <Check className="h-3.5 w-3.5 shrink-0 text-income-fg" aria-hidden="true" />
             ) : (
-              <Circle className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <Circle className="h-3 w-3 shrink-0 text-text-2" aria-hidden="true" />
             )}
             {rule.label}
             <span className="sr-only">{met ? ": fatto" : ": manca"}</span>

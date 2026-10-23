@@ -4,7 +4,7 @@
 export const PASSWORD_MIN_LENGTH = 8
 
 // Supabase accetta come simboli solo questi caratteri: una lettera accentata o "€" non contano.
-const SUPABASE_SYMBOLS = "!@#$%^&*()_+-=[]{};'\\:\"|<>?,./`~"
+const SUPABASE_SYMBOLS = "!@#$%^&*()_+-=[]{};':\"|<>?,./`~"
 
 export type PasswordRule = { id: string; label: string; test: (password: string) => boolean }
 
