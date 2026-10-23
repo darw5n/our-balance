@@ -113,6 +113,9 @@
   --color-hero-income:  var(--hero-income);
   --color-hero-expense: var(--hero-expense);
 
+  /* ---- Dissolvenza tra pagine pubbliche (fissa, sempre scura) ---- */
+  --color-page-transition: var(--page-transition);
+
   /* ---- Animations & Keyframes for Bottom Sheet ---- */
   --animate-slide-in-bottom: slide-in-bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-slide-out-bottom: slide-out-bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -232,6 +235,9 @@
   --hero-text:    #F0EDE8;
   --hero-income:  #5DC98E;
   --hero-expense: #E07B6A;
+
+  /* ---- Page transition (fixed, always dark) ---- */
+  --page-transition: #141210;
 }
 
 /* ---- Dark theme — classe applicata da next-themes su <html> ---- */
