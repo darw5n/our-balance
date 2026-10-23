@@ -7,7 +7,7 @@ import { HeroBalanceCard } from "@/components/dashboard/hero-balance-card"
 import { UpcomingCard } from "@/components/dashboard/upcoming-card"
 import { CategorySpendingCard } from "@/components/dashboard/category-spending-card"
 import { RecentTransactionsCard } from "@/components/dashboard/recent-transactions-card"
-import { CashflowChart } from "@/components/dashboard/cashflow-chart"
+import { CashflowChart } from "@/components/dashboard/charts/lazy-charts"
 import { Card } from "@/components/ui/card"
 import {
   getDashboardSummary,

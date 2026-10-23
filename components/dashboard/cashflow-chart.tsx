@@ -13,7 +13,7 @@ import {
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
-import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, SERIES_ANIMATION } from "@/components/dashboard/charts/chart-config"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, SERIES_ANIMATION, CHART_INITIAL_DIMENSION } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type CashflowChartProps = {
@@ -47,7 +47,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
           Nessun dato disponibile.
         </div>
       ) : hideIncome ? (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" initialDimension={CHART_INITIAL_DIMENSION}>
           <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="usciteFill" x1="0" y1="0" x2="0" y2="1">
@@ -78,7 +78,7 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
           </AreaChart>
         </ResponsiveContainer>
       ) : (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" initialDimension={CHART_INITIAL_DIMENSION}>
           <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="nettoFill" x1="0" y1="0" x2="0" y2="1">
