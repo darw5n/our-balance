@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -37,42 +38,38 @@ const DELAY_OPTIONS: { value: number; label: string; hint: string }[] = [
   { value: 2, label: "+2 cicli", hint: "Es. bolletta gen → conferma mar" },
 ]
 
-export function RecurringFormDialog({
-  open,
-  onOpenChange,
-  recurring,
-  categories,
-  onSuccess,
-}: RecurringFormDialogProps) {
-  const [type, setType] = useState<"income" | "expense">("expense")
-  const [scope, setScope] = useState<"personal" | "family">("personal")
-  const [amount, setAmount] = useState("")
-  const [description, setDescription] = useState("")
-  const [categoryId, setCategoryId] = useState("")
-  const [frequency, setFrequency] = useState<RecurringFrequency>("monthly")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [requiresConfirmation, setRequiresConfirmation] = useState(false)
-  const [confirmationDelay, setConfirmationDelay] = useState(0)
+export function RecurringFormDialog({ open, onOpenChange, ...formProps }: RecurringFormDialogProps) {
+  // DialogContent si smonta alla chiusura: il form riparte dai valori della ricorrenza a ogni apertura.
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <RecurringForm onClose={() => onOpenChange(false)} {...formProps} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type RecurringFormProps = Omit<RecurringFormDialogProps, "open" | "onOpenChange"> & {
+  onClose: () => void
+}
+
+function RecurringForm({ recurring: recurringProp, categories, onSuccess, onClose }: RecurringFormProps) {
+  // Copia della ricorrenza all'apertura: alla chiusura il genitore la azzera, e il form
+  // non deve cambiare aspetto durante l'animazione di uscita.
+  const [recurring] = useState(recurringProp)
+  const [type, setType] = useState<"income" | "expense">(recurring?.type ?? "expense")
+  const [scope, setScope] = useState<"personal" | "family">(recurring?.scope ?? "personal")
+  const [amount, setAmount] = useState(recurring ? Number(recurring.amount).toFixed(2).replace(".", ",") : "")
+  const [description, setDescription] = useState(recurring?.description ?? "")
+  const [categoryId, setCategoryId] = useState(recurring?.category_id ?? "")
+  const [frequency, setFrequency] = useState<RecurringFrequency>(recurring?.frequency ?? "monthly")
+  const [startDate, setStartDate] = useState(recurring?.start_date ?? "")
+  const [endDate, setEndDate] = useState(recurring?.end_date ?? "")
+  const [requiresConfirmation, setRequiresConfirmation] = useState(recurring?.requires_confirmation ?? false)
+  const [confirmationDelay, setConfirmationDelay] = useState(recurring?.confirmation_delay ?? 0)
   const { submitting, error, setError, wrap } = useFormState()
 
   const isEdit = !!recurring?.id
-
-  useEffect(() => {
-    if (open) {
-      setType(recurring?.type ?? "expense")
-      setScope(recurring?.scope ?? "personal")
-      setAmount(recurring ? Number(recurring.amount).toFixed(2).replace(".", ",") : "")
-      setDescription(recurring?.description ?? "")
-      setCategoryId(recurring?.category_id ?? "")
-      setFrequency(recurring?.frequency ?? "monthly")
-      setStartDate(recurring?.start_date ?? "")
-      setEndDate(recurring?.end_date ?? "")
-      setRequiresConfirmation(recurring?.requires_confirmation ?? false)
-      setConfirmationDelay(recurring?.confirmation_delay ?? 0)
-      setError(null)
-    }
-  }, [open, recurring])
 
   // Auto-set defaults based on type (only for new records)
   function handleTypeChange(newType: "income" | "expense") {
@@ -140,246 +137,247 @@ export function RecurringFormDialog({
         return
       }
 
-      onOpenChange(false)
+      onClose()
       onSuccess?.()
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifica ricorrenza" : "Nuova ricorrenza"}</DialogTitle>
-        </DialogHeader>
+    <>
+      <DialogHeader>
+        <DialogTitle>{isEdit ? "Modifica ricorrenza" : "Nuova ricorrenza"}</DialogTitle>
+        <DialogDescription>
+          Si registra da sola a ogni scadenza, con la frequenza scelta. I campi con * sono obbligatori.
+        </DialogDescription>
+      </DialogHeader>
 
-        <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
-        <div className="min-h-0 flex-1 overflow-y-auto space-y-4 pb-2">
-          {/* Type */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">
-              Tipo <span className="text-expense-fg">*</span>
-            </label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleTypeChange("income")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                  type === "income"
-                    ? "border-income bg-income-subtle text-income-fg"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                }`}
-              >
-                <TrendingUp className="h-4 w-4" />
-                Entrata
-              </button>
-              <button
-                type="button"
-                onClick={() => handleTypeChange("expense")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                  type === "expense"
-                    ? "border-expense bg-expense-subtle text-expense-fg"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                }`}
-              >
-                <TrendingDown className="h-4 w-4" />
-                Uscita
-              </button>
-            </div>
+      <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
+      <div className="min-h-0 flex-1 overflow-y-auto space-y-4 pb-2">
+        {/* Type */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2">
+            Tipo <span className="text-expense-fg">*</span>
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleTypeChange("income")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                type === "income"
+                  ? "border-income bg-income-subtle text-income-fg"
+                  : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+              }`}
+            >
+              <TrendingUp className="h-4 w-4" />
+              Entrata
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTypeChange("expense")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                type === "expense"
+                  ? "border-expense bg-expense-subtle text-expense-fg"
+                  : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+              }`}
+            >
+              <TrendingDown className="h-4 w-4" />
+              Uscita
+            </button>
           </div>
-
-          {/* Scope */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">Visibilità</label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setScope("personal")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                  scope === "personal"
-                    ? "border-info bg-info-subtle text-info"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                }`}
-              >
-                <User className="h-4 w-4" />
-                Personale
-              </button>
-              <button
-                type="button"
-                onClick={() => setScope("family")}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
-                  scope === "family"
-                    ? "border-shared bg-shared-subtle text-shared"
-                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                }`}
-              >
-                <Users className="h-4 w-4" />
-                In comune
-              </button>
-            </div>
-          </div>
-
-          {/* Amount */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="rec-amount">
-              Importo <span className="text-expense-fg">*</span>
-            </label>
-            <Input
-              id="rec-amount"
-              type="text"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0,00"
-              className="border-border-subtle bg-surface-0 text-text-1"
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="rec-desc">
-              Descrizione
-            </label>
-            <Input
-              id="rec-desc"
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Es. Affitto, Stipendio..."
-              className="border-border-subtle bg-surface-0 text-text-1"
-            />
-          </div>
-
-          {/* Category */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">
-              Categoria <span className="text-expense-fg">*</span>
-            </label>
-            <CategoryCombobox
-              categories={categories}
-              txType={type}
-              value={categoryId}
-              onChange={setCategoryId}
-            />
-          </div>
-
-          {/* Frequency */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">
-              Frequenza <span className="text-expense-fg">*</span>
-            </label>
-            <div className="flex gap-2">
-              {(["weekly", "monthly", "yearly"] as const).map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setFrequency(f)}
-                  className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
-                    frequency === f
-                      ? "border-pending bg-pending-subtle text-pending-fg"
-                      : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                  }`}
-                >
-                  {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Start Date */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="rec-start">
-              Data inizio <span className="text-expense-fg">*</span>
-            </label>
-            <DateInput
-              id="rec-start"
-              value={startDate}
-              onChange={setStartDate}
-              className="border-border-subtle bg-surface-0 text-text-1"
-            />
-          </div>
-
-          {/* End Date (optional) */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="rec-end">
-              Data fine <span className="text-text-3">(opzionale)</span>
-            </label>
-            <DateInput
-              id="rec-end"
-              value={endDate}
-              onChange={setEndDate}
-              className="border-border-subtle bg-surface-0 text-text-1"
-            />
-            <p className="text-[11px] text-text-3">
-              Dopo questa data la ricorrenza non genera più movimenti.
-            </p>
-          </div>
-
-          {/* Requires confirmation */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <input
-                id="rec-confirm"
-                type="checkbox"
-                checked={requiresConfirmation}
-                onChange={(e) => handleConfirmationToggle(e.target.checked)}
-                className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-primary"
-              />
-              <label htmlFor="rec-confirm" className="text-xs text-text-2 cursor-pointer">
-                Richiedi conferma importo prima di registrare
-              </label>
-            </div>
-
-            {/* Confirmation delay — visible only when requires_confirmation is on */}
-            {requiresConfirmation && (
-              <div className="ml-7 space-y-1.5">
-                <p className="text-xs text-text-2">Quando chiedere conferma?</p>
-                <div className="flex gap-2">
-                  {DELAY_OPTIONS.map(({ value, label, hint }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setConfirmationDelay(value)}
-                      title={hint}
-                      className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
-                        confirmationDelay === value
-                          ? "border-info bg-info-subtle text-info"
-                          : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-[11px] text-text-3">
-                  {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {error && <p className="text-xs text-expense-fg">{error}</p>}
         </div>
 
-          <div className="flex flex-shrink-0 justify-end gap-2 border-t border-border-subtle -mx-5 px-5 py-4">
-            <Button
+        {/* Scope */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2">Visibilità</label>
+          <div className="flex gap-2">
+            <button
               type="button"
-              variant="outline"
-              className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-2"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
+              onClick={() => setScope("personal")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                scope === "personal"
+                  ? "border-info bg-info-subtle text-info"
+                  : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+              }`}
             >
-              Annulla
-            </Button>
-            <Button
-              type="submit"
-              className="bg-income text-white hover:bg-income-fg"
-              disabled={submitting}
+              <User className="h-4 w-4" />
+              Personale
+            </button>
+            <button
+              type="button"
+              onClick={() => setScope("family")}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
+                scope === "family"
+                  ? "border-shared bg-shared-subtle text-shared"
+                  : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+              }`}
             >
-              {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}
-            </Button>
+              <Users className="h-4 w-4" />
+              In comune
+            </button>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        {/* Amount */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="rec-amount">
+            Importo <span className="text-expense-fg">*</span>
+          </label>
+          <Input
+            id="rec-amount"
+            type="text"
+            inputMode="decimal"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0,00"
+            className="border-border-subtle bg-surface-0 text-text-1"
+          />
+        </div>
+
+        {/* Description */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="rec-desc">
+            Descrizione
+          </label>
+          <Input
+            id="rec-desc"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Es. Affitto, Stipendio..."
+            className="border-border-subtle bg-surface-0 text-text-1"
+          />
+        </div>
+
+        {/* Category */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2">
+            Categoria <span className="text-expense-fg">*</span>
+          </label>
+          <CategoryCombobox
+            categories={categories}
+            txType={type}
+            value={categoryId}
+            onChange={setCategoryId}
+          />
+        </div>
+
+        {/* Frequency */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2">
+            Frequenza <span className="text-expense-fg">*</span>
+          </label>
+          <div className="flex gap-2">
+            {(["weekly", "monthly", "yearly"] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFrequency(f)}
+                className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                  frequency === f
+                    ? "border-pending bg-pending-subtle text-pending-fg"
+                    : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+                }`}
+              >
+                {f === "weekly" ? "Settimanale" : f === "monthly" ? "Mensile" : "Annuale"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Start Date */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="rec-start">
+            Data inizio <span className="text-expense-fg">*</span>
+          </label>
+          <DateInput
+            id="rec-start"
+            value={startDate}
+            onChange={setStartDate}
+            className="border-border-subtle bg-surface-0 text-text-1"
+          />
+        </div>
+
+        {/* End Date (optional) */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="rec-end">
+            Data fine <span className="text-text-3">(opzionale)</span>
+          </label>
+          <DateInput
+            id="rec-end"
+            value={endDate}
+            onChange={setEndDate}
+            className="border-border-subtle bg-surface-0 text-text-1"
+          />
+          <p className="text-[11px] text-text-3">
+            Dopo questa data la ricorrenza non genera più movimenti.
+          </p>
+        </div>
+
+        {/* Requires confirmation */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <input
+              id="rec-confirm"
+              type="checkbox"
+              checked={requiresConfirmation}
+              onChange={(e) => handleConfirmationToggle(e.target.checked)}
+              className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-primary"
+            />
+            <label htmlFor="rec-confirm" className="text-xs text-text-2 cursor-pointer">
+              Richiedi conferma importo prima di registrare
+            </label>
+          </div>
+
+          {/* Confirmation delay — visible only when requires_confirmation is on */}
+          {requiresConfirmation && (
+            <div className="ml-7 space-y-1.5">
+              <p className="text-xs text-text-2">Quando chiedere conferma?</p>
+              <div className="flex gap-2">
+                {DELAY_OPTIONS.map(({ value, label, hint }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setConfirmationDelay(value)}
+                    title={hint}
+                    className={`flex flex-1 items-center justify-center rounded-md border px-2 py-2 text-xs font-medium transition-colors ${
+                      confirmationDelay === value
+                        ? "border-info bg-info-subtle text-info"
+                        : "border-border-subtle bg-transparent text-text-2 hover:bg-surface-2"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-text-3">
+                {DELAY_OPTIONS.find((o) => o.value === confirmationDelay)?.hint}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {error && <p className="text-xs text-expense-fg">{error}</p>}
+      </div>
+
+        <div className="flex flex-shrink-0 justify-end gap-2 border-t border-border-subtle -mx-5 px-5 py-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="border-border-subtle bg-transparent text-text-1 hover:bg-surface-2"
+            onClick={onClose}
+            disabled={submitting}
+          >
+            Annulla
+          </Button>
+          <Button
+            type="submit"
+            className="bg-income text-white hover:bg-income-fg"
+            disabled={submitting}
+          >
+            {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}
+          </Button>
+        </div>
+      </form>
+    </>
   )
 }

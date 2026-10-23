@@ -111,12 +111,14 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
   const selected = categories.find((c) => c.id === value)
 
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50)
-    } else {
-      setSearch("")
-    }
+    if (open) setTimeout(() => inputRef.current?.focus(), 50)
   }, [open])
+
+  // Alla chiusura la ricerca si azzera, così alla riapertura si vedono tutte le categorie.
+  function changeOpen(next: boolean) {
+    setOpen(next)
+    if (!next) setSearch("")
+  }
 
   // Lock body scroll on mobile when picker is open
   useEffect(() => {
@@ -128,13 +130,13 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
 
   function handleSelect(id: string) {
     onChange(id)
-    setOpen(false)
+    changeOpen(false)
   }
 
   const trigger = (
     <button
       type="button"
-      onClick={() => setOpen(true)}
+      onClick={() => changeOpen(true)}
       className="flex h-10 w-full items-center justify-between rounded-md border border-border-subtle bg-surface-0 px-3 text-sm text-text-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {selected ? (
@@ -163,7 +165,7 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
             <div className="flex shrink-0 items-center gap-3 border-b border-border-subtle px-4 py-3">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => changeOpen(false)}
                 className="flex h-9 w-9 items-center justify-center rounded-lg text-text-2 hover:bg-surface-2 hover:text-text-1"
                 aria-label="Chiudi"
               >
@@ -203,7 +205,7 @@ export function CategoryCombobox({ categories, txType, value, onChange }: Catego
 
   // ── Desktop: popover ──────────────────────────────────────────────────────────
   return (
-    <Popover.Root open={open} onOpenChange={setOpen}>
+    <Popover.Root open={open} onOpenChange={changeOpen}>
       <Popover.Trigger asChild>
         {trigger}
       </Popover.Trigger>

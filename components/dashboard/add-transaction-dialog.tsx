@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DateInput } from "@/components/ui/date-input"
@@ -83,7 +83,6 @@ export function AddTransactionDialog({
   const [confirmationDelay, setConfirmationDelay] = useState(0)
   const { submitting, error, setError, wrap } = useFormState()
   const [suggestedCategoryId, setSuggestedCategoryId] = useState<string | null>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Keyboard shortcut: press 'N' to open the dialog (unless focus is in an input/textarea)
   useEffect(() => {
@@ -98,31 +97,28 @@ export function AddTransactionDialog({
     }
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [])
+  }, [setOpen])
 
-  // Auto-suggest category from description (debounced 400ms, client-side query)
+  // Auto-suggest category from description (debounced 400ms, client-side query).
+  // Sotto i 3 caratteri il suggerimento non si mostra, anche se ne arriva uno in ritardo.
+  const suggestionQuery = description.trim()
+  const canSuggest = suggestionQuery.length >= 3
+  const suggestion = canSuggest ? suggestedCategoryId : null
+
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!canSuggest) return
 
-    const trimmed = description.trim()
-    if (trimmed.length < 3) {
-      setSuggestedCategoryId(null)
-      return
-    }
-
-    debounceRef.current = setTimeout(async () => {
+    const timeout = setTimeout(async () => {
       try {
-        const suggested = await suggestCategory(trimmed, type)
+        const suggested = await suggestCategory(suggestionQuery, type)
         setSuggestedCategoryId(suggested)
       } catch (err) {
         console.warn("[CategorySuggestion] errore:", err)
       }
     }, 400)
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [description, type])
+    return () => clearTimeout(timeout)
+  }, [canSuggest, suggestionQuery, type])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -215,6 +211,7 @@ export function AddTransactionDialog({
           <DialogContent>
           <DialogHeader>
             <DialogTitle>Aggiungi transazione</DialogTitle>
+            <DialogDescription>I campi con * sono obbligatori.</DialogDescription>
           </DialogHeader>
 
           <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
@@ -334,13 +331,13 @@ export function AddTransactionDialog({
                 value={categoryId}
                 onChange={(id) => { setCategoryId(id); setSuggestedCategoryId(null) }}
               />
-              {suggestedCategoryId && suggestedCategoryId !== categoryId && (() => {
-                const cat = categories.find((c) => c.id === suggestedCategoryId)
+              {suggestion && suggestion !== categoryId && (() => {
+                const cat = categories.find((c) => c.id === suggestion)
                 if (!cat) return null
                 return (
                   <button
                     type="button"
-                    onClick={() => { setCategoryId(suggestedCategoryId); setSuggestedCategoryId(null) }}
+                    onClick={() => { setCategoryId(suggestion); setSuggestedCategoryId(null) }}
                     className="flex items-center gap-2 rounded-md border border-pending/30 bg-pending-subtle px-2.5 py-1.5 text-xs text-pending-fg transition-colors hover:bg-pending-subtle"
                   >
                     <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: cat.color }} />

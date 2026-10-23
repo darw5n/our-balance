@@ -138,8 +138,6 @@ async function DashboardDetails({ userId, viewMode }: { userId: string; viewMode
     getCashflowMonthly(userId, 12, viewMode),
   ])
 
-  const currentMonthLabel = new Date().toLocaleDateString("it-IT", { month: "long", year: "numeric" })
-
   return (
     <>
       {/* Cashflow chart */}
@@ -157,7 +155,7 @@ async function DashboardDetails({ userId, viewMode }: { userId: string; viewMode
 
       {/* Dove vanno i soldi */}
       {topCategories.length > 0 && (
-        <CategorySpendingCard categories={topCategories} month={currentMonthLabel} />
+        <CategorySpendingCard categories={topCategories} />
       )}
 
       {/* Movimenti recenti */}
