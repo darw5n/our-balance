@@ -64,6 +64,13 @@ Tailwind CSS v4, shadcn/ui, Supabase, Vercel.
   In `after()` non si possono leggere i cookie: il client va creato prima con
   `createSupabaseClientForAfter()` e passato alla funzione.
 
+## Migration
+
+File in `supabase/migrations/AAAAMMGGhhmmss_nome.sql`, con le RLS policy nello stesso file.
+Le scritture sul database dall'agente sono bloccate: Darwin applica la migration dal SQL Editor.
+Prepara l'SQL con `scripts/migration-sql.sh <file>` (applica e registra nello storico in una
+transazione, copia negli appunti), poi verifica con `list_migrations` e una SELECT di sola lettura.
+
 ## Design tokens
 
 I colori sono token semantici definiti inline in `app/globals.css`
