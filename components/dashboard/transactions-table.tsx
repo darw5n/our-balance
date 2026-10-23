@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState } from "react"
-import { useRouter } from "next/navigation"
 import { MoreHorizontal, Pencil, Trash2, CheckCircle, Users } from "lucide-react"
 import { getCategoryIcon } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
@@ -71,7 +70,6 @@ function formatTime(dateStr: string | null | undefined): string {
 }
 
 export function TransactionsTable({ transactions, categories }: TransactionsTableProps) {
-  const router = useRouter()
   const toast = useToast()
   const confirm = useConfirm()
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -118,7 +116,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
         return
       }
       toast("Transazione eliminata.", "success")
-      router.refresh()
     } finally {
       setDeleting(false)
     }
@@ -141,7 +138,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
       }
       toast(`${count} ${count === 1 ? "transazione eliminata" : "transazioni eliminate"}.`, "success")
       setSelected(new Set())
-      router.refresh()
     } finally {
       setDeleting(false)
     }
@@ -328,7 +324,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
         }}
         transaction={editingTx}
         categories={categories}
-        onSuccess={() => router.refresh()}
       />
 
       <ConfirmTransactionDialog
@@ -338,7 +333,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
           if (!open) setConfirmingTx(null)
         }}
         transaction={confirmingTx}
-        onSuccess={() => router.refresh()}
       />
 
       {/* Mobile actions bottom sheet */}

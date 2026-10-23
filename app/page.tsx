@@ -21,11 +21,9 @@ export default async function Home() {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data } = await supabase.auth.getClaims()
 
-  if (user) {
+  if (data?.claims?.sub) {
     redirect("/dashboard")
   }
 

@@ -36,25 +36,23 @@ export async function createSupabaseServerClient() {
  * Ottiene l'utente autenticato dal server.
  * Restituisce null se non autenticato.
  *
- * Avvolto in `cache()` di React: `supabase.auth.getUser()` fa una richiesta
- * di rete per validare il token, e questa funzione viene chiamata sia nel
- * layout che nella pagina. `cache()` deduplica le chiamate nella stessa
- * richiesta server, evitando round-trip di rete ripetuti a ogni navigazione.
+ * Usa `getClaims()`: verifica la firma del JWT in locale (con le chiavi
+ * pubbliche del progetto, messe in cache) invece di chiamare il server Auth
+ * a ogni richiesta come `getUser()`. Restituisce solo i campi che l'app usa.
+ * Avvolto in `cache()` di React per deduplicare layout e pagina nella stessa richiesta.
  */
-export const getServerUser = cache(async () => {
+export const getServerUser = cache(async (): Promise<{ id: string; email: string | null } | null> => {
   try {
     const supabase = await createSupabaseServerClient()
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
+    const { data, error } = await supabase.auth.getClaims()
 
     if (error) {
       console.error("[getServerUser] Auth error:", error.message)
       return null
     }
+    if (!data?.claims?.sub) return null
 
-    return user
+    return { id: data.claims.sub, email: data.claims.email ?? null }
   } catch (error) {
     console.error("[getServerUser] Unexpected error:", error)
     return null

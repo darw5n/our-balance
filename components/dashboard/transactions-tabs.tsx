@@ -45,7 +45,6 @@ export function TransactionsTabs({ active }: { active: string }) {
             href={hrefFor(value)}
             role="tab"
             aria-selected={isActive}
-            prefetch
             scroll={false}
             className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               isActive

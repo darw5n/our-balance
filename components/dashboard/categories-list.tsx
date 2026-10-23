@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Pencil, Trash2, Plus, Tag } from "lucide-react"
 import { getCategoryIcon, GROUP_ICONS } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
@@ -21,7 +20,6 @@ type CategoriesListProps = {
 }
 
 export function CategoriesList({ categories: initialCategories, budgets = [] }: CategoriesListProps) {
-  const router = useRouter()
   const toast = useToast()
   const confirm = useConfirm()
   const [categories, setCategories] = useState(initialCategories)
@@ -35,7 +33,6 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 
   function handleSuccess() {
-    router.refresh()
     setFormOpen(false)
     setEditingCategory(null)
   }
@@ -62,7 +59,6 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
     if (result.success) {
       setCategories((prev) => prev.filter((c) => c.id !== cat.id))
       toast(`Categoria "${cat.name}" eliminata.`, "success")
-      router.refresh()
     } else {
       toast(result.error ?? "Errore durante l'eliminazione.", "error")
     }

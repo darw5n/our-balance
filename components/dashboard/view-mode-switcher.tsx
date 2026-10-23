@@ -23,7 +23,6 @@ export function ViewModeSwitcher({ currentView, basePath = "/dashboard", extraPa
           <Link
             key={value}
             href={`${basePath}?${params.toString()}`}
-            prefetch
             replace
             scroll={false}
             className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out ${
