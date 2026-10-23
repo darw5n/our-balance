@@ -12,17 +12,18 @@ export default async function SettingsPage() {
   const mcpUrl = `${protocol}://${host}/api/mcp`
 
   const user = await getServerUser()
-  const settings = user
-    ? await getUserSettings(user.id)
-    : { theme: "system" as const, defaultView: "personal" as const }
 
-  let tokenInfo = null
   let configError: string | null = null
-  try {
-    tokenInfo = await getApiTokenInfo()
-  } catch (e) {
-    configError = e instanceof Error ? e.message : "Errore di configurazione"
-  }
+  // Preferenze e token sono indipendenti: si leggono in parallelo.
+  const [settings, tokenInfo] = await Promise.all([
+    user
+      ? getUserSettings(user.id)
+      : { theme: "system" as const, defaultView: "personal" as const },
+    getApiTokenInfo().catch((e: unknown) => {
+      configError = e instanceof Error ? e.message : "Errore di configurazione"
+      return null
+    }),
+  ])
 
   return (
     <div className="space-y-6">

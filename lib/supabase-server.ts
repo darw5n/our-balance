@@ -33,6 +33,30 @@ export async function createSupabaseServerClient() {
 }
 
 /**
+ * Client con i cookie letti subito, da usare dentro `after()` in una pagina:
+ * lì `cookies()` non è più leggibile, quindi la richiesta va "fotografata" prima.
+ * Solo lettura dei cookie: dopo la risposta non si possono più scrivere.
+ */
+export async function createSupabaseClientForAfter() {
+  const cookieList = (await cookies()).getAll()
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieList
+        },
+        setAll() {
+          // La risposta è già partita: niente da scrivere.
+        },
+      },
+    }
+  )
+}
+
+/**
  * Ottiene l'utente autenticato dal server.
  * Restituisce null se non autenticato.
  *

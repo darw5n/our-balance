@@ -34,10 +34,9 @@ export default async function ReportsPage({
   const user = await getServerUser()
   if (!user) return null
 
-  // Se ?view= è assente si usa la preferenza dell'utente.
-  const defaultView = (await getUserSettings(user.id)).defaultView
+  // Se ?view= è assente si usa la preferenza dell'utente (già in cache: la legge anche il layout).
   const viewMode: ViewMode =
-    view === "family" ? "family" : view === "personal" ? "personal" : defaultView
+    view === "family" || view === "personal" ? view : (await getUserSettings(user.id)).defaultView
 
   const [summary, cashflowCurrent, cashflowPrev, macroBreakdown, categoryMonthly] =
     await Promise.all([

@@ -323,9 +323,14 @@ export async function resumeRecurringTransaction(id: string): Promise<RecurringA
   }
 }
 
-export async function processRecurringTransactions(userId: string): Promise<void> {
+export async function processRecurringTransactions(
+  userId: string,
+  // Client già pronto: serve quando la funzione gira dentro `after()` nella
+  // dashboard, dove cookies() non è più leggibile.
+  client?: Awaited<ReturnType<typeof createSupabaseServerClient>>
+): Promise<void> {
   try {
-    const supabase = await createSupabaseServerClient()
+    const supabase = client ?? (await createSupabaseServerClient())
     const today = todayISO()
 
     const { data: due, error } = await supabase
