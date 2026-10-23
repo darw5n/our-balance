@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Pencil, Trash2, Plus } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
@@ -26,19 +26,15 @@ function progressBarColor(percentage: number, is_exceeded: boolean): string {
 }
 
 export function BudgetsList({
-  budgets: initialBudgets,
-  categoriesWithoutBudget: initialCategoriesWithoutBudget,
+  budgets: serverBudgets,
+  categoriesWithoutBudget,
   hasCategories,
 }: BudgetsListProps) {
   const toast = useToast()
   const confirm = useConfirm()
-  const [budgets, setBudgets] = useState(initialBudgets)
-  const [categoriesWithoutBudget, setCategoriesWithoutBudget] = useState(initialCategoriesWithoutBudget)
-
-  useEffect(() => {
-    setBudgets(initialBudgets)
-    setCategoriesWithoutBudget(initialCategoriesWithoutBudget)
-  }, [initialBudgets, initialCategoriesWithoutBudget])
+  // I budget eliminati spariscono subito, senza aspettare i dati aggiornati dal server.
+  const [deletedIds, setDeletedIds] = useState<ReadonlySet<string>>(new Set())
+  const budgets = serverBudgets.filter((b) => !deletedIds.has(b.id))
 
   const [formOpen, setFormOpen] = useState(false)
   const [editingBudget, setEditingBudget] = useState<BudgetWithProgress | null>(null)
@@ -68,7 +64,7 @@ export function BudgetsList({
     if (!ok) return
     const result = await deleteBudget(budget.id)
     if (result.success) {
-      setBudgets((prev) => prev.filter((b) => b.id !== budget.id))
+      setDeletedIds((prev) => new Set(prev).add(budget.id))
       toast(`Budget per "${budget.category_name}" eliminato.`, "success")
     } else {
       toast(result.error ?? "Errore durante l'eliminazione.", "error")

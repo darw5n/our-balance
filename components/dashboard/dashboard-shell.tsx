@@ -45,7 +45,9 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
   const pathname = usePathname()
   const router = useRouter()
   const [addOpen, setAddOpen] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  // Il menu ricorda la pagina su cui è stato aperto: cambiando pagina si chiude da solo.
+  const [menuOpenOn, setMenuOpenOn] = useState<string | null>(null)
+  const menuOpen = menuOpenOn === pathname
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Allinea il cookie del tema alla preferenza salvata (utile su un nuovo
@@ -64,16 +66,12 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
     if (!menuOpen) return
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
+        setMenuOpenOn(null)
       }
     }
     document.addEventListener("mousedown", handleClick)
     return () => document.removeEventListener("mousedown", handleClick)
   }, [menuOpen])
-
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [pathname])
 
   useEffect(() => {
     const handler = () => setAddOpen(true)
@@ -138,7 +136,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
             {/* Avatar — opens secondary dropdown */}
             <div className="relative" ref={menuRef}>
               <button
-                onClick={() => setMenuOpen((v) => !v)}
+                onClick={() => setMenuOpenOn(menuOpen ? null : pathname)}
                 aria-label="Menu account"
                 className="flex h-9 w-9 items-center justify-center rounded-full font-sans text-sm font-bold text-white transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--accent-brand)" }}

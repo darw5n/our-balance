@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
@@ -47,33 +47,34 @@ type CategoryFormDialogProps = {
   onSuccess?: () => void
 }
 
-export function CategoryFormDialog({
-  open,
-  onOpenChange,
-  category,
-  onSuccess,
-}: CategoryFormDialogProps) {
-  const [name, setName] = useState("")
-  const [emoji, setEmoji] = useState("")
-  const [color, setColor] = useState("#22c55e")
-  const [type, setType] = useState<"expense" | "income">("expense")
-  const [macroCategory, setMacroCategory] = useState<MacroCategory | null>(null)
-  const [groupName, setGroupName] = useState("")
+export function CategoryFormDialog({ open, onOpenChange, ...formProps }: CategoryFormDialogProps) {
+  // DialogContent si smonta alla chiusura: il form riparte dai valori della categoria a ogni apertura.
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <CategoryForm onClose={() => onOpenChange(false)} {...formProps} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+type CategoryFormProps = Omit<CategoryFormDialogProps, "open" | "onOpenChange"> & {
+  onClose: () => void
+}
+
+function CategoryForm({ category: categoryProp, onSuccess, onClose }: CategoryFormProps) {
+  // Copia della categoria all'apertura: alla chiusura il genitore la azzera, e il form
+  // non deve cambiare aspetto durante l'animazione di uscita.
+  const [category] = useState(categoryProp)
+  const [name, setName] = useState(category?.name ?? "")
+  const [emoji, setEmoji] = useState(category?.emoji ?? "")
+  const [color, setColor] = useState(category?.color ?? "#22c55e")
+  const [type, setType] = useState<"expense" | "income">(category?.type === "income" ? "income" : "expense")
+  const [macroCategory, setMacroCategory] = useState<MacroCategory | null>(category?.macro_category ?? null)
+  const [groupName, setGroupName] = useState(category?.group_name ?? "")
   const { submitting, error, setError, wrap } = useFormState()
 
   const isEdit = !!category?.id
-
-  useEffect(() => {
-    if (open) {
-      setName(category?.name ?? "")
-      setEmoji(category?.emoji ?? "")
-      setColor(category?.color ?? "#22c55e")
-      setType(category?.type === "income" ? "income" : "expense")
-      setMacroCategory(category?.macro_category ?? null)
-      setGroupName(category?.group_name ?? "")
-      setError(null)
-    }
-  }, [open, category])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -101,163 +102,161 @@ export function CategoryFormDialog({
         setError(result.error)
         return
       }
-      onOpenChange(false)
+      onClose()
       onSuccess?.()
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Modifica categoria" : "Nuova categoria"}</DialogTitle>
-        </DialogHeader>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+    <>
+      <DialogHeader>
+        <DialogTitle>{isEdit ? "Modifica categoria" : "Nuova categoria"}</DialogTitle>
+      </DialogHeader>
+      <form className="space-y-4" onSubmit={handleSubmit}>
 
-          {/* Nome */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="cat-name">Nome</label>
-            <Input
-              id="cat-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Es. Alimentari"
-            />
-          </div>
+        {/* Nome */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="cat-name">Nome</label>
+          <Input
+            id="cat-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Es. Alimentari"
+          />
+        </div>
 
-          {/* Emoji */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="cat-emoji">
-              Emoji <span className="text-text-3">(opzionale)</span>
-            </label>
-            <div className="flex items-center gap-2">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-surface-2 text-xl">
-                {emoji || "?"}
-              </div>
-              <Input
-                id="cat-emoji"
-                value={emoji}
-                onChange={(e) => setEmoji(e.target.value.trim())}
-                placeholder="🛒"
-                maxLength={4}
-              />
-            </div>
-            <p className="font-sans text-[10px] text-text-3">
-              Incolla o digita un&apos;emoji — visibile nelle transazioni e nella dashboard
-            </p>
-          </div>
-
-          {/* Gruppo */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2" htmlFor="cat-group">
-              Gruppo <span className="text-text-3">(opzionale)</span>
-            </label>
-            <Input
-              id="cat-group"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              placeholder="Es. Abitazione, Cibo, Trasporti…"
-            />
-          </div>
-
-          {/* Tipo */}
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-text-2">Tipo</label>
-            <div className="flex overflow-hidden rounded-md border border-border-subtle">
-              <button
-                type="button"
-                onClick={() => setType("expense")}
-                className={`flex-1 py-2 text-sm transition-colors ${
-                  type === "expense"
-                    ? "bg-expense-subtle text-expense-fg font-medium"
-                    : "bg-transparent text-text-2 hover:bg-surface-hover"
-                }`}
-              >
-                Spesa
-              </button>
-              <button
-                type="button"
-                onClick={() => setType("income")}
-                className={`flex-1 py-2 text-sm transition-colors ${
-                  type === "income"
-                    ? "bg-income-subtle text-income-fg font-medium"
-                    : "bg-transparent text-text-2 hover:bg-surface-hover"
-                }`}
-              >
-                Entrata
-              </button>
-            </div>
-          </div>
-
-          {/* Colore */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-2">Colore</label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    color === c ? "border-border-strong ring-2 ring-border-strong/30" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={`Colore ${c}`}
-                />
-              ))}
+        {/* Emoji */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="cat-emoji">
+            Emoji <span className="text-text-3">(opzionale)</span>
+          </label>
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-surface-2 text-xl">
+              {emoji || "?"}
             </div>
             <Input
-              type="text"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="font-mono"
-              placeholder="#22c55e"
+              id="cat-emoji"
+              value={emoji}
+              onChange={(e) => setEmoji(e.target.value.trim())}
+              placeholder="🛒"
+              maxLength={4}
             />
           </div>
+          <p className="font-sans text-[10px] text-text-3">
+            Incolla o digita un&apos;emoji — visibile nelle transazioni e nella dashboard
+          </p>
+        </div>
 
-          {/* Macro-categoria */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-text-2">
-              Macro-categoria <span className="text-text-3">(opzionale)</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {MACRO_OPTIONS.map((opt) => {
-                const isActive = macroCategory === opt.value
-                const key = opt.value ?? "none"
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setMacroCategory(opt.value)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                      isActive
-                        ? (MACRO_ACTIVE[key] ?? MACRO_ACTIVE.none)
-                        : "border-border-subtle text-text-3 hover:bg-surface-hover"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+        {/* Gruppo */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2" htmlFor="cat-group">
+            Gruppo <span className="text-text-3">(opzionale)</span>
+          </label>
+          <Input
+            id="cat-group"
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Es. Abitazione, Cibo, Trasporti…"
+          />
+        </div>
 
-          {error && <p className="text-xs text-expense-fg">{error}</p>}
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
+        {/* Tipo */}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-text-2">Tipo</label>
+          <div className="flex overflow-hidden rounded-md border border-border-subtle">
+            <button
               type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
+              onClick={() => setType("expense")}
+              className={`flex-1 py-2 text-sm transition-colors ${
+                type === "expense"
+                  ? "bg-expense-subtle text-expense-fg font-medium"
+                  : "bg-transparent text-text-2 hover:bg-surface-hover"
+              }`}
             >
-              Annulla
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}
-            </Button>
+              Spesa
+            </button>
+            <button
+              type="button"
+              onClick={() => setType("income")}
+              className={`flex-1 py-2 text-sm transition-colors ${
+                type === "income"
+                  ? "bg-income-subtle text-income-fg font-medium"
+                  : "bg-transparent text-text-2 hover:bg-surface-hover"
+              }`}
+            >
+              Entrata
+            </button>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        {/* Colore */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-text-2">Colore</label>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
+                  color === c ? "border-border-strong ring-2 ring-border-strong/30" : "border-transparent"
+                }`}
+                style={{ backgroundColor: c }}
+                aria-label={`Colore ${c}`}
+              />
+            ))}
+          </div>
+          <Input
+            type="text"
+            value={color}
+            onChange={(e) => setColor(e.target.value)}
+            className="font-mono"
+            placeholder="#22c55e"
+          />
+        </div>
+
+        {/* Macro-categoria */}
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-text-2">
+            Macro-categoria <span className="text-text-3">(opzionale)</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {MACRO_OPTIONS.map((opt) => {
+              const isActive = macroCategory === opt.value
+              const key = opt.value ?? "none"
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setMacroCategory(opt.value)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                    isActive
+                      ? (MACRO_ACTIVE[key] ?? MACRO_ACTIVE.none)
+                      : "border-border-subtle text-text-3 hover:bg-surface-hover"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {error && <p className="text-xs text-expense-fg">{error}</p>}
+        <div className="flex justify-end gap-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={submitting}
+          >
+            Annulla
+          </Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? "Salvataggio..." : isEdit ? "Salva" : "Crea"}
+          </Button>
+        </div>
+      </form>
+    </>
   )
 }

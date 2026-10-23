@@ -13,16 +13,18 @@ export default async function SettingsPage() {
 
   const user = await getServerUser()
 
-  let configError: string | null = null
   // Preferenze e token sono indipendenti: si leggono in parallelo.
-  const [settings, tokenInfo] = await Promise.all([
+  const [settings, { tokenInfo, configError }] = await Promise.all([
     user
       ? getUserSettings(user.id)
       : { theme: "system" as const, defaultView: "personal" as const },
-    getApiTokenInfo().catch((e: unknown) => {
-      configError = e instanceof Error ? e.message : "Errore di configurazione"
-      return null
-    }),
+    getApiTokenInfo().then(
+      (tokenInfo) => ({ tokenInfo, configError: null }),
+      (e: unknown) => ({
+        tokenInfo: null,
+        configError: e instanceof Error ? e.message : "Errore di configurazione",
+      })
+    ),
   ])
 
   return (
