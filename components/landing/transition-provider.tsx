@@ -67,7 +67,7 @@ export function TransitionProvider({
         {phase === "drawing" && (
           <motion.div
             key="fade-transition"
-            className="pointer-events-none fixed inset-0 z-[200] bg-zinc-950"
+            className="pointer-events-none fixed inset-0 z-[200] bg-page-transition"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

@@ -109,7 +109,7 @@ Esposto su `/app/api/mcp/[token]/route.ts`.
 non scarica `motion`. `usePageTransition()` funziona solo dentro quelle pagine.
 - Usa `navigate(href)` al posto di `<Link>` o `router.push()` quando
   si vuole la transizione animata tra pagine pubbliche
-- La transizione attuale è una dissolvenza in nero (zinc-950), ~200 ms per lato
+- La transizione attuale è una dissolvenza in nero (token `page-transition`), ~200 ms per lato
 - Nell'app autenticata le transizioni sono in CSS: `app/(dashboard)/template.tsx` (`.route-fade`)
 
 ## Grafici
