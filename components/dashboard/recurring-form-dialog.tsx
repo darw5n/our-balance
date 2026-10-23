@@ -322,7 +322,7 @@ export function RecurringFormDialog({
                 type="checkbox"
                 checked={requiresConfirmation}
                 onChange={(e) => handleConfirmationToggle(e.target.checked)}
-                className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-emerald-500"
+                className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-primary"
               />
               <label htmlFor="rec-confirm" className="text-xs text-text-2 cursor-pointer">
                 Richiedi conferma importo prima di registrare
