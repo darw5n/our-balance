@@ -91,7 +91,8 @@ Gestita con Supabase Auth.
 - `npm run dev` — richiede `.env.local` con le chiavi Supabase
 - Errore `PGRST303 "JWT issued at future"`: l'orologio del Mac è fuori sync.
   Risincronizza l'ora di sistema (o rifai il login) e ricarica.
-- Non c'è ancora un setup di test — validazione con `npm run build` e `npx tsc --noEmit`.
+- Prove automatiche con Vitest in `tests/` (`npm test`): helper di `query-utils` e lettura a blocchi
+  di `transaction-list` con un finto client Supabase. Validazione completa: `npm test`, `npx tsc --noEmit`, `npm run build`.
 
 ## MCP Server
 
