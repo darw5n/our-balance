@@ -3,7 +3,8 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from "recharts"
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
-import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL } from "@/components/dashboard/charts/chart-config"
+import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL, SERIES_ANIMATION } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -21,6 +22,7 @@ type ChartPoint = {
 
 export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "personal" }: Props) {
   const isMobile = useIsMobile()
+  const reduceMotion = useReducedMotion()
   const isFamily = viewMode === "family"
   const formatMonth = (v: string) => isMobile ? v.charAt(0).toUpperCase() : v.charAt(0).toUpperCase() + v.slice(1)
 
@@ -74,6 +76,8 @@ export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "p
               formatter={(value) => (value === "current" ? String(year) : String(year - 1))}
             />
             <Line
+              {...SERIES_ANIMATION}
+              isAnimationActive={!reduceMotion}
               type="monotone"
               dataKey="current"
               stroke="var(--text-1)"
@@ -82,6 +86,8 @@ export function YearComparisonChart({ currentYear, prevYear, year, viewMode = "p
               activeDot={{ r: 4 }}
             />
             <Line
+              {...SERIES_ANIMATION}
+              isAnimationActive={!reduceMotion}
               type="monotone"
               dataKey="prev"
               stroke="var(--text-3)"

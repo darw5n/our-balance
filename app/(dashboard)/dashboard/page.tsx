@@ -120,9 +120,13 @@ export default async function DashboardPage({
       {upcoming.length > 0 && <UpcomingCard upcoming={upcoming} />}
 
       {/* Grafico e liste arrivano in streaming: hero e totali compaiono prima. */}
-      <Suspense key={viewMode} fallback={<DashboardDetailsSkeleton />}>
-        <DashboardDetails userId={user.id} viewMode={viewMode} />
-      </Suspense>
+      <div className="route-fade">
+        <Suspense key={viewMode} fallback={<DashboardDetailsSkeleton />}>
+          <div className="space-y-3">
+            <DashboardDetails userId={user.id} viewMode={viewMode} />
+          </div>
+        </Suspense>
+      </div>
     </div>
   )
 }

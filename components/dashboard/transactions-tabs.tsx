@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
+import { SegmentedLinks } from "@/components/dashboard/segmented-links"
 
 const TABS = [
   { value: "lista", label: "Lista" },
@@ -32,30 +32,10 @@ export function TransactionsTabs({ active }: { active: string }) {
   }
 
   return (
-    <div
-      role="tablist"
-      aria-label="Vista transazioni"
-      className="flex w-full rounded-[14px] border border-border-subtle bg-surface-2 p-[3px]"
-    >
-      {TABS.map(({ value, label }) => {
-        const isActive = active === value
-        return (
-          <Link
-            key={value}
-            href={hrefFor(value)}
-            role="tab"
-            aria-selected={isActive}
-            scroll={false}
-            className={`flex flex-1 items-center justify-center whitespace-nowrap px-3 py-2 font-sans text-sm font-medium transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-              isActive
-                ? "rounded-full bg-surface-1 text-text-1 shadow-sm"
-                : "rounded-[10px] bg-transparent text-text-3 hover:text-text-2"
-            }`}
-          >
-            {label}
-          </Link>
-        )
-      })}
-    </div>
+    <SegmentedLinks
+      segments={TABS.map(({ value, label }) => ({ value, label, href: hrefFor(value) }))}
+      active={active}
+      tabsLabel="Vista transazioni"
+    />
   )
 }

@@ -2,7 +2,7 @@ import { DashboardDetailsSkeleton, DashboardTopSkeleton } from "./dashboard-skel
 
 export default function Loading() {
   return (
-    <div className="space-y-3" role="status" aria-label="Caricamento dashboard">
+    <div data-loading className="space-y-3" role="status" aria-label="Caricamento dashboard">
       <DashboardTopSkeleton />
       <DashboardDetailsSkeleton />
     </div>
