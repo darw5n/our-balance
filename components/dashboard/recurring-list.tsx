@@ -165,7 +165,7 @@ export function RecurringList({ recurring: initialRecurring, categories }: Recur
                         {isEnded && <span className="ml-2 rounded-full bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-text-3">Conclusa</span>}
                       </p>
                       <p className="font-sans text-[11px] text-text-3 truncate">
-                        <span className={`font-semibold ${rec.type === "income" ? "text-income-fg" : "text-accent-brand"}`}>
+                        <span className={`font-semibold ${rec.type === "income" ? "text-income-fg" : "text-accent-brand-fg"}`}>
                           {rec.type === "income" ? "+" : "-"}{formatCurrency(Number(rec.amount))}
                         </span>
                         {" · "}

@@ -124,7 +124,7 @@ export default function SignupPage() {
         <div className="w-full max-w-sm space-y-6 text-center">
           <div className="flex flex-col items-center gap-3">
             <div className="rounded-full border border-accent-brand/30 bg-accent-brand-bg p-4">
-              <Mail className="h-8 w-8 text-accent-brand" />
+              <Mail className="h-8 w-8 text-accent-brand-fg" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-text-1">Controlla la email</h1>
@@ -141,7 +141,7 @@ export default function SignupPage() {
             <p>
               Non trovi la email? Controlla la cartella spam o{" "}
               <button
-                className="text-accent-brand font-medium hover:underline"
+                className="text-accent-brand-fg font-medium hover:underline"
                 onClick={() => setSuccess(false)}
               >
                 riprova con un altro indirizzo
@@ -152,7 +152,7 @@ export default function SignupPage() {
               <button
                 onClick={handleResend}
                 disabled={resendCooldown > 0}
-                className="text-accent-brand font-medium hover:underline disabled:text-text-3 disabled:no-underline disabled:cursor-not-allowed"
+                className="text-accent-brand-fg font-medium hover:underline disabled:text-text-3 disabled:no-underline disabled:cursor-not-allowed"
               >
                 {resendSuccess ? "Reinvia di nuovo" : "Reinvia email"}
               </button>
@@ -183,7 +183,7 @@ export default function SignupPage() {
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="rounded-full border border-accent-brand/30 bg-accent-brand-bg p-3">
-            <Wallet className="h-6 w-6 text-accent-brand" />
+            <Wallet className="h-6 w-6 text-accent-brand-fg" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-1">Crea account</h1>
@@ -314,7 +314,7 @@ export default function SignupPage() {
           Hai già un account?{" "}
           <button
             onClick={() => navigate("/login")}
-            className="text-accent-brand font-medium underline-offset-2 hover:underline"
+            className="text-accent-brand-fg font-medium underline-offset-2 hover:underline"
           >
             Accedi
           </button>

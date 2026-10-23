@@ -21,7 +21,7 @@ type BudgetsListProps = {
 
 function progressBarColor(percentage: number, is_exceeded: boolean): string {
   if (is_exceeded || percentage >= 100) return "bg-expense"
-  if (percentage >= 80) return "bg-pending-fg"
+  if (percentage >= 80) return "bg-pending"
   return "bg-income"
 }
 

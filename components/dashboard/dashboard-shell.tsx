@@ -120,7 +120,7 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
                   href={href}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-sm transition-all duration-200 ease-out ${
                     active
-                      ? "bg-accent-brand-bg text-accent-brand font-semibold"
+                      ? "bg-accent-brand-bg text-accent-brand-fg font-semibold"
                       : "text-text-2 hover:bg-surface-2 hover:text-text-1"
                   }`}
                 >
@@ -216,11 +216,11 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
               >
                 <Icon
                   className={`h-[20px] w-[20px] transition-colors ${
-                    active ? "text-accent-brand" : "text-text-3"
+                    active ? "text-accent-brand-fg" : "text-text-3"
                   }`}
                   strokeWidth={active ? 2.2 : 1.7}
                 />
-                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand-fg" : "font-normal text-text-3"}`}>
                   {label}
                 </span>
               </Link>
@@ -250,11 +250,11 @@ export function DashboardShell({ children, userEmail, categories, theme }: Props
               >
                 <Icon
                   className={`h-[20px] w-[20px] transition-colors ${
-                    active ? "text-accent-brand" : "text-text-3"
+                    active ? "text-accent-brand-fg" : "text-text-3"
                   }`}
                   strokeWidth={active ? 2.2 : 1.7}
                 />
-                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand" : "font-normal text-text-3"}`}>
+                <span className={`font-sans text-[9px] leading-none transition-colors ${active ? "font-semibold text-accent-brand-fg" : "font-normal text-text-3"}`}>
                   {label}
                 </span>
               </Link>

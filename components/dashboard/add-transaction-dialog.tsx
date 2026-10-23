@@ -406,7 +406,7 @@ export function AddTransactionDialog({
                         setRequiresConfirmation(e.target.checked)
                         if (!e.target.checked) setConfirmationDelay(0)
                       }}
-                      className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-emerald-500"
+                      className="h-4 w-4 rounded border-border-strong bg-surface-1 accent-primary"
                     />
                     <label htmlFor="req-confirm" className="text-xs text-text-2 cursor-pointer">
                       Chiedi conferma importo ogni volta{" "}

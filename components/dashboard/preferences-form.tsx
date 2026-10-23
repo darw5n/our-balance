@@ -75,7 +75,7 @@ export function PreferencesForm({ settings }: { settings: UserSettings }) {
                 disabled={isPending}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   active
-                    ? "border-accent-brand bg-accent-brand-bg text-accent-brand"
+                    ? "border-accent-brand bg-accent-brand-bg text-accent-brand-fg"
                     : "border-border-subtle bg-transparent text-text-2 hover:text-text-1"
                 }`}
               >
@@ -101,7 +101,7 @@ export function PreferencesForm({ settings }: { settings: UserSettings }) {
                 disabled={isPending}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   active
-                    ? "border-accent-brand bg-accent-brand-bg text-accent-brand"
+                    ? "border-accent-brand bg-accent-brand-bg text-accent-brand-fg"
                     : "border-border-subtle bg-transparent text-text-2 hover:text-text-1"
                 }`}
               >

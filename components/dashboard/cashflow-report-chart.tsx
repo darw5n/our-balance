@@ -83,11 +83,11 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
             {!isFamily && <ReferenceLine y={0} stroke="var(--border-strong)" strokeDasharray="4 3" />}
             {!isFamily && (
               <>
-                <Bar dataKey="entrate" stackId="e" fill="var(--income-fg)" radius={[0, 0, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
-                <Bar dataKey="entrate_provvisorie" stackId="e" fill="var(--income-fg)" fillOpacity={0.35} radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
+                <Bar dataKey="entrate" stackId="e" fill="var(--income)" radius={[0, 0, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
+                <Bar dataKey="entrate_provvisorie" stackId="e" fill="var(--income)" fillOpacity={0.35} radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
               </>
             )}
-            <Bar dataKey="uscite" fill="var(--expense-fg)" radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
+            <Bar dataKey="uscite" fill="var(--expense)" radius={[4, 4, 0, 0]} {...SERIES_ANIMATION} isAnimationActive={!reduceMotion} />
             {!isFamily && (
               <Line
                 {...SERIES_ANIMATION}

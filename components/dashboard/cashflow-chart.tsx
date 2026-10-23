@@ -51,8 +51,8 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
           <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="usciteFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--expense-fg)" stopOpacity={0.4} />
-                <stop offset="100%" stopColor="var(--expense-fg)" stopOpacity={0.05} />
+                <stop offset="0%" stopColor="var(--expense)" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="var(--expense)" stopOpacity={0.05} />
               </linearGradient>
             </defs>
             <CartesianGrid stroke="var(--border-subtle)" vertical={false} />
@@ -69,11 +69,11 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
               isAnimationActive={!reduceMotion}
               type="monotone"
               dataKey="uscite"
-              stroke="var(--expense-fg)"
+              stroke="var(--expense)"
               strokeWidth={2}
               fill="url(#usciteFill)"
               dot={false}
-              activeDot={{ r: 4, fill: "var(--expense-fg)" }}
+              activeDot={{ r: 4, fill: "var(--expense)" }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -82,14 +82,14 @@ export function CashflowChart({ data, hideIncome = false }: CashflowChartProps) 
           <AreaChart data={nettoData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="nettoFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--income-fg)" stopOpacity={0.4} />
-                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--income-fg)" stopOpacity={0.08} />
-                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--expense-fg)" stopOpacity={0.08} />
-                <stop offset="100%" stopColor="var(--expense-fg)" stopOpacity={0.4} />
+                <stop offset="0%" stopColor="var(--income)" stopOpacity={0.4} />
+                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--income)" stopOpacity={0.08} />
+                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--expense)" stopOpacity={0.08} />
+                <stop offset="100%" stopColor="var(--expense)" stopOpacity={0.4} />
               </linearGradient>
               <linearGradient id="nettoStroke" x1="0" y1="0" x2="0" y2="1">
-                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--income-fg)" />
-                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--expense-fg)" />
+                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--income)" />
+                <stop offset={`${zeroOffset * 100}%`} stopColor="var(--expense)" />
               </linearGradient>
             </defs>
             <CartesianGrid stroke="var(--border-subtle)" vertical={false} />

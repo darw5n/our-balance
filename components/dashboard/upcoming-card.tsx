@@ -51,7 +51,7 @@ export function UpcomingCard({ upcoming }: { upcoming: RecurringTransaction[] })
               {/* Amount */}
               <p
                 className={`font-sans text-sm font-semibold flex-shrink-0 ${
-                  amount > 100 ? "text-pending-fg" : "text-accent-brand"
+                  amount > 100 ? "text-pending-fg" : "text-accent-brand-fg"
                 }`}
               >
                 {isExpense ? "-" : "+"}{formatCurrency(amount)}
