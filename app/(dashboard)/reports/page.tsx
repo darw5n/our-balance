@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Wallet, Calendar } from "lucide-react"
 import { getServerUser } from "@/lib/supabase-server"
 import { Card } from "@/components/ui/card"
@@ -84,13 +85,14 @@ export default async function ReportsPage({
     <div className="space-y-4">
       {/* Year navigation + title */}
       <div className="flex items-center justify-between">
-        <a
+        <Link
           href={makeUrl(safeYear - 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1"
+          scroll={false}
+          className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label={`Anno ${safeYear - 1}`}
         >
           <ChevronLeft className="h-4 w-4" />
-        </a>
+        </Link>
         <div className="text-center">
           <h1 className="font-serif italic text-[26px] font-semibold text-text-1 leading-tight">{safeYear}</h1>
           <p className="font-sans text-xs text-text-3">
@@ -99,15 +101,16 @@ export default async function ReportsPage({
         </div>
         {isFutureYear ? (
           /* Nessun anno futuro navigabile: spaziatore per tenere il titolo centrato */
-          <span className="block h-8 w-8" aria-hidden="true" />
+          <span className="block h-11 w-11" aria-hidden="true" />
         ) : (
-          <a
+          <Link
             href={makeUrl(safeYear + 1)}
-            className="flex h-8 w-8 items-center justify-center rounded-[10px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1"
+            scroll={false}
+            className="flex h-11 w-11 items-center justify-center rounded-[12px] border border-border-subtle text-text-3 transition-colors hover:bg-surface-2 hover:text-text-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={`Anno ${safeYear + 1}`}
           >
             <ChevronRight className="h-4 w-4" />
-          </a>
+          </Link>
         )}
       </div>
 

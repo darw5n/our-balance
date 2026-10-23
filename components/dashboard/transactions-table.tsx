@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
 import { MoreHorizontal, Pencil, Trash2, CheckCircle, Users } from "lucide-react"
 import { getCategoryIcon } from "@/lib/category-icons"
 import { Button } from "@/components/ui/button"
@@ -26,19 +26,31 @@ type TransactionsTableProps = {
   categories: CategoryOption[]
 }
 
+// Date e orari si calcolano sempre sul fuso di Roma: il server (UTC) e il browser
+// producono così lo stesso testo, senza differenze tra HTML iniziale e idratazione.
+const TIME_ZONE = "Europe/Rome"
+const dayKeyFormat = new Intl.DateTimeFormat("en-CA", { timeZone: TIME_ZONE })
+const timeFormat = new Intl.DateTimeFormat("it-IT", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit" })
+
+/** Giorno di calendario "YYYY-MM-DD" spostato di `days` giorni. */
+function shiftDay(dayKey: string, days: number): string {
+  const d = new Date(dayKey + "T00:00:00Z")
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 function getDateLabel(dateStr: string | null | undefined): string {
   if (!dateStr) return "Senza data"
-  const date = new Date(dateStr + "T00:00:00")
-  const today = new Date()
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
+  const day = dateStr.slice(0, 10)
+  const today = dayKeyFormat.format(new Date())
 
-  if (date.toDateString() === today.toDateString()) return "OGGI"
-  if (date.toDateString() === yesterday.toDateString()) return "IERI"
+  if (day === today) return "OGGI"
+  if (day === shiftDay(today, -1)) return "IERI"
 
-  const isCurrentYear = date.getFullYear() === today.getFullYear()
-  return date
+  const isCurrentYear = day.slice(0, 4) === today.slice(0, 4)
+  return new Date(day + "T00:00:00Z")
     .toLocaleDateString("it-IT", {
+      timeZone: "UTC",
       day: "numeric",
       month: "short",
       ...(isCurrentYear ? {} : { year: "numeric" }),
@@ -65,8 +77,7 @@ function groupByDate(transactions: Transaction[]): { label: string; transactions
 
 function formatTime(dateStr: string | null | undefined): string {
   if (!dateStr) return ""
-  const d = new Date(dateStr)
-  return d.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })
+  return timeFormat.format(new Date(dateStr))
 }
 
 export function TransactionsTable({ transactions, categories }: TransactionsTableProps) {
@@ -79,6 +90,9 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [mobileActionsTx, setMobileActionsTx] = useState<Transaction | null>(null)
+
+  const groups = useMemo(() => groupByDate(transactions), [transactions])
+  const catMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
 
   const allSelected = transactions.length > 0 && selected.size === transactions.length
 
@@ -146,9 +160,6 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
   if (transactions.length === 0) {
     return <p className="font-sans text-xs text-text-2 py-6 text-center">Nessuna transazione trovata.</p>
   }
-
-  const groups = groupByDate(transactions)
-  const catMap = new Map(categories.map((c) => [c.id, c]))
 
   return (
     <>

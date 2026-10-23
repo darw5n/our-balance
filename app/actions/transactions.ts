@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache"
 import { createSupabaseServerClient, getServerUser } from "@/lib/supabase-server"
 import { ActionResult, ActionResultWithId } from "@/lib/types/actions"
+import { getCategories } from "@/lib/supabase/queries/categories"
+import { getAllTransactions, type TransactionListFilters } from "@/lib/supabase/queries/transaction-list"
+import { formatDate } from "@/lib/utils"
 
 export type TransactionType = "income" | "expense"
 
@@ -269,4 +272,45 @@ export async function bulkDeleteTransactions(ids: string[]): Promise<Transaction
       error: error instanceof Error ? error.message : "Errore sconosciuto.",
     }
   }
+}
+
+/**
+ * CSV di tutte le transazioni che rispettano i filtri (non solo quelle caricate nella pagina).
+ * Separatore ";" e virgola decimale, come si aspetta Excel in italiano.
+ */
+export async function exportTransactionsCsv(
+  filters: TransactionListFilters
+): Promise<{ success: true; csv: string } | { success: false; error: string }> {
+  const user = await getServerUser()
+  if (!user?.id) return { success: false, error: "Utente non autenticato. Effettua il login per continuare." }
+
+  const clean: TransactionListFilters = {
+    q: typeof filters.q === "string" ? filters.q : undefined,
+    from: typeof filters.from === "string" ? filters.from : undefined,
+    to: typeof filters.to === "string" ? filters.to : undefined,
+    categoryId: typeof filters.categoryId === "string" ? filters.categoryId : undefined,
+  }
+
+  const [transactions, categories] = await Promise.all([
+    getAllTransactions(user.id, clean),
+    getCategories(user.id),
+  ])
+  if (!transactions) {
+    return { success: false, error: "Non sono riuscito a leggere tutte le transazioni. Riprova tra poco." }
+  }
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]))
+
+  const rows = [
+    ["Data", "Descrizione", "Tipo", "Importo", "Stato", "Categoria"],
+    ...transactions.map((tx) => [
+      formatDate(tx.date),
+      tx.description ?? "",
+      tx.type ?? "",
+      (tx.amount ?? 0).toString().replace(".", ","),
+      tx.status ?? "",
+      tx.category_id ? (categoryMap.get(tx.category_id) ?? "") : "",
+    ]),
+  ]
+  const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(";")).join("\n")
+  return { success: true, csv }
 }

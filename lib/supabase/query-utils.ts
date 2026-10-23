@@ -63,3 +63,13 @@ export function rewindDate(dateStr: string, frequency: Frequency): string {
 export function pendingTransactionDate(dueDate: string, type: string): string {
   return type === "income" ? firstDayOfMonth(dueDate) : dueDate
 }
+
+/**
+ * Valore per un filtro `ilike` dentro `.or()` di PostgREST che cerca il testo alla lettera:
+ * `%` e `_` non fanno da jolly, e virgole o parentesi non rompono il filtro (il valore è tra virgolette).
+ */
+export function ilikeContainsLiteral(text: string): string {
+  const likeEscaped = text.replace(/[\\%_]/g, (c) => `\\${c}`)
+  const quoted = likeEscaped.replace(/["\\]/g, (c) => `\\${c}`)
+  return `"%${quoted}%"`
+}
