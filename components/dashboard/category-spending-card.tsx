@@ -18,7 +18,7 @@ export function CategorySpendingCard({ categories, month }: Props) {
     <Card className="px-4 py-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-serif text-[18px] font-semibold text-text-1">Dove vanno i soldi</h2>
-        <Link href="/transactions" className="font-sans text-xs text-accent-brand hover:underline">
+        <Link href="/transactions" className="font-sans text-xs text-accent-brand-fg hover:underline">
           Vedi tutto ›
         </Link>
       </div>

@@ -44,14 +44,14 @@ export function CategoryMonthTable({ data, year }: Props) {
   function heatmapBg(v: number) {
     if (v <= 0) return undefined
     const intensity = Math.min(v / maxCellValue, 1)
-    return `color-mix(in srgb, var(--expense-fg) ${Math.round(intensity * 28)}%, transparent)`
+    return `color-mix(in srgb, var(--expense) ${Math.round(intensity * 28)}%, transparent)`
   }
 
   if (!hasData) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 font-sans text-xs text-text-3">
         <p>Nessuna spesa registrata per il {year}.</p>
-        <Link href="/transactions" className="text-accent-brand underline underline-offset-2">
+        <Link href="/transactions" className="text-accent-brand-fg underline underline-offset-2">
           Aggiungi transazioni →
         </Link>
       </div>

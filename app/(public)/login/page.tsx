@@ -75,7 +75,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="rounded-full border border-accent-brand/30 bg-accent-brand-bg p-3">
-            <Wallet className="h-6 w-6 text-accent-brand" />
+            <Wallet className="h-6 w-6 text-accent-brand-fg" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-text-1">Bentornato</h1>
@@ -170,7 +170,7 @@ export default function LoginPage() {
           Non hai un account?{" "}
           <button
             onClick={() => navigate("/signup")}
-            className="text-accent-brand font-medium underline-offset-2 hover:underline"
+            className="text-accent-brand-fg font-medium underline-offset-2 hover:underline"
           >
             Registrati gratis
           </button>

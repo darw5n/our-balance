@@ -12,7 +12,7 @@ export function RecentTransactionsCard({ transactions }: { transactions: RecentT
     <Card className="px-4 py-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-serif text-[18px] font-semibold text-text-1">Movimenti recenti</h2>
-        <Link href="/transactions" className="font-sans text-xs text-accent-brand hover:underline">
+        <Link href="/transactions" className="font-sans text-xs text-accent-brand-fg hover:underline">
           Vedi tutti ›
         </Link>
       </div>

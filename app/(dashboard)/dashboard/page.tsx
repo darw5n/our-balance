@@ -88,7 +88,7 @@ export default async function DashboardPage({
               <span className="font-sans text-[10px] leading-snug text-text-3">Uscite questo mese</span>
               <div
                 className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
-                style={{ background: "color-mix(in srgb, var(--expense-fg) 15%, transparent)" }}
+                style={{ background: "color-mix(in srgb, var(--expense) 15%, transparent)" }}
               >
                 <TrendingDown className="h-3.5 w-3.5" style={{ color: "var(--expense-fg)" }} />
               </div>
@@ -102,7 +102,7 @@ export default async function DashboardPage({
               <span className="font-sans text-[10px] leading-snug text-text-3">Uscite da gennaio</span>
               <div
                 className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[9px]"
-                style={{ background: "color-mix(in srgb, var(--expense-fg) 15%, transparent)" }}
+                style={{ background: "color-mix(in srgb, var(--expense) 15%, transparent)" }}
               >
                 <Calendar className="h-3.5 w-3.5" style={{ color: "var(--expense-fg)" }} />
               </div>

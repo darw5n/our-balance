@@ -60,7 +60,7 @@ export function TransactionsFilters({ q, from, to, category, categories, actions
           onClick={() => setFiltersOpen((v) => !v)}
           className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-3 py-2.5 font-sans text-sm font-medium transition-all duration-200 sm:px-4 ${
             filtersOpen || activeFilterCount > 0
-              ? "border-accent-brand bg-accent-brand-bg text-accent-brand"
+              ? "border-accent-brand bg-accent-brand-bg text-accent-brand-fg"
               : "border-border-subtle bg-surface-1 text-text-2 hover:text-text-1"
           }`}
           aria-label="Filtri avanzati"

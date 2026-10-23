@@ -102,6 +102,7 @@
 
   /* ---- Accent brand ---- */
   --color-accent-brand:    var(--accent-brand);
+  --color-accent-brand-fg: var(--accent-brand-fg);
   --color-accent-brand-bg: var(--accent-brand-bg);
 
   /* ---- Hero gradient ---- */
@@ -164,7 +165,7 @@
   --secondary:            #EDE8DF;
   --secondary-foreground: #1A1410;
   --muted:                #EDE8DF;
-  --muted-foreground:     #9B8D83;
+  --muted-foreground:     #74665C;
   --accent:               #EDE8DF;
   --accent-foreground:    #1A1410;
   --destructive:          #C7374A;
@@ -188,8 +189,8 @@
 
   /* ---- Testo (light) ---- */
   --text-1: #1A1410;
-  --text-2: #7A6D63;
-  --text-3: #9B8D83;
+  --text-2: #73665C;
+  --text-3: #74665C;
 
   /* ---- Bordi (light) ---- */
   --border-subtle: rgba(0,0,0,0.055);
@@ -202,17 +203,17 @@
 
   /* ---- Intent: entrate (green) ---- */
   --income:        #3D8F6B;
-  --income-fg:     #3D8F6B;
+  --income-fg:     #2F735D;
   --income-subtle: #EAF5EF;
 
   /* ---- Intent: uscite (red) ---- */
   --expense:        #C7374A;
-  --expense-fg:     #C7374A;
+  --expense-fg:     #BF3346;
   --expense-subtle: #FDEDF0;
 
   /* ---- Intent: in attesa (amber) ---- */
   --pending:        #B07830;
-  --pending-fg:     #B07830;
+  --pending-fg:     #866221;
   --pending-subtle: #FBF4E8;
 
   /* ---- Intent: info (blue) ---- */
@@ -225,6 +226,7 @@
 
   /* ---- Accent brand (terracotta) ---- */
   --accent-brand:    #C85A3A;
+  --accent-brand-fg: #AD4B2B;
   --accent-brand-bg: #FEF0EB;
 
   /* ---- Hero gradient (always dark) ---- */
@@ -255,7 +257,7 @@
   --secondary:            #272320;
   --secondary-foreground: #F0EDE8;
   --muted:                #272320;
-  --muted-foreground:     #6B5F57;
+  --muted-foreground:     #948880;
   --accent:               #272320;
   --accent-foreground:    #F0EDE8;
   --destructive:          #E05C6A;
@@ -280,7 +282,7 @@
   /* ---- Testo (dark) ---- */
   --text-1: #F0EDE8;
   --text-2: #9A8D85;
-  --text-3: #6B5F57;
+  --text-3: #948880;
 
   /* ---- Bordi (dark) ---- */
   --border-subtle: rgba(255,255,255,0.07);
@@ -298,7 +300,7 @@
 
   /* ---- Intent: uscite (red) ---- */
   --expense:        #E05C6A;
-  --expense-fg:     #E05C6A;
+  --expense-fg:     #E0606E;
   --expense-subtle: rgba(224,92,106,0.13);
 
   /* ---- Intent: in attesa (amber) ---- */
@@ -316,6 +318,7 @@
 
   /* ---- Accent brand (terracotta dark) ---- */
   --accent-brand:    #D9674A;
+  --accent-brand-fg: #D9694C;
   --accent-brand-bg: rgba(217,103,74,0.15);
 
   /* ---- Hero gradient (darker) ---- */

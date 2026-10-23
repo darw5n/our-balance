@@ -173,7 +173,7 @@ export function CategoriesList({ categories: initialCategories, budgets = [] }: 
                                 <div className="h-1 w-full overflow-hidden rounded-full bg-surface-3">
                                   <div
                                     className={`h-full rounded-full transition-all ${
-                                      b.is_exceeded ? "bg-expense" : b.percentage >= 80 ? "bg-pending-fg" : "bg-income"
+                                      b.is_exceeded ? "bg-expense" : b.percentage >= 80 ? "bg-pending" : "bg-income"
                                     }`}
                                     style={{ width: `${Math.min(b.percentage, 100)}%` }}
                                   />

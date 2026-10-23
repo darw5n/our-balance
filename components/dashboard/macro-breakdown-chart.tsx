@@ -28,7 +28,7 @@ export function MacroBreakdownChart({ data, monthsElapsed }: Props) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 font-sans text-xs text-text-3">
         <p>Nessuna categoria ha una macro-categoria assegnata.</p>
-        <Link href="/categories" className="text-accent-brand underline underline-offset-2">
+        <Link href="/categories" className="text-accent-brand-fg underline underline-offset-2">
           Vai a Categorie →
         </Link>
       </div>
