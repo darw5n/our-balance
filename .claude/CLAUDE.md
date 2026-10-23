@@ -98,8 +98,9 @@ Gestita con Supabase Auth.
 - `npm run dev` — richiede `.env.local` con le chiavi Supabase
 - Errore `PGRST303 "JWT issued at future"`: l'orologio del Mac è fuori sync.
   Risincronizza l'ora di sistema (o rifai il login) e ricarica.
-- Prove automatiche con Vitest in `tests/` (`npm test`): helper di `query-utils` e lettura a blocchi
-  di `transaction-list` con un finto client Supabase. Validazione completa: `npm test`, `npx tsc --noEmit`, `npm run build`.
+- Prove automatiche con Vitest in `tests/` (`npm test`). Validazione completa: `npm run lint`,
+  `npx tsc --noEmit`, `npm test`, `npm run build`.
+- Provare la versione compilata nel browser: `npm run preview` (build + server su http://localhost:3100).
 
 ## MCP Server
 
@@ -125,17 +126,7 @@ non scarica `motion`. `usePageTransition()` funziona solo dentro quelle pagine.
 I grafici recharts si importano da `components/dashboard/charts/lazy-charts.tsx`
 (`next/dynamic`, solo browser, segnaposto alto come il grafico), non dai file originali.
 
-## Skill disponibili
+## Review
 
-Le skill sono in `.claude/skills/` — sono template riutilizzabili
-per task ricorrenti. Leggile prima di iniziare il task relativo.
-
-- `git-flow/` → commit, push, PR, merge, nuovo branch
-- `commit/` → formato Conventional Commits
-- `new-component/` → scaffold componente React
-- `think/` → analisi e pianificazione pre-implementazione
-- `ux-review/` → review UX e accessibilità
-
-Regola: crea una nuova skill solo quando Claude fa errori ripetuti
-su un argomento specifico, o quando devi spiegare le stesse cose
-ogni sessione. Non pianificarle in anticipo.
+Prima di proporre una PR: review del diff con `open-code-review:delegate-review`, applicando le
+regole di `CODING_STANDARDS.md` (casi che lint e prove non possono controllare).
