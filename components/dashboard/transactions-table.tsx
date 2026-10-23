@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { formatCurrency } from "@/lib/utils"
 import { applyScope } from "@/lib/supabase/query-utils"
 import { deleteTransaction, bulkDeleteTransactions } from "@/app/actions/transactions"
@@ -353,7 +353,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
             <DialogTitle className="truncate text-base font-semibold">
               {mobileActionsTx?.description || (mobileActionsTx?.type === "income" ? "Entrata" : "Uscita")}
             </DialogTitle>
-            <p className="text-xs text-text-3 font-medium mt-1">
+            <DialogDescription className="text-xs text-text-3 font-medium mt-1">
               {mobileActionsTx && (() => {
                 const rawAmount = Math.abs(mobileActionsTx.amount ?? 0)
                 const displayAmount = applyScope(rawAmount, mobileActionsTx.scope, "personal")
@@ -368,7 +368,7 @@ export function TransactionsTable({ transactions, categories }: TransactionsTabl
                   </span>
                 )
               })()}
-            </p>
+            </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 pt-2">
             <Button

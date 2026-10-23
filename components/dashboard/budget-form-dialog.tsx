@@ -4,6 +4,7 @@ import { useState } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -81,6 +82,11 @@ function BudgetForm({ budget: budgetProp, categories, onSuccess, onClose }: Budg
     <>
       <DialogHeader>
         <DialogTitle>{isEdit ? "Modifica budget" : "Nuovo budget"}</DialogTitle>
+        <DialogDescription>
+          {isEdit
+            ? "La categoria resta la stessa: puoi cambiare il limite mensile."
+            : "Scegli una categoria e quanto vuoi spendere al massimo ogni mese."}
+        </DialogDescription>
       </DialogHeader>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="space-y-1">

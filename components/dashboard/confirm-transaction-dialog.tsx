@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { CheckCircle } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DateInput } from "@/components/ui/date-input"
@@ -83,11 +83,10 @@ function ConfirmTransactionForm({ transaction: transactionProp, onSuccess, onClo
           <CheckCircle className="h-4 w-4 text-income-fg" />
           Conferma {label.toLowerCase()}
         </DialogTitle>
+        <DialogDescription>
+          {transaction.description || label} — verifica importo e data prima di confermare.
+        </DialogDescription>
       </DialogHeader>
-
-      <p className="text-xs text-text-2">
-        {transaction.description || label} — verifica importo e data prima di confermare.
-      </p>
 
       <form onSubmit={handleSubmit} className="mt-2 space-y-4">
         <div className="space-y-1.5">

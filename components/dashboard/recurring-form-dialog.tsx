@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -145,6 +146,9 @@ function RecurringForm({ recurring: recurringProp, categories, onSuccess, onClos
     <>
       <DialogHeader>
         <DialogTitle>{isEdit ? "Modifica ricorrenza" : "Nuova ricorrenza"}</DialogTitle>
+        <DialogDescription>
+          Si registra da sola a ogni scadenza, con la frequenza scelta. I campi con * sono obbligatori.
+        </DialogDescription>
       </DialogHeader>
 
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>

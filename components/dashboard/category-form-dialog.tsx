@@ -4,6 +4,7 @@ import { useState } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -111,6 +112,7 @@ function CategoryForm({ category: categoryProp, onSuccess, onClose }: CategoryFo
     <>
       <DialogHeader>
         <DialogTitle>{isEdit ? "Modifica categoria" : "Nuova categoria"}</DialogTitle>
+        <DialogDescription>Le categorie raggruppano le transazioni nei report e nei budget.</DialogDescription>
       </DialogHeader>
       <form className="space-y-4" onSubmit={handleSubmit}>
 

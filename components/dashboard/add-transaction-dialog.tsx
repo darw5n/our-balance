@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DateInput } from "@/components/ui/date-input"
@@ -211,6 +211,7 @@ export function AddTransactionDialog({
           <DialogContent>
           <DialogHeader>
             <DialogTitle>Aggiungi transazione</DialogTitle>
+            <DialogDescription>I campi con * sono obbligatori.</DialogDescription>
           </DialogHeader>
 
           <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { TrendingUp, TrendingDown, User, Users } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { updateTransaction, type TransactionType } from "@/app/actions/transactions"
@@ -111,6 +111,7 @@ function EditTransactionForm({ transaction: transactionProp, categories, onSucce
     <>
       <DialogHeader>
         <DialogTitle>Modifica transazione</DialogTitle>
+        <DialogDescription>I campi con * sono obbligatori.</DialogDescription>
       </DialogHeader>
 
       <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>

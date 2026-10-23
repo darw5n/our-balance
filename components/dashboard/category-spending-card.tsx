@@ -6,10 +6,9 @@ import { getCategoryIcon } from "@/lib/category-icons"
 
 type Props = {
   categories: TopCategory[]
-  month: string // e.g. "Maggio 2026"
 }
 
-export function CategorySpendingCard({ categories, month }: Props) {
+export function CategorySpendingCard({ categories }: Props) {
   if (categories.length === 0) return null
 
   const max = Math.max(...categories.map((c) => c.amount))
