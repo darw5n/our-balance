@@ -21,8 +21,9 @@ Tailwind CSS v4, shadcn/ui, Supabase, Vercel.
   /actions/             → Server Actions (mutazioni + revalidatePath)
   /api/mcp/[token]/     → server MCP HTTP (JSON-RPC)
   /auth/callback/       → callback OAuth Supabase
-  /login/ /signup/      → auth email + Google OAuth
-  /page.tsx             → landing page (marketing)
+  /(public)/            → layout con TransitionProvider (dissolvenza tra pagine)
+    login/ signup/      → auth email + Google OAuth
+    page.tsx            → landing page (marketing)
   /layout.tsx           → root layout con provider globali
 
 /components
@@ -104,10 +105,17 @@ Esposto su `/app/api/mcp/[token]/route.ts`.
 ## Transizioni pagina
 
 `TransitionProvider` in `components/landing/transition-provider.tsx`
-è wrappato nel root layout e fornisce `usePageTransition()` a tutti i componenti.
+è wrappato solo nel layout `app/(public)/` (landing, login, signup): l'app autenticata
+non scarica `motion`. `usePageTransition()` funziona solo dentro quelle pagine.
 - Usa `navigate(href)` al posto di `<Link>` o `router.push()` quando
-  si vuole la transizione animata tra pagine
-- La transizione attuale è una dissolvenza in nero (zinc-950)
+  si vuole la transizione animata tra pagine pubbliche
+- La transizione attuale è una dissolvenza in nero (zinc-950), ~200 ms per lato
+- Nell'app autenticata le transizioni sono in CSS: `app/(dashboard)/template.tsx` (`.route-fade`)
+
+## Grafici
+
+I grafici recharts si importano da `components/dashboard/charts/lazy-charts.tsx`
+(`next/dynamic`, solo browser, segnaposto alto come il grafico), non dai file originali.
 
 ## Skill disponibili
 

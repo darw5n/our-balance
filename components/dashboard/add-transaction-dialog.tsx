@@ -11,7 +11,6 @@ import { DateInput } from "@/components/ui/date-input"
 import { createTransaction, type TransactionType } from "@/app/actions/transactions"
 import { createRecurringTransaction, type RecurringFrequency } from "@/app/actions/recurring"
 import { suggestCategory } from "@/app/actions/suggest-category"
-import { supabase } from "@/lib/supabase"
 import { CategoryCombobox } from "@/components/dashboard/category-combobox"
 import { validateAmount } from "@/lib/utils"
 import { useFormState } from "@/lib/hooks/use-form-state"
@@ -83,7 +82,6 @@ export function AddTransactionDialog({
   const [requiresConfirmation, setRequiresConfirmation] = useState(false)
   const [confirmationDelay, setConfirmationDelay] = useState(0)
   const { submitting, error, setError, wrap } = useFormState()
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [suggestedCategoryId, setSuggestedCategoryId] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -126,26 +124,9 @@ export function AddTransactionDialog({
     }
   }, [description, type])
 
-  // Check authentication status
-  useEffect(() => {
-    async function checkAuth() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setIsAuthenticated(!!user)
-    }
-    checkAuth()
-  }, [])
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-
-    // Check authentication first
-    if (isAuthenticated === false) {
-      setError("Devi essere autenticato per aggiungere una transazione. Ricarica la pagina.")
-      return
-    }
 
     // Validation
     if (!date || !amount) {
@@ -177,17 +158,8 @@ export function AddTransactionDialog({
     }
     const formattedDate = date
 
+    // Il login lo verificano le Server Actions: se la sessione è scaduta tornano un errore leggibile.
     await wrap(async () => {
-      // Verify authentication again before submitting
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        setError("Sessione scaduta. Ricarica la pagina e riprova.")
-        return
-      }
-
       let result: { success: boolean; error?: string }
 
       if (isRecurring) {

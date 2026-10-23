@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { TransitionProvider } from "@/components/landing/transition-provider";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -71,13 +70,11 @@ export default async function RootLayout({
       <body
         className={`${lora.variable} ${dmSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TransitionProvider>
-          <ToastProvider>
-            <ConfirmProvider>
-              {children}
-            </ConfirmProvider>
-          </ToastProvider>
-        </TransitionProvider>
+        <ToastProvider>
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
+        </ToastProvider>
       </body>
     </html>
   );

@@ -4,9 +4,8 @@ import { getServerUser } from "@/lib/supabase-server"
 import { Card } from "@/components/ui/card"
 import { ViewModeSwitcher } from "@/components/dashboard/view-mode-switcher"
 import { MacroBreakdownChart } from "@/components/dashboard/macro-breakdown-chart"
-import { YearComparisonChart } from "@/components/dashboard/year-comparison-chart"
+import { CashflowReportChart, YearComparisonChart } from "@/components/dashboard/charts/lazy-charts"
 import { CategoryMonthTable } from "@/components/dashboard/category-month-table"
-import { CashflowReportChart } from "@/components/dashboard/cashflow-report-chart"
 import {
   getDashboardSummaryYear,
   type ViewMode,

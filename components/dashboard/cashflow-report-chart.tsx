@@ -15,7 +15,7 @@ import {
 import { formatCurrency, formatCurrencyAxis } from "@/lib/utils"
 import { useIsMobile } from "@/lib/hooks/use-is-mobile"
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion"
-import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL, SERIES_ANIMATION } from "@/components/dashboard/charts/chart-config"
+import { AXIS_TICK, AXIS_LINE, TOOLTIP_STYLE, MONTH_FULL, SERIES_ANIMATION, CHART_INITIAL_DIMENSION } from "@/components/dashboard/charts/chart-config"
 import type { CashflowMonthlyPoint } from "@/lib/supabase/queries/transactions"
 
 type Props = {
@@ -55,7 +55,7 @@ export function CashflowReportChart({ data, year, viewMode = "personal" }: Props
           Nessun dato da visualizzare per il {year}.
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" initialDimension={CHART_INITIAL_DIMENSION}>
           <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="var(--border-subtle)" vertical={false} />
             <XAxis dataKey="month" tick={AXIS_TICK} axisLine={AXIS_LINE} tickLine={AXIS_LINE} tickFormatter={formatMonth} />
