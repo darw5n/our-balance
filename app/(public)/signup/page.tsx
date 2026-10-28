@@ -79,7 +79,7 @@ export default function SignupPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${appUrl}/dashboard`,
+          emailRedirectTo: `${appUrl}/auth/callback`,
         },
       })
 
@@ -101,7 +101,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${appUrl}/dashboard` },
+      options: { emailRedirectTo: `${appUrl}/auth/callback` },
     })
     if (!error) {
       setResendSuccess(true)
