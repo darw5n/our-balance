@@ -119,5 +119,8 @@ export const GROUP_ICONS: Record<string, LucideIcon> = {
  * Icona per una categoria: prima per nome esatto, poi per gruppo, infine `Tag`.
  */
 export function getCategoryIcon(name: string, groupName?: string | null): LucideIcon {
-  return CATEGORY_ICONS[name] ?? GROUP_ICONS[groupName ?? ""] ?? Tag
+  // Solo chiavi proprie: un nome come "constructor" non deve pescare Object.prototype.
+  const own = <T,>(map: Record<string, T>, key: string): T | undefined =>
+    Object.hasOwn(map, key) ? map[key] : undefined
+  return own(CATEGORY_ICONS, name) ?? own(GROUP_ICONS, groupName ?? "") ?? Tag
 }
