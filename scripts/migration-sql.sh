@@ -12,9 +12,14 @@ file="${1:?Indica il file della migration, es. supabase/migrations/2026102308000
 base="$(basename "$file" .sql)"
 version="${base%%_*}"
 name="${base#*_}"
+quote="'"
+name_sql="${name//$quote/$quote$quote}" # apici raddoppiati: il nome finisce dentro una stringa SQL
 [[ "$version" =~ ^[0-9]{14}$ ]] || { echo "Il nome deve iniziare con AAAAMMGGhhmmss_: $base" >&2; exit 1; }
 if grep -q '\$mig\$' "$file"; then
   echo "Il file contiene \$mig\$, che serve da delimitatore: rinominalo nello script." >&2; exit 1
+fi
+if grep -Eiq '^[[:space:]]*(begin|commit|rollback)[[:space:]]*;' "$file"; then
+  echo "La migration contiene begin/commit/rollback: toglili, ci pensa lo script." >&2; exit 1
 fi
 
 sql="begin;
@@ -22,7 +27,7 @@ sql="begin;
 $(cat "$file")
 
 insert into supabase_migrations.schema_migrations (version, name, statements)
-values ('$version', '$name', array[\$mig\$$(cat "$file")\$mig\$])
+values ('$version', '$name_sql', array[\$mig\$$(cat "$file")\$mig\$])
 on conflict (version) do nothing;
 
 commit;"

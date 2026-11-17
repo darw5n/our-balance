@@ -47,9 +47,17 @@ export function firstDayOfMonth(dateStr: string): string {
 
 export function rewindDate(dateStr: string, frequency: Frequency): string {
   const date = new Date(dateStr + "T00:00:00Z")
-  if (frequency === "weekly") date.setUTCDate(date.getUTCDate() - 7)
-  else if (frequency === "monthly") date.setUTCMonth(date.getUTCMonth() - 1)
-  else date.setUTCFullYear(date.getUTCFullYear() - 1)
+  const day = date.getUTCDate()
+  // Parto dal 1° del mese: setUTCMonth/Year su un 31 farebbe overflow (31 mag → 1 mag).
+  date.setUTCDate(1)
+  if (frequency === "weekly") {
+    date.setUTCDate(day - 7)
+  } else {
+    if (frequency === "monthly") date.setUTCMonth(date.getUTCMonth() - 1)
+    else date.setUTCFullYear(date.getUTCFullYear() - 1)
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate()
+    date.setUTCDate(Math.min(day, lastDay))
+  }
   return date.toISOString().split("T")[0]
 }
 
