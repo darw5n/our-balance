@@ -100,6 +100,7 @@ Gestita con Supabase Auth.
   Risincronizza l'ora di sistema (o rifai il login) e ricarica.
 - Prove automatiche con Vitest in `tests/` (`npm test`). Validazione completa: `npm run lint`,
   `npx tsc --noEmit`, `npm test`, `npm run build`.
+- `main` è protetto: si lavora su un branch e si passa dalla PR, con il check `check` di `.github/workflows/ci.yml` verde.
 - Provare la versione compilata nel browser: `npm run preview` (build + server su http://localhost:3100).
 
 ## MCP Server
