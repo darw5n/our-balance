@@ -15,6 +15,8 @@ name="${base#*_}"
 quote="'"
 name_sql="${name//$quote/$quote$quote}" # apici raddoppiati: il nome finisce dentro una stringa SQL
 [[ "$version" =~ ^[0-9]{14}$ ]] || { echo "Il nome deve iniziare con AAAAMMGGhhmmss_: $base" >&2; exit 1; }
+# Cerco il testo letterale "$mig$" (delimitatore dollar-quoting): gli apici singoli sono voluti.
+# shellcheck disable=SC2016
 if grep -q '\$mig\$' "$file"; then
   echo "Il file contiene \$mig\$, che serve da delimitatore: rinominalo nello script." >&2; exit 1
 fi
