@@ -73,6 +73,14 @@ describe("date", () => {
     expect(rewindDate("2025-06-15", "yearly")).toBe("2024-06-15")
   })
 
+  it("rewindDate tiene il giorno del mese: 31 → ultimo giorno del mese precedente", () => {
+    expect(rewindDate("2026-05-31", "monthly")).toBe("2026-04-30")
+    expect(rewindDate("2026-03-31", "monthly")).toBe("2026-02-28")
+    expect(rewindDate("2028-02-29", "yearly")).toBe("2027-02-28")
+    expect(rewindDate("2026-05-03", "weekly")).toBe("2026-04-26")
+    expect(rewindDate("2026-01-15", "monthly")).toBe("2025-12-15")
+  })
+
   it("pendingTransactionDate: entrate al primo del mese, uscite alla scadenza", () => {
     expect(pendingTransactionDate("2026-10-15", "income")).toBe("2026-10-01")
     expect(pendingTransactionDate("2026-10-15", "expense")).toBe("2026-10-15")
