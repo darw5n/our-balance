@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Screenshot di lavoro
 /.*.png
+/.claude
+/CODING_STANDARDS.md
+/docs
